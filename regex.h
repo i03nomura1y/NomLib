@@ -1,5 +1,6 @@
 // -*- mode: cpp -*-
-// regex.h ‚Ì c++ ”Å
+// regex.h ã® c++ ç‰ˆ
+//  regex_t ã¯ã‚¹ãƒãƒ¼ãƒˆãƒã‚¤ãƒ³ã‚¿ã§æ‰±ã†ã€‚
 // -lregex
 #ifndef __NOMLIB_REGEX_H__
 #define __NOMLIB_REGEX_H__
@@ -11,32 +12,36 @@
 namespace nl{
   class RegEx{
   public:
-	// ³‹K•\Œ»•¶š—ñ‚ğƒRƒ“ƒpƒCƒ‹‚·‚é
-	// @param rxstr ³‹K•\Œ» •¶š—ñ
+	// æ­£è¦è¡¨ç¾æ–‡å­—åˆ—ã‚’ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã™ã‚‹
+	// @param rxstr æ­£è¦è¡¨ç¾ æ–‡å­—åˆ—
 	explicit RegEx(const std::string &rxstr);
 	~RegEx();
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^‚É“n‚³‚ê‚½•¶š—ñ‚ğ•Ô‚·
+	RegEx(const RegEx &obj); // ã‚³ãƒ”ãƒ¼ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+	RegEx &operator=(RegEx &obj);  // ä»£å…¥æ¼”ç®—å­
+	void swap(RegEx &obj);
+
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã«æ¸¡ã•ã‚ŒãŸæ–‡å­—åˆ—ã‚’è¿”ã™
 	std::string rx_str() const{ return rx_str_; };
-	// ³‹K•\Œ»‚ğ³í‚ÉƒRƒ“ƒpƒCƒ‹‚Å‚«‚½‚©H
+	// æ­£è¦è¡¨ç¾ã‚’æ­£å¸¸ã«ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã§ããŸã‹ï¼Ÿ
 	bool isValid() const { return valid; }
 	
-	/// ³‹K•\Œ»‚Éƒ}ƒbƒ`‚·‚é?
-	// @return  ƒ}ƒbƒ`‚µ‚½‚ç true
+	/// æ­£è¦è¡¨ç¾ã«ãƒãƒƒãƒã™ã‚‹?
+	// @return  ãƒãƒƒãƒã—ãŸã‚‰ true
 	bool match(const std::string &str_);
-	/// ‘O‰ñ‚ÌÀs‚É‚æ‚èƒ}ƒbƒ`‚µ‚½•”•ª•¶š—ñ‚Ì idx ”Ô–Ú‚Ì‚à‚Ì‚ğ•Ô‚·
-	std::string get(int idx) const; // •”•ª•¶š—ñ
-	int getStartPos(int idx) const; // ŠJnƒCƒ“ƒfƒNƒX
-	int getEndPos(int idx) const;   // I—¹ƒCƒ“ƒfƒNƒX
-	// •”•ª•¶š—ñ‚ÌŒÂ”
+	/// å‰å›ã®å®Ÿè¡Œã«ã‚ˆã‚Šãƒãƒƒãƒã—ãŸéƒ¨åˆ†æ–‡å­—åˆ—ã® idx ç•ªç›®ã®ã‚‚ã®ã‚’è¿”ã™
+	std::string get(int idx) const; // éƒ¨åˆ†æ–‡å­—åˆ—
+	int getStartPos(int idx) const; // é–‹å§‹ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹
+	int getEndPos(int idx) const;   // çµ‚äº†ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹
+	// éƒ¨åˆ†æ–‡å­—åˆ—ã®å€‹æ•°
 	int length() const{ return idx_list.size(); }
 	
   private:
 	bool valid;
-	regex_t reg;
-	std::string rx_str_; // ƒRƒ“ƒXƒgƒ‰ƒNƒ^‚É“n‚³‚ê‚½•¶š—ñ
-	// ‘O‰ñ match()Às‚µ‚½‚Æ‚«‚Ì•¶š—ñ
+	mutable regex_t *reg; // smart pointer ã¨ã—ã¦ä½¿ã†ã€‚
+	std::string rx_str_; // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã«æ¸¡ã•ã‚ŒãŸæ–‡å­—åˆ—
+	// å‰å› match()å®Ÿè¡Œã—ãŸã¨ãã®æ–‡å­—åˆ—
 	std::string str;
-	// ‘O‰ñ‚Ì match()Às‚É‚æ‚èƒ}ƒbƒ`‚µ‚½•”•ª•¶š—ñ‚Ì(ƒCƒ“ƒfƒNƒX,’·‚³) ‚½‚¾‚µÅ‘å100ŒÂ
+	// å‰å›ã® match()å®Ÿè¡Œã«ã‚ˆã‚Šãƒãƒƒãƒã—ãŸéƒ¨åˆ†æ–‡å­—åˆ—ã®(ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹,é•·ã•) ãŸã ã—æœ€å¤§100å€‹
 	std::vector<std::pair<int,int> > idx_list;
 	
   };

@@ -5,30 +5,66 @@
 
 #include <stdexcept>
 #include <iostream>
+#include "util.h"
 
 namespace nl{
 
-  RegEx::RegEx(const std::string &rxstr) : str(),idx_list(){
+  RegEx::RegEx(const std::string &rxstr) : reg(NULL), str(),idx_list(){
 	char errbuf[100];
 	rx_str_ = rxstr;
+	reg = new regex_t;
 	// regcomp の最後の引数
 	//   REG_EXTENDED : POSIX拡張正規表現を使用。指定なしなら POSIX 標準正規表現が使われる
 	//   REG_ICASE    : 大文字小文字の違いを無視
 	//   REG_NOSUB    : regexec で パラメータ nmatch, pmatch が無視される
 	//   REG_NEWLINE  : 全ての文字にマッチするオペレータに改行をマッチさせない
-	int ret = regcomp(&reg, rxstr.c_str(), REG_EXTENDED | REG_NEWLINE );
+	int ret = regcomp(reg, rxstr.c_str(), REG_EXTENDED | REG_NEWLINE );
 	if(ret != 0){
-	  regerror(ret, &reg, errbuf, sizeof errbuf);
+	  regerror(ret, reg, errbuf, sizeof errbuf);
 	  fprintf(stderr, "%s(%d) regcomp error: %s\n", __FILE__,__LINE__,errbuf);
+	  delete reg;
 	}
 	valid = (ret == 0); // コンパイルに成功したら true
 	idx_list.clear();
   }
+
+  // コピーコンストラクタ
+  RegEx::RegEx(const RegEx &obj)
+	: valid(obj.valid),
+	  reg(obj.reg),
+	  rx_str_(obj.rx_str_),
+	  str(obj.str),
+	  idx_list(obj.idx_list) {
+	obj.reg = NULL;
+  }
+  
   RegEx::~RegEx(){
 	idx_list.clear();
-	if(valid) regfree(&reg);
+	if(reg != NULL){
+	  if(valid) regfree(reg);
+	  delete reg;
+	}
   }
+  
+  // 代入演算子
+  RegEx &RegEx::operator=(RegEx &obj){
+	swap(obj);
+	return *this;
+  }
+
+  void RegEx::swap(RegEx &obj){
+	using std::swap;
+	swap(valid  , obj.valid  );
+	swap(reg    , obj.reg    );
+	swap(rx_str_, obj.rx_str_);
+	swap(str    , obj.str    );
+	swap(idx_list, obj.idx_list);
+  }
+
+
   bool RegEx::match(const std::string &str_){
+	if(reg == NULL){ ERRP("reg is NULL"); return false; }
+	
 	size_t nmatch = 100;
 	regmatch_t pmatch[nmatch];
 	idx_list.clear();
@@ -37,7 +73,7 @@ namespace nl{
 	//   REG_NOTBOL : 行頭にマッチするオペレータは必ずマッチに失敗する
 	//                (複数行文字列の先頭を行頭として解釈させない場合に用いる)
 	//   REG_NOTEOL : 行末にマッチするオペレータは必ずマッチに失敗する
-	if(valid && (regexec(&reg, str_.c_str() , nmatch, pmatch, 0) == REG_NOERROR) ){
+	if(valid && (regexec(reg, str_.c_str() , nmatch, pmatch, 0) == REG_NOERROR) ){
 	  for (unsigned int i = 0; i < nmatch && pmatch[i].rm_so>=0; i++) {
 		int so = (int)pmatch[i].rm_so;
 		int eo = (int)pmatch[i].rm_eo;

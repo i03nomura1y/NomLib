@@ -35,15 +35,23 @@ namespace nl{
 	// ルールをセット
 	void setRule( RuleList *rule_list_ ){ rule_list = rule_list_; }
   
+	// 現在の行/列番号
+	int getLineNo() const{ return line_no; }
+	int getColumnNo() const{ return pre_idx; }
+
 	// トークンをひとつ切り出す。
 	// @return 成功したら true
 	bool get(Token &token);
+	// 読み取り中の行の残り部分を返す。idx は進める。
+	std::string getRest();
+	/// 前回返したトークンの情報を返す
+	const char *getPosStr() const; // 位置情報 を文字列で返す
+
 	void unget();	// 前回の get() を無かったことにする
-	const char *getPosStr() const;	// 前回返したトークンの位置情報を文字列で返す
+	bool eod() const; // データをすべて読み終わった?
   private:
 	void init(); // 初期化
 	bool eol() const; // 行末を指している? == その行で読める文字はもうない?
-	bool eod() const; // データをすべて読み終わった?
 	// str を更新。
 	// idx が行末まで来た
 	//   -> 次の行を読む

@@ -51,11 +51,19 @@ namespace nl{
 		return true;
 	  }
 	}
+	DBGP("didn't match. " << &str[idx]);
 	return false;
   }
   // 前回の get() を無かったことにする
   void Lexer::unget(){ idx = pre_idx; }
   
+  // 読み取り中の行の残り部分を返す。idx は進める。
+  std::string Lexer::getRest(){
+	int tmp = idx;
+	idx = str.length();
+	return &str[tmp];
+  }
+
   // 前回返したトークンの位置情報を文字列で返す
   const char *Lexer::getPosStr() const{
 	static char buf[512];
@@ -68,8 +76,6 @@ namespace nl{
 	ss.str("");
 	file_name = "";
 	is = NULL;
-
-	rule_list = NULL;
 
 	str     = "";
 	line_no = idx = pre_idx =  0;
@@ -118,7 +124,6 @@ using nl::Rule;
 using nl::RuleList;
 using nl::Token;
 
-/// Lexer 系 =======================================================
 int main(){
   Lexer lexer;
   lexer.open("../test_input/rule1.txt");  // ファイル開く

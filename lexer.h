@@ -28,8 +28,8 @@ namespace nl{
 	Lexer(const std::string &file_name_, const std::string &content_ );
 	~Lexer();
   private:
-	Lexer(const Lexer &obj){}	// コピーコンストラクタ
-	Lexer &operator=(Lexer &obj){ return *this; } // 代入演算子
+	Lexer(const Lexer &){}	// コピーコンストラクタ
+	Lexer &operator=(Lexer &){ return *this; } // 代入演算子
   public:
 	// ファイルを開く
 	void open(const std::string &file_name_);

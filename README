@@ -1,9 +1,19 @@
 created date : 2011/12/02 00:32:55
-last updated : 2011/12/07 14:48:12
+last updated : 2011/12/08 02:32:50
 
-Nom Library
-http://github.com/i03nomura1y/NomLib.git
+Nom Library:
+ - http://github.com/i03nomura1y/NomLib.git
+ - for CPP: *.cpp, namespace nl
+ - for C:   *_c.c
+ - テスト用 main() は .c/.cpp の最後に記述。
 
-for CPP: namespace nl
-  regex 正規表現
-  lexer 字句解析器
+List:
+ - lexer 字句解析器
+ - regex 正規表現
+ - stdlib  メモリ管理など
+ - util	   ユーティリティ
+ - varstr  可変長文字列
+ - xml     libxml2 のラッパ
+
+
+  

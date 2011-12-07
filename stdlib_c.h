@@ -1,7 +1,7 @@
 #ifndef _NOMLIB_STD_LIB_C_H_
 #define _NOMLIB_STD_LIB_C_H_
 // created date : 2011/12/07 18:24:10
-// last updated : 2011/12/07 20:06:43
+// last updated : 2011/12/08 02:24:22
 // メモリ管理(malloc,freeなど)関連
 // 共通ヘッダ
 
@@ -9,6 +9,10 @@
 
 #ifdef __cplusplus
 namespace nl{
+#endif
+
+#ifndef FALSE
+#  define FALSE 0
 #endif
 
 extern int PRINT_ADDR_FLG;

@@ -21,7 +21,7 @@ namespace nl{
 	int ret = regcomp(reg, rxstr.c_str(), REG_EXTENDED | REG_NEWLINE );
 	if(ret != 0){
 	  regerror(ret, reg, errbuf, sizeof errbuf);
-	  fprintf(stderr, "%s(%d) regcomp error: %s\n", __FILE__,__LINE__,errbuf);
+	  ERRP("regcomp error:" << errbuf);
 	  delete reg;
 	}
 	valid = (ret == 0); // コンパイルに成功したら true
@@ -114,6 +114,7 @@ namespace nl{
 
 #if 0
 // test
+// $ make TARGET=regex
 #include <iostream>
 using namespace std;
 using nl::RegEx;
@@ -131,7 +132,7 @@ void test(const string &rx_str, const string &str1, const string &str2){
 	  cout << " match[" << i << "] " << re.get(i) << endl;
 	}
   }else{
-	cout << " not match" << endl;
+	cout << " no match" << endl;
   }
 
   cout << "str : '" << str2 << "'" << endl;
@@ -140,7 +141,7 @@ void test(const string &rx_str, const string &str1, const string &str2){
 	  cout << " match[" << i << "] " << re.get(i) << endl;
 	}
   }else{
-	cout << " not match" << endl;
+	cout << " no match" << endl;
   }
 }
 

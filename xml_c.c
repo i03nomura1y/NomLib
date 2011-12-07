@@ -1,5 +1,5 @@
 // created date : 2011/12/07 18:24:10
-// last updated : 2011/12/07 20:06:26
+// last updated : 2011/12/08 02:27:26
 #include "xml_c.h"
 
 #include <stdarg.h>
@@ -18,8 +18,6 @@ namespace nl{
 // warning/error のときに文字列を出すか?
 #define PRINT_WARNING 1
 
-// convert_charset を使う?
-#define USE_CONVERT_CHARSET 0
 #if USE_CONVERT_CHARSET
 #  include "convert_charset.h"
   // 暫定的に
@@ -184,8 +182,8 @@ void XML_putHexStr(XML_Printer *p, const char *content, const int length){
 }
 
 /// XML タグ開始
-// 要素名, [属性名, 型名, 値,]* NULL
-// (p, "Human", "age", "d", 22, "name", "s", "Taro", NULL )
+// 要素名, [型名, 属性名, 値,]* NULL
+// (p, "Human", "d", "age", 22, "s", "name", "Taro", NULL )
 void XML_startElemv(XML_Printer *p, const char *elem, ...){
   va_list args;
   va_start(args, elem);
@@ -202,19 +200,26 @@ void XML_putElemv(XML_Printer *p, const char *elem, ...){
   va_end(args);
 }
 
-
 // コンストラクタ
 // 失敗時: NULL
-XML_Scanner *new_XML_Scanner(const char *file_name){
+static XML_Scanner *new_XML_Scanner_core(xmlDocPtr doc){
   XML_Scanner *this_ =(XML_Scanner*)new_(sizeof(XML_Scanner));
   this_->ptr = this_->parent = NULL;
-  if((this_->doc = xmlParseFile(file_name)) == NULL) goto NEW_XMLSC_ERR;
+  if((this_->doc = doc) == NULL) goto NEW_XMLSC_ERR;
   if((this_->ptr = xmlDocGetRootElement(this_->doc)) == NULL) goto NEW_XMLSC_ERR;
   return this_;
  NEW_XMLSC_ERR:
   delete_XML_Scanner(this_);
   return NULL;
 }
+
+XML_Scanner *new_XML_Scanner(const char *file_name){
+  return new_XML_Scanner_core(xmlParseFile(file_name));
+}
+XML_Scanner *new_XML_Scanner_fromString(const char *text){
+  return new_XML_Scanner_core(xmlParseMemory(text, strlen(text)));
+}
+
 // デストラクタ
 void delete_XML_Scanner(XML_Scanner *this_){
   if(this_==NULL) return;
@@ -321,7 +326,7 @@ float XML_getAttrFloat(XML_Scanner *this_, const char *name){
 // 文字列 -> bool
 int XML_getAttrBool(XML_Scanner *this_, const char *name){
   xmlChar *prop = xmlGetProp(this_->ptr,BAD_CAST name);
-  if(prop == NULL) return false;
+  if(prop == NULL) return FALSE;
   int len = strlen((char*)prop);
   // 小文字にする
   tolowers((char*)prop);
@@ -332,8 +337,10 @@ int XML_getAttrBool(XML_Scanner *this_, const char *name){
 }
 
 // 内容 戻り値は解放しなくてよい
-char *XML_getContent  (XML_Scanner *this_){
-  return (char*)(this_->ptr->children->content);
+const char *XML_getContent  (XML_Scanner *this_){
+  return (this_->ptr->children == NULL ||
+		  this_->ptr->children->content == NULL)
+	? "" : (char*)(this_->ptr->children->content);
 }
 
 
@@ -355,3 +362,95 @@ static void XML_putAttrs_core(XML_Printer *p, va_list *args){
 #ifdef __cplusplus
 }; // namespace nl
 #endif
+
+
+
+#if 1
+// test
+// $ make TARGET=xml_c
+// $ gcc -o xml_c xml_c.c stdlib_c.c -I/usr/include/libxml2 -lxml2 -Wall -Wextra
+#include <stdio.h>
+
+#ifdef __cplusplus
+using namespace nl;
+#endif
+
+void test_scanner(XML_Scanner *s); // 入力
+void test_printer(); // 出力
+
+int main(){
+  test_scanner(new_XML_Scanner("TestData/input.xml"));
+  test_scanner(new_XML_Scanner_fromString("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+										  "<root>"
+										  "<message>Hello from String</message>"
+										  "<fruit> <name>Orange</name> </fruit>"
+										  "</root>"
+										  ));
+  puts("");
+  test_printer();
+  return 0;
+}
+
+void test_scanner(XML_Scanner *s){
+  if(s == NULL){ puts("XML parse error."); return; }
+  if(!XML_isName(s,"root")){ puts("error: ルートノードが root ではありません。"); goto END_OF_INPUT;}
+  puts("root:");
+  
+  for(XML_childElem(s); XML_valid(s); XML_nextElem(s)){
+	if( XML_isName(s,"message") ){
+	  printf(" message: %s\n",XML_getContent(s));
+	}else if( XML_isName(s,"fruit") ){
+	  puts(" fruit: ");
+	  for(XML_childElem(s); XML_valid(s); XML_nextElem(s)){
+		if( XML_isName(s,"name") ){
+		  char buf[256];
+		  buf[0] = '\0';
+		  if( XML_hasAttr(s,"lang") ) XML_getAttr(s, "lang", buf, 256);
+		  printf("  name: (%s) %s\n",buf, XML_getContent(s));
+		}
+	  }
+	  XML_parent(s);
+	}
+  }
+  XML_parent(s);
+  
+ END_OF_INPUT:
+  delete_XML_Scanner(s);
+}
+
+void test_printer(){
+  const char *file_name = "TestData/output.xml";
+  XML_Printer *p = new_XML_Printer(file_name);
+  
+  XML_startElem(p, "root");
+
+  XML_startElemv(p, "message",
+				 "s", "id",     "0001",
+				 "d", "number", 102,
+				 NULL);
+  XML_putStr(p, "Hello");
+  XML_endElem(p);
+  
+  XML_startElem(p, "message");
+  XML_putStr(p, "Bye");
+  XML_endElem(p);
+
+  XML_startElem(p, "fruit");
+  XML_startElemv(p, "name",  "s", "lang", "en", NULL);
+  XML_putStr(p, "Apple");
+  XML_endElem(p);
+  XML_startElemv(p, "name",  "s", "lang", "ja", NULL);
+  XML_putStr(p, "りんご");
+  XML_endElem(p);
+  XML_endElem(p);
+  
+  XML_endElem(p);
+
+  delete_XML_Printer(p);
+  
+  printf("write To '%s'\n",file_name);
+}
+
+
+#endif
+

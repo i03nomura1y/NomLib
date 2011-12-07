@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/07 21:25:05
+// last updated : 2011/12/08 02:11:30
 // xml_c.h の c++ 版
 // -lxml2 -lws2_32
 
@@ -11,16 +11,23 @@
 #include <list>
 
 namespace nl{
+  typedef std::list<std::pair<std::string, std::string> > AttrList;
+  
   class XmlScanner{
   public:
-	XmlScanner(const std::string &path) : s(NULL), depth_(0){
-	  if((s = new_XML_Scanner(path.c_str())) == NULL) return;
+	// ファイルから
+	explicit XmlScanner(const std::string &file_name_) : file_name(file_name_), s(NULL), depth_(0){
+	  if((s = new_XML_Scanner(file_name_.c_str())) == NULL) return;
+	}
+	// 文字列から
+	XmlScanner(const std::string &file_name_, const std::string &content_) : file_name(file_name_), s(NULL), depth_(0){
+	  if((s = new_XML_Scanner_fromString(content_.c_str())) == NULL) return;
 	}
 	~XmlScanner(){ if(s != NULL) delete_XML_Scanner(s); }
   
 	// 現在指している要素が有効か？(nullでないか？)
 	bool valid() const{ return (s!=NULL && XML_valid(s)); }
-	int depth() const{ return depth_; };// 現在の深さ
+	int  depth() const{ return depth_; };// 現在の深さ
 	bool isRoot() const{ return (depth_==0); } // 現在ルート要素ノードを指している?
 
 	// return タグ名, 内容
@@ -48,8 +55,8 @@ namespace nl{
 	void parent(){ if(depth_>0){ XML_parent(s); depth_--; } }
   
 	// 属性のリスト <属性名, 値>
-	std::list<std::pair<std::string, std::string> > getAttrList() const{
-	  std::list<std::pair<std::string, std::string> > ret;
+	AttrList getAttrList() const{
+	  AttrList ret;
 	  if(!valid()) return ret;
 	  for(xmlAttrPtr attr = s->ptr->properties; attr; attr=attr->next){
 		ret.push_back(std::pair<std::string,std::string>((const char*)attr->name,
@@ -59,8 +66,44 @@ namespace nl{
 	}
 	
   private:
+	std::string file_name; // 開いているファイル名
 	XML_Scanner *s;
 	int depth_; // 現在の深さ。ルートノードが0。子に行くほど数字が大きくなる。
+  };
+
+  class XmlPrinter{
+  public:
+	explicit XmlPrinter(const std::string &file_name_) : file_name(file_name_), p(NULL){
+	  if((p = new_XML_Printer(file_name_.c_str())) == NULL) return;
+	}
+	~XmlPrinter(){ if(p != NULL) delete_XML_Printer(p); }
+
+	// namespace の設定
+	XmlPrinter &setNS(const std::string &ns){ XML_setNS(p,ns.c_str()); return *this; }
+
+	// 要素の開始/終了
+	XmlPrinter &start(const std::string &elem){ XML_startElem(p,elem.c_str()); return *this; }
+	XmlPrinter &end(){ XML_endElem(p); return *this; }
+	XmlPrinter &put(const std::string &elem, const AttrList &attrs){
+	  start(elem); attr(attrs); end(); return *this;
+	}
+	// 属性(Attribute)を出力
+	XmlPrinter &attr(const std::string &name, const std::string &val){
+	  XML_putAttr(p,name.c_str(), val.c_str()); return *this;
+	}
+	XmlPrinter &attr(const std::string &name, int   val){ XML_putAttrInt  (p,name.c_str(), val); return *this; }
+	XmlPrinter &attr(const std::string &name, float val){ XML_putAttrFloat(p,name.c_str(), val); return *this; }
+	XmlPrinter &attr(const AttrList &attrs){
+	  for(AttrList::const_iterator ite=attrs.begin(); ite!=attrs.end(); ++ite)
+		attr(ite->first, ite->second);
+	  return *this;
+	}
+	// 中身を出力
+	XmlPrinter &content(const std::string &content){ XML_putStr(p,content.c_str()); return *this; }
+  
+  private:
+	std::string file_name; // 開いているファイル名
+	XML_Printer *p;
   };
 
 };

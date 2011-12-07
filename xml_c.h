@@ -1,13 +1,16 @@
 #ifndef _NOMLIB_XML_C_H_
 #define _NOMLIB_XML_C_H_
 // created date : 2011/12/07 18:24:10
-// last updated : 2011/12/07 21:20:10
+// last updated : 2011/12/08 01:42:49
 // XML 読み書きライブラリ (libxml2 のラッパ)
 // utf-8 のみ。
 // -lxml2 -lws2_32
 
 #include <libxml/xmlwriter.h>
 #include <libxml/parser.h>
+
+// convert_charset を使う?
+#define USE_CONVERT_CHARSET 0
 
 #ifdef __cplusplus
 namespace nl{
@@ -30,8 +33,10 @@ XML_Printer *new_XML_Printer(const char *file_name);
 // デストラクタ
 void delete_XML_Printer(XML_Printer *this_);
 
+#if USE_CONVERT_CHARSET
 // 読み出し時に SHIFT-JIS に変換するかどうか
 void XML_setSJISflag(int flag);
+#endif
 
 // namespace の設定
 void XML_setNS(XML_Printer *p, const char *ns);
@@ -52,7 +57,7 @@ void XML_putStr(XML_Printer *p, const char *content);
 void XML_putHexStr(XML_Printer *p, const char *content, const int length);
 
 /// 要素の開始
-// 要素名, [属性名, 型名, 値,]* NULL
+// 要素名, [型名, 属性名, 値,]* NULL
 // (p, "Human",  "age", "d", 22,  "name", "s", "Taro",   NULL )
 void XML_startElemv(XML_Printer *p, const char *elem, ...);
 /// 要素を出力
@@ -64,6 +69,7 @@ void XML_putElemv(XML_Printer *p, const char *elem, ...);
 // コンストラクタ
 // 失敗時: NULL
 XML_Scanner *new_XML_Scanner(const char *file_name);
+XML_Scanner *new_XML_Scanner_fromString(const char *text);
 // デストラクタ
 void delete_XML_Scanner(XML_Scanner *this_);
 // 要素名が等しいか？
@@ -95,7 +101,7 @@ long  XML_getAttrHex  (XML_Scanner *this_, const char *name); // 16進数 -> lon
 float XML_getAttrFloat(XML_Scanner *this_, const char *name); // 文字列 -> float
 int   XML_getAttrBool (XML_Scanner *this_, const char *name); // 文字列 -> bool
 // 内容 戻り値は解放しなくてよい
-char *XML_getContent  (XML_Scanner *this_);
+const char *XML_getContent  (XML_Scanner *this_);
 
 #ifdef __cplusplus
 }; // namespace nl

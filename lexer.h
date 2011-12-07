@@ -1,6 +1,10 @@
 // -*- mode: cpp -*-
 // 字句解析用
 //  regex を利用。 -lregex
+// class:
+//   - Lexer
+//   - Rule
+//   - RuleList  <- typedef
 #ifndef __NOMLIB_LEXER_H__
 #define __NOMLIB_LEXER_H__
 
@@ -13,7 +17,6 @@
 
 namespace nl{
   // クラスの宣言 中身は Lexer のあと
-  class Token; // Lexer で切り出すトークンの情報
   class Rule;  // 切り出しのルール
   typedef std::list<Rule> RuleList;
   
@@ -40,8 +43,9 @@ namespace nl{
 	int getColumnNo() const{ return pre_idx; }
 
 	// トークンをひとつ切り出す。
-	// @return 成功したら true
-	bool get(Token &token);
+	// @return マッチした Rule へのポインタ or NULL
+	Rule *get(); // RuleList は setRule で渡されたものを使う
+	Rule *get(RuleList &lst); // 渡した RuleList を使う。 rule_list は更新しない。
 	// 読み取り中の行の残り部分を返す。idx は進める。
 	std::string getRest();
 	/// 前回返したトークンの情報を返す
@@ -72,39 +76,19 @@ namespace nl{
 	std::ifstream ifs;
 	std::stringstream ss;
   };
-
-  // Lexer で得られたトークンの情報
-  // 文字列そのもの と、タイプ(文字列、コメント、数値 など) を表す。
-  class Token{
-  public:
-	// トークンの情報
-	int type; // 正常: 0以上  無効: 負の値
-	std::string str;
-  public:
-	// トークン情報をセット
-	void set(int t, std::string s){ type = t; str = s; }
-	// このトークンが'無効'を示すようにする ( 内部的には type に 負の数を入れるだけ )
-	void invalidate(){ type = -1; }
-  };
   
   // 字句解析ルール
   //  正規表現で表す。
   //  ユーザ定義の type は正の値。
-  class Rule{
+  class Rule : public RegEx{
   public:
-	Rule(const RegEx &re_, const unsigned int type_) : re(re_), type(type_){}
+	Rule(const std::string &rxstr, const unsigned int type_) : RegEx(rxstr), type(type_){}
 	~Rule(){}
-	// コピーコンストラクタ
-	Rule(const Rule &obj) : re(obj.re), type(obj.type){}
-	// 代入演算子
-	Rule &operator=(Rule &obj){
-	  re = obj.re;
-	  type = obj.type;
-	  return *this;
-	}
+	Rule(const Rule &obj) : RegEx(obj), type(obj.type){}	// コピーコンストラクタ
+	Rule &operator=(Rule &obj){ swap(obj); return *this; }	// 代入演算子
+	void swap(Rule &obj){ RegEx::swap(obj); std::swap(type, obj.type); }
 	
   public:
-	RegEx re;
 	unsigned int type;
   };
   

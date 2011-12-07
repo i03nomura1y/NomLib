@@ -1,7 +1,7 @@
 # create *.o:  $ make
 # create xxx.exe: $ make TARGET=xxx
 
-SRC = $(shell ls *.cpp)
+SRC = $(shell ls *.cpp *.c)
 OBJ0 = $(SRC:.c=.o)
 OBJ  = $(OBJ0:.cpp=.o)
 

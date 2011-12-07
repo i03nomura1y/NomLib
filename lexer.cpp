@@ -34,25 +34,22 @@ namespace nl{
   }
   
   // トークンをひとつ切り出す。
-  // @return 成功したら true
-  bool Lexer::get(Token &token){
-	token.invalidate(); // 不正な値で初期化。
-	if( rule_list == NULL ) return DBGP("rule_list is NULL."), false;
-	if( !updateString()   ) return DBGP("pointer maybe reached end of file."), false;
-	for( RuleList::iterator ite = rule_list->begin();
-		 ite != rule_list->end();
-		 ++ite){
-	  int  type = ite->type;
-	  RegEx &re = ite->re;
-	  if( re.match( &str[idx] ) ){
-		token.set( type, re.get(0) );
+  // @return マッチした Rule へのポインタ or NULL
+  Rule *Lexer::get(){
+	if( rule_list == NULL ) return ERRP("rule_list is NULL."), (Rule*)NULL;
+	return get(*rule_list);
+  }
+  Rule *Lexer::get(RuleList &lst){
+	if( !updateString()   ) return (Rule*)NULL;
+	for( RuleList::iterator ite = lst.begin(); ite != lst.end(); ++ite){
+	  if( ite->match( &str[idx] ) ){
 		pre_idx = idx;
-		idx += re.get(0).length();
-		return true;
+		idx += ite->get(0).length();
+		return &(*ite);
 	  }
 	}
 	DBGP("didn't match. " << &str[idx]);
-	return false;
+	return NULL;
   }
   // 前回の get() を無かったことにする
   void Lexer::unget(){ idx = pre_idx; }
@@ -122,26 +119,24 @@ using nl::RegEx;
 using nl::Lexer;
 using nl::Rule;
 using nl::RuleList;
-using nl::Token;
 
 int main(){
   Lexer lexer;
   lexer.open("../test_input/rule1.txt");  // ファイル開く
-  lexer.open("dat","int a=0;\nint b=0;");
+  lexer.open("dat","// comment line.\nint a=0;\nint b=0;");
 
   // タイプと正規表現のリストを作成
   RuleList rule_list;
-  rule_list.push_back( Rule(RegEx("(^\\s+)|(^$)"), 0 )); // white-space | 空行
-  rule_list.push_back( Rule(RegEx("^\\w+"),        1 )); // リテラル
-  rule_list.push_back( Rule(RegEx("^\\d+"),        2 )); // 数値
-  rule_list.push_back( Rule(RegEx("^//.*$"),       3 )); // コメント行
-  rule_list.push_back( Rule(RegEx("^.*$"),       100 )); //
+  rule_list.push_back( Rule("(^\\s+)|(^$)", 0 )); // white-space | 空行
+  rule_list.push_back( Rule("^\\w+",        1 )); // リテラル
+  rule_list.push_back( Rule("^\\d+",        2 )); // 数値
+  rule_list.push_back( Rule("^//.*$",       3 )); // コメント行
+  rule_list.push_back( Rule("^.*$",       100 )); //
 
   lexer.setRule(&rule_list);
-  
-  Token token;
-  while( lexer.get(token) ){
-	DBGP("[" << lexer.getPosStr() << "] " << token.type << "  '" << token.str << "'");
+  Rule *ret;
+  while( (ret = lexer.get()) != NULL ){
+	DBGP("[" << lexer.getPosStr() << "] " << ret->type << "  '" << ret->get(0) << "'");
   }
   
   return 0;

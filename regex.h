@@ -15,7 +15,7 @@ namespace nl{
 	// 正規表現文字列をコンパイルする
 	// @param rxstr 正規表現 文字列
 	explicit RegEx(const std::string &rxstr);
-	~RegEx();
+	virtual ~RegEx();
 	RegEx(const RegEx &obj); // コピーコンストラクタ
 	RegEx &operator=(RegEx &obj);  // 代入演算子
 	void swap(RegEx &obj);

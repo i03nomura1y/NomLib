@@ -2,109 +2,90 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/08 02:11:30
+// last updated : 2011/12/09 01:48:06
 // xml_c.h の c++ 版
+//  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
 
-#include "xml_c.h"
 #include <string>
 #include <list>
 
+#include "xml_io.h"
+
 namespace nl{
-  typedef std::list<std::pair<std::string, std::string> > AttrList;
+  class XmlNode;
+  typedef std::list<XmlNode> NodeList;
+
   
-  class XmlScanner{
+  // Xml のひとつのタグを表す
+  class XmlNode{
   public:
-	// ファイルから
-	explicit XmlScanner(const std::string &file_name_) : file_name(file_name_), s(NULL), depth_(0){
-	  if((s = new_XML_Scanner(file_name_.c_str())) == NULL) return;
-	}
-	// 文字列から
-	XmlScanner(const std::string &file_name_, const std::string &content_) : file_name(file_name_), s(NULL), depth_(0){
-	  if((s = new_XML_Scanner_fromString(content_.c_str())) == NULL) return;
-	}
-	~XmlScanner(){ if(s != NULL) delete_XML_Scanner(s); }
-  
-	// 現在指している要素が有効か？(nullでないか？)
-	bool valid() const{ return (s!=NULL && XML_valid(s)); }
-	int  depth() const{ return depth_; };// 現在の深さ
-	bool isRoot() const{ return (depth_==0); } // 現在ルート要素ノードを指している?
+	XmlNode();
+	explicit XmlNode(const std::string &name); // タグ名を指定して初期化
+	~XmlNode(){};
+	XmlNode(const XmlNode &obj);
+	XmlNode &operator=(const XmlNode &obj);
+	XmlNode &attr(const std::string &name, const std::string &val);
+	XmlNode &attr(const std::string &name, const int val);
+	XmlNode &add(XmlNode &node);
+	XmlNode &content(const std::string &con){ content_ = con; return *this; }
+	const std::string &name() const{ return name_; }
 
-	// return タグ名, 内容
-	std::string getName()    const{ return valid() ? std::string((char*)(s->ptr->name)) : ""; }
-	std::string getContent() const{ return valid() ? std::string(XML_getContent(s)) : ""; }
-	// return (属性attr を持つか?)
-	bool has(const std::string &attr) const{ return valid() ? XML_hasAttr(s, attr.c_str()) : false; }
-
-	/// return has(attr) ? attrの値 : def;
-	int get        (const std::string &attr, const int def) const{
-	  return has(attr) ? XML_getAttrInt(s, attr.c_str()) : def;
-	}
-	std::string get(const std::string &attr, const std::string &def) const{
-	  char buf[1024];
-	  return has(attr) ? std::string( XML_getAttr(s, attr.c_str(), buf, 1024) ) : def ;
-	}
-	bool get       (const std::string &attr, const bool def) const{
-	  return has(attr) ? XML_getAttrBool(s, attr.c_str()) : def;
-	}
-  
-	// 要素移動 次, 前, 子, 親
-	void next(){ XML_nextElem(s); }
-	void prev(){ XML_prevElem(s); }
-	void child(){ XML_childElem(s); depth_++; }
-	void parent(){ if(depth_>0){ XML_parent(s); depth_--; } }
-  
-	// 属性のリスト <属性名, 値>
-	AttrList getAttrList() const{
-	  AttrList ret;
-	  if(!valid()) return ret;
-	  for(xmlAttrPtr attr = s->ptr->properties; attr; attr=attr->next){
-		ret.push_back(std::pair<std::string,std::string>((const char*)attr->name,
-														 (const char*)attr->children->content));
-	  }
-	  return ret;
-	}
+	// パース
+	XmlNode &parse(const std::string &file_name);	// ファイル内容をパース このオブジェクトをルートノードにする
+	XmlNode &parseText(const std::string &text); // 文字列をパース
+	static XmlNode create(const std::string &file_name); // XmlNode を生成
+	static XmlNode createFromText(const std::string &text); // XmlNode を生成
 	
+	// 文字列に変換
+	void writeToFile(const std::string &file_name); // ファイルに書き出し
+	std::string toStr(); // XML文字列に変換
+	
+	// 表示
+	void dump();	// 確認用表示
+
   private:
-	std::string file_name; // 開いているファイル名
-	XML_Scanner *s;
-	int depth_; // 現在の深さ。ルートノードが0。子に行くほど数字が大きくなる。
+	XmlNode *parent() const{ return parent_; }
+	void updateDepth(int newDepth);	// 深さを更新
+	XmlNode &parse(XmlScanner &s); // XmlScanner から読み込み
+	void write(XmlPrinter &p); // XmlPrinter に書き出し
+
+  private:
+	//std::string ns;      // namespace
+	std::string name_;    // tag name
+	std::string content_; //
+	AttrList attrs_; // xml_io.h で typedef
+	NodeList children; //std::list<XmlNode> children;
+	mutable XmlNode *parent_; // 親ノードへのポインタ
+	int depth_; // ルートから数えた深さ。ルートは0
   };
 
-  class XmlPrinter{
-  public:
-	explicit XmlPrinter(const std::string &file_name_) : file_name(file_name_), p(NULL){
-	  if((p = new_XML_Printer(file_name_.c_str())) == NULL) return;
-	}
-	~XmlPrinter(){ if(p != NULL) delete_XML_Printer(p); }
 
-	// namespace の設定
-	XmlPrinter &setNS(const std::string &ns){ XML_setNS(p,ns.c_str()); return *this; }
 
-	// 要素の開始/終了
-	XmlPrinter &start(const std::string &elem){ XML_startElem(p,elem.c_str()); return *this; }
-	XmlPrinter &end(){ XML_endElem(p); return *this; }
-	XmlPrinter &put(const std::string &elem, const AttrList &attrs){
-	  start(elem); attr(attrs); end(); return *this;
-	}
-	// 属性(Attribute)を出力
-	XmlPrinter &attr(const std::string &name, const std::string &val){
-	  XML_putAttr(p,name.c_str(), val.c_str()); return *this;
-	}
-	XmlPrinter &attr(const std::string &name, int   val){ XML_putAttrInt  (p,name.c_str(), val); return *this; }
-	XmlPrinter &attr(const std::string &name, float val){ XML_putAttrFloat(p,name.c_str(), val); return *this; }
-	XmlPrinter &attr(const AttrList &attrs){
-	  for(AttrList::const_iterator ite=attrs.begin(); ite!=attrs.end(); ++ite)
-		attr(ite->first, ite->second);
-	  return *this;
-	}
-	// 中身を出力
-	XmlPrinter &content(const std::string &content){ XML_putStr(p,content.c_str()); return *this; }
-  
-  private:
-	std::string file_name; // 開いているファイル名
-	XML_Printer *p;
-  };
+// class XmlPtr{
+// public:
+//   XmlPtr(XmlNode &node) : root_(node), ptr_(&node){};
+//   ~XmlPtr(){};
+//   XmlPtr(const XmlPtr &obj) : root_(obj.root_), ptr_(obj.ptr_){}
+//   XmlPtr &operator=(const XmlPtr &obj){
+// 	root_ = obj.root_;
+// 	ptr_  = obj.ptr_;
+// 	return *this;
+//   }
+//   
+//   XmlNode &root() const{ return root_; }
+//   
+//   XmlPtr &add(XmlNode &node){ ptr_->add(node); return *this; }
+//   XmlPtr &addMove(XmlNode &node){ ptr_->add(node); ptr_ = &node; return *this; }
+//   XmlPtr &parent(){ ptr_ = ptr_->parent(); return *this; }
+//   
+// 
+// public:
+//   XmlNode &root_;
+//   XmlNode *ptr_;
+// };
+
+
 
 };
 

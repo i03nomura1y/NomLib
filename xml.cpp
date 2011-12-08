@@ -1,75 +1,157 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/08 20:55:03
+// last updated : 2011/12/09 01:55:23
 
-#include <iostream>
-using namespace std;
+#include "util.h"
 
 namespace nl{
+
+  XmlNode::XmlNode()
+	: //ns(""),
+	  name_(""), content_(""), attrs_(), children(), parent_(NULL), depth_(0){};
+  XmlNode::XmlNode(const std::string &name) :
+	//ns(""), 
+	name_(name), content_(""), attrs_(), children(), parent_(NULL), depth_(0){};
+  XmlNode::XmlNode(const XmlNode &obj) :
+	//ns(obj.ns),
+	name_(obj.name_), content_(obj.content_),
+	attrs_(obj.attrs_), children(obj.children), parent_(obj.parent_),
+	depth_(obj.depth_){}
+  XmlNode &XmlNode::operator=(const XmlNode &obj){
+	//ns       = obj.ns;
+	name_	 = obj.name_;
+	content_ = obj.content_;
+	attrs_   = obj.attrs_;
+	children = obj.children;
+	parent_  = obj.parent_;
+	depth_   = obj.depth_;
+	return *this;
+  }
+  
+  XmlNode &XmlNode::attr(const std::string &name, const std::string &val){
+	attrs_.push_back(Attr(name, val));
+	return *this;
+  }
+  XmlNode &XmlNode::attr(const std::string &name, const int val){
+	char buf[256];
+	sprintf(buf, "%d", val);
+	attr(name, buf);
+	return *this;
+  }
+  XmlNode &XmlNode::add(XmlNode &node){
+	node.parent_ = this;
+	node.updateDepth(depth_+1);
+	children.push_back(node);
+	return *this;
+  }
+  // 深さを更新
+  void XmlNode::updateDepth(int newDepth){
+	depth_ = newDepth;
+	for( NodeList::iterator ite = children.begin(); ite!=children.end(); ++ite)
+	  ite->updateDepth(depth_+1);
+  }
+
+
+  /// parse -----------------------------------------------------------------------------------
+  // ファイル内容をパース このオブジェクトをルートノードにする
+  XmlNode &XmlNode::parse(const std::string &file_name){
+	XmlScanner s(file_name);
+	return parse(s);
+  }
+  // 文字列をパース
+  XmlNode &XmlNode::parseText(const std::string &text){
+	XmlScanner s("text", text);
+	return parse(s);
+  }
+
+  XmlNode XmlNode::create(const std::string &file_name){ return XmlNode().parse(file_name); }
+  XmlNode XmlNode::createFromText(const std::string &text){ return XmlNode().parseText(text); }
+
+
+  XmlNode &XmlNode::parse(XmlScanner &s){
+	name_    = s.getName();
+	content_ = s.getContent();
+	attrs_   = s.getAttrList();
+
+	for( s.child(); s.valid(); s.next() )
+	  add( XmlNode().parse(s) );
+	s.parent();
+	
+	return *this;
+  }
+
+  /// to string ------------------------------------------------------------------------------
+  // ファイルに書き出し
+  void XmlNode::writeToFile(const std::string &file_name){
+#warning error!!
+	//	XmlPrinter p(file_name);
+	//	write(p);
+  }
+
+  void XmlNode::write(XmlPrinter &p){
+	p.start(name_);
+	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
+	  p.attr(ite->first, ite->second);
+	p.content(content_);
+
+	for( NodeList::iterator ite=children.begin(); ite!=children.end(); ++ite)
+	  write(p);
+	
+	p.end();
+  }
+  // XML文字列に変換
+  std::string XmlNode::toStr(){
+#warning todo
+	return "";
+  }
+
+
+  // 確認用表示
+  void XmlNode::dump(){
+	char buf[512];
+	for(int i=0;i<depth_;i++) buf[i] = ' ';
+	buf[depth_] = '\0';
+	DBGP(buf << name_);
+	for( NodeList::iterator ite = children.begin(); ite!=children.end(); ++ite)
+	  ite->dump();
+  }
 
 };
 
 
-#if 0
+#if 1
 // test
 // $ make TARGET=xml
 #include <iostream>
 using namespace std;
-using nl::AttrList;
-using nl::XmlScanner;
-using nl::XmlPrinter;
+using nl::XmlNode;
 
-void test_scanner(XmlScanner &s); // 入力
-void test_printer(); // 出力
+void test_XmlNode();
 
 int main(){
-  XmlScanner s = XmlScanner("TestData/input.xml");
-  test_scanner(s);
-  XmlScanner s1 = XmlScanner("dat",
-							 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-							 "<root>"
-							 "<message>Hello from String</message>"
-							 "<fruit> <name>Orange</name> </fruit>"
-							 "</root>"
-							 );
-  test_scanner(s1);
-  test_printer();
+  test_XmlNode();
   return 0;
 }
 
-void test_scanner(XmlScanner &s){
-  if(s.getName() != "root"){ cout << "error: ルートノードが root ではありません。" << endl; return; }
+void test_XmlNode(){
+  XmlNode doc("root");
 
-  cout << s.getName() << ": '" << s.getContent() << "'" << endl;
-  for( s.child(); s.valid(); s.next() ){
-	cout << " " << s.getName() << ": '" << s.getContent() << "'" << endl;
-	for( s.child(); s.valid(); s.next() ){
-	  cout << "  " << s.getName() << ": ";
-	  AttrList attrs = s.getAttrList();
-	  for(AttrList::iterator ite=attrs.begin(); ite!=attrs.end(); ++ite)
-		cout << "(" << ite->first << "=" << ite->second << ") ";
-	  cout << "'" << s.getContent() << "'" << endl;
-	}
-	s.parent();
-  }
-  s.parent();
-}
+  DBGP(" ---------------- ---------------------- ---------------------- ");
 
-void test_printer(){
-  XmlPrinter p("TestData/output.xml");
+  doc.attr("from","xml.cpp");
+  doc
+	.add( XmlNode("message").attr("id", "0001").attr("number", 102).content("Hello") )
+	.add( XmlNode("message").content("Bye") )
+	.add( XmlNode("fruit").content("Bye")
+		  .add( XmlNode("name").attr("lang","en").content("Apple") )
+		  .add( XmlNode("name").attr("lang","ja").content("りんご") )
+		  );
+  doc.dump();
   
-  p.start("root").attr("from","cpp");
+  //doc.writeToFile("TestData/output3.xml");
 
-  p.start("message").attr("id", "0001").attr("number", 102).content("Hello").end();
-  p.start("message").content("Bye").end();
-
-  p.start("fruit");
-  p.start("name").attr("lang", "en").content("Apple").end();
-  p.start("name").attr("lang", "ja").content("りんご").end();
-  p.end(); // fruit
-  
-  p.end(); // root
+  cout << "write to 'TestData/output3.xml'" << endl;
 }
 
 

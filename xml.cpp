@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/08 02:15:50
+// last updated : 2011/12/08 20:55:03
 
 #include <iostream>
 using namespace std;
@@ -11,7 +11,7 @@ namespace nl{
 };
 
 
-#if 1
+#if 0
 // test
 // $ make TARGET=xml
 #include <iostream>

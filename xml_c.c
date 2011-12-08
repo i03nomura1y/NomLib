@@ -1,5 +1,5 @@
 // created date : 2011/12/07 18:24:10
-// last updated : 2011/12/08 02:27:26
+// last updated : 2011/12/08 20:54:19
 #include "xml_c.h"
 
 #include <stdarg.h>
@@ -365,7 +365,7 @@ static void XML_putAttrs_core(XML_Printer *p, va_list *args){
 
 
 
-#if 1
+#if 0
 // test
 // $ make TARGET=xml_c
 // $ gcc -o xml_c xml_c.c stdlib_c.c -I/usr/include/libxml2 -lxml2 -Wall -Wextra

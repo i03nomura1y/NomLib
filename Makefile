@@ -28,6 +28,8 @@ all: $(OBJ) $(TARGET)
 .c.o:
 	$(CC) -c $< -o $@ $(CFLAGS)
 
+
+
 clean:
 	@rm -f $(OBJ) $(EXE_LIST)
 

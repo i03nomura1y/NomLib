@@ -1,7 +1,7 @@
 #ifndef _NOMLIB_XML_C_H_
 #define _NOMLIB_XML_C_H_
 // created date : 2011/12/07 18:24:10
-// last updated : 2011/12/08 01:42:49
+// last updated : 2011/12/09 17:27:21
 // XML 読み書きライブラリ (libxml2 のラッパ)
 // utf-8 のみ。
 // -lxml2 -lws2_32
@@ -25,11 +25,14 @@ typedef struct{
 typedef struct{
   xmlTextWriterPtr writer;
   char ns[512];
+  // 文字列への変換用
+  xmlBufferPtr bufp;
 }XML_Printer;
 
 // コンストラクタ
 // 失敗時: NULL
 XML_Printer *new_XML_Printer(const char *file_name);
+XML_Printer *new_XML_StringPrinter(); // 文字列に変換
 // デストラクタ
 void delete_XML_Printer(XML_Printer *this_);
 
@@ -37,6 +40,13 @@ void delete_XML_Printer(XML_Printer *this_);
 // 読み出し時に SHIFT-JIS に変換するかどうか
 void XML_setSJISflag(int flag);
 #endif
+
+// 作成されたXML文字列を取り出す: StringPrinter として new している場合のみ
+// 戻り値は解放しなくてよい
+// @return 失敗時 NULL
+const char *XML_popXMLStr(XML_Printer *p);
+// 作成されたXML文字列を初期化
+void XML_resetXMLStr(XML_Printer *p);
 
 // namespace の設定
 void XML_setNS(XML_Printer *p, const char *ns);

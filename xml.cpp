@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/09 01:55:23
+// last updated : 2011/12/09 16:33:33
 
 #include "util.h"
 
@@ -84,9 +84,8 @@ namespace nl{
   /// to string ------------------------------------------------------------------------------
   // ファイルに書き出し
   void XmlNode::writeToFile(const std::string &file_name){
-#warning error!!
-	//	XmlPrinter p(file_name);
-	//	write(p);
+	XmlPrinter p(file_name);
+	write(p);
   }
 
   void XmlNode::write(XmlPrinter &p){
@@ -96,7 +95,7 @@ namespace nl{
 	p.content(content_);
 
 	for( NodeList::iterator ite=children.begin(); ite!=children.end(); ++ite)
-	  write(p);
+	  ite->write(p);
 	
 	p.end();
   }
@@ -113,6 +112,8 @@ namespace nl{
 	for(int i=0;i<depth_;i++) buf[i] = ' ';
 	buf[depth_] = '\0';
 	DBGP(buf << name_);
+	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
+	  DBGP(buf << "(" << ite->first << " = " << ite->second << ")");
 	for( NodeList::iterator ite = children.begin(); ite!=children.end(); ++ite)
 	  ite->dump();
   }
@@ -120,36 +121,49 @@ namespace nl{
 };
 
 
-#if 1
+#if 0
 // test
 // $ make TARGET=xml
 #include <iostream>
 using namespace std;
 using nl::XmlNode;
 
+void test_XmlNode_scan();
 void test_XmlNode();
 
 int main(){
+  test_XmlNode_scan();
   test_XmlNode();
   return 0;
 }
 
+void test_XmlNode_scan(){
+  XmlNode doc = XmlNode::create("TestData/input.xml");
+  doc.dump();
+  cout << " ---------------- ---------------------- ---------------------- " << endl;
+  doc.parseText("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+				"<root>\n"
+				"<message>Hello from String</message>"
+				"<fruit> <name>Orange</name> </fruit>"
+				"</root>\n");
+  cout << doc.toStr() << endl;
+}
+
 void test_XmlNode(){
-  XmlNode doc("root");
+  cout << " ---------------- ---------------------- ---------------------- " << endl;
 
-  DBGP(" ---------------- ---------------------- ---------------------- ");
-
+  XmlNode doc("rootNode");
   doc.attr("from","xml.cpp");
   doc
-	.add( XmlNode("message").attr("id", "0001").attr("number", 102).content("Hello") )
-	.add( XmlNode("message").content("Bye") )
-	.add( XmlNode("fruit").content("Bye")
+	.add( XmlNode("text").attr("id", "0001").attr("number", 102).content("Hello") )
+	.add( XmlNode("text").content("Bye") )
+	.add( XmlNode("fruit")
 		  .add( XmlNode("name").attr("lang","en").content("Apple") )
 		  .add( XmlNode("name").attr("lang","ja").content("りんご") )
 		  );
   doc.dump();
   
-  //doc.writeToFile("TestData/output3.xml");
+  doc.writeToFile("TestData/output3.xml");
 
   cout << "write to 'TestData/output3.xml'" << endl;
 }

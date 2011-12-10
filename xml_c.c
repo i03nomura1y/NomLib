@@ -1,5 +1,5 @@
 // created date : 2011/12/07 18:24:10
-// last updated : 2011/12/09 17:44:05
+// last updated : 2011/12/10 18:54:21
 #include "xml_c.h"
 
 #include <stdarg.h>
@@ -405,10 +405,10 @@ static void XML_putAttrs_core(XML_Printer *p, va_list *args){
 
 
 
-#if 0
+#ifdef TEST
 // test
-// $ make TARGET=xml_c
-// $ gcc -o xml_c xml_c.c stdlib_c.c -I/usr/include/libxml2 -lxml2 -Wall -Wextra
+// $ make TEST=xml_c
+// $ gcc -o xml_c xml_c.c stdlib_c.c -DTEST -I/usr/include/libxml2 -lxml2 -Wall -Wextra
 #include <stdio.h>
 
 #ifdef __cplusplus

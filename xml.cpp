@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/09 16:33:33
+// last updated : 2011/12/10 18:53:44
 
 #include "util.h"
 
@@ -87,6 +87,12 @@ namespace nl{
 	XmlPrinter p(file_name);
 	write(p);
   }
+  // XML文字列に変換
+  std::string XmlNode::toStr(){
+	XmlPrinter p;
+	write(p);
+	return p.popXmlString();
+  }
 
   void XmlNode::write(XmlPrinter &p){
 	p.start(name_);
@@ -98,11 +104,6 @@ namespace nl{
 	  ite->write(p);
 	
 	p.end();
-  }
-  // XML文字列に変換
-  std::string XmlNode::toStr(){
-#warning todo
-	return "";
   }
 
 
@@ -121,19 +122,19 @@ namespace nl{
 };
 
 
-#if 0
+#ifdef TEST
 // test
-// $ make TARGET=xml
+// $ make TEST=xml
 #include <iostream>
 using namespace std;
 using nl::XmlNode;
 
 void test_XmlNode_scan();
-void test_XmlNode();
+void test_XmlNode_print();
 
 int main(){
   test_XmlNode_scan();
-  test_XmlNode();
+  test_XmlNode_print();
   return 0;
 }
 
@@ -149,7 +150,7 @@ void test_XmlNode_scan(){
   cout << doc.toStr() << endl;
 }
 
-void test_XmlNode(){
+void test_XmlNode_print(){
   cout << " ---------------- ---------------------- ---------------------- " << endl;
 
   XmlNode doc("rootNode");
@@ -166,6 +167,8 @@ void test_XmlNode(){
   doc.writeToFile("TestData/output3.xml");
 
   cout << "write to 'TestData/output3.xml'" << endl;
+
+  cout << "XmlString:" << endl << doc.toStr() << endl;
 }
 
 

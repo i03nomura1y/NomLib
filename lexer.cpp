@@ -109,9 +109,9 @@ namespace nl{
 }; // namespace nl;
 
 
-#if 0
+#ifdef TEST
 // test
-// $ make TARGET=lexer
+// $ make TEST=lexer
 #include "util.h"
 
 using nl::RegEx;

@@ -1,12 +1,12 @@
 // -*- mode: cpp -*-
 #include "xml_io.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/09 01:53:58
+// last updated : 2011/12/10 18:53:50
 
 
-#if 0
+#ifdef TEST
 // test
-// $ make TARGET=xml_io
+// $ make TEST=xml_io
 #include <iostream>
 using namespace std;
 using nl::AttrList;
@@ -14,7 +14,7 @@ using nl::XmlScanner;
 using nl::XmlPrinter;
 
 void test_scanner(XmlScanner &s); // 入力
-void test_printer(); // 出力
+void test_printer(XmlPrinter &p); // 出力
 
 int main(){
   XmlScanner s = XmlScanner("TestData/input.xml");
@@ -27,7 +27,16 @@ int main(){
 							 "</root>"
 							 );
   test_scanner(s1);
-  test_printer();
+
+  
+  XmlPrinter p("TestData/output.xml");
+  test_printer(p);
+  
+  XmlPrinter p1;
+  test_printer(p1);
+  cout << "--- printer.popXmlString() -----" << endl;
+  cout << p1.popXmlString() << endl;
+  
   return 0;
 }
 
@@ -49,9 +58,7 @@ void test_scanner(XmlScanner &s){
   s.parent();
 }
 
-void test_printer(){
-  XmlPrinter p("TestData/output.xml");
-  
+void test_printer( XmlPrinter &p ){
   p.start("root").attr("from","xml_io.cpp");
 
   p.start("message").attr("id", "0001").attr("number", 102).content("Hello").end();

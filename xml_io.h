@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_IO_H__
 #define __NOMLIB_XML_IO_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/09 01:24:02
+// last updated : 2011/12/10 17:20:34
 // xml_c.h の c++ 版
 // XmlScanner / XmlPrinter
 // -lxml2 -lws2_32
@@ -80,14 +80,23 @@ namespace nl{
 
   class XmlPrinter{
   public:
+	XmlPrinter() : file_name(), p(NULL){
+	  p = new_XML_StringPrinter();
+	}
 	explicit XmlPrinter(const std::string &file_name_) : file_name(file_name_), p(NULL){
 	  if((p = new_XML_Printer(file_name_.c_str())) == NULL) return;
 	}
 	~XmlPrinter(){ if(p != NULL) delete_XML_Printer(p); }
+	
+	const std::string popXmlString(){
+	  std::string ret(XML_popXMLStr(p));
+	  XML_resetXMLStr(p);
+	  return ret;
+	}
 
 	// namespace の設定
 	XmlPrinter &setNS(const std::string &ns){ XML_setNS(p,ns.c_str()); return *this; }
-
+	
 	// 要素の開始/終了
 	XmlPrinter &start(const std::string &elem){ XML_startElem(p,elem.c_str()); return *this; }
 	XmlPrinter &end(){ XML_endElem(p); return *this; }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<root>
+<root from="xml_io.cpp">
  <message id="0001" number="102">Hello</message>
  <message>Bye</message>
  <fruit>

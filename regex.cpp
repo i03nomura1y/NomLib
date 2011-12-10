@@ -112,9 +112,9 @@ namespace nl{
 
 };
 
-#if 0
+#ifdef TEST
 // test
-// $ make TARGET=regex
+// $ make TEST=regex
 #include <iostream>
 using namespace std;
 using nl::RegEx;

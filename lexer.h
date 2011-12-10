@@ -52,10 +52,10 @@ namespace nl{
 	const char *getPosStr() const; // 位置情報 を文字列で返す
 
 	void unget();	// 前回の get() を無かったことにする
+	bool eol() const; // 行末を指している? == その行で読める文字はもうない?
 	bool eod() const; // データをすべて読み終わった?
   private:
 	void init(); // 初期化
-	bool eol() const; // 行末を指している? == その行で読める文字はもうない?
 	// str を更新。
 	// idx が行末まで来た
 	//   -> 次の行を読む

@@ -88,24 +88,24 @@ namespace nl{
   /// 前回の実行によりマッチした部分文字列の idx 番目のものを返す
   std::string RegEx::get(int idx) const{
 	if( idx<0 || idx>=(int)idx_list.size() ){
-	  std::cerr << __FILE__ << "(" << __LINE__ << ") error in RegEx::get(int)  size "<< idx_list.size() << "  arg " << idx << std::endl;
+	  ERRP("size "<< idx_list.size() << "  arg " << idx);
 	  throw std::out_of_range("in RegEx::get(int)");
 	}
 	//std::cout << idx_list[idx].first << "," << idx_list[idx].second << std::endl;
 	//std::cout << str << "," << (str.substr(0,1)) << std::endl;
 	return str.substr( idx_list[idx].first, idx_list[idx].second );
   }
-  int RegEx::getStartPos(int idx) const{
+  int RegEx::spos(int idx) const{
 	if( idx<0 || idx>=(int)idx_list.size() ){
-	  std::cerr << __FILE__ << "(" << __LINE__ << ") error in RegEx::getStartPos(int)  size "<< idx_list.size() << "  arg " << idx << std::endl;
-	  throw std::out_of_range("in RegEx::getStartPos(int)");
+	  ERRP("size "<< idx_list.size() << "  arg " << idx);
+	  throw std::out_of_range("in RegEx::spos(int)");
 	}
 	return idx_list[idx].first;
   }
-  int RegEx::getEndPos(int idx) const{
+  int RegEx::epos(int idx) const{
 	if( idx<0 || idx>=(int)idx_list.size() ){
-	  std::cerr << __FILE__ << "(" << __LINE__ << ") error in RegEx::getEndPos(int)  size "<< idx_list.size() << "  arg " << idx << std::endl;
-	  throw std::out_of_range("in RegEx::getEndPos(int)");
+	  ERRP("size "<< idx_list.size() << "  arg " << idx);
+	  throw std::out_of_range("in RegEx::epos(int)");
 	}
 	return ( idx_list[idx].first + idx_list[idx].second );
   }
@@ -143,6 +143,20 @@ void test(const string &rx_str, const string &str1, const string &str2){
   }else{
 	cout << " no match" << endl;
   }
+}
+
+void test_replace(){
+#warning TODO
+  RegEx re("\\\\[$]");
+  std::string str("sample string \\escape \\$");
+  
+  if( re.match(str) ){
+	for(int i=0; i<re.length(); i++){
+	  DBGP(" match[" << i << "] '" << re.get(i) << "' " << re.spos(i) << " , " << re.epos(i));
+	  DBGP(str.substr(0, re.spos(i)) << "," << str.substr(re.epos(i)));
+	}
+  }
+
 }
 
 int main(){

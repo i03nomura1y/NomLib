@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <sstream>
 #include "util.h"
 
 namespace nl{
@@ -110,6 +111,22 @@ namespace nl{
 	return ( idx_list[idx].first + idx_list[idx].second );
   }
 
+  /// 置換
+  // src 内のマッチした部分文字列を repl で置き換える
+  std::string RegEx::replace(const std::string &src, const std::string &repl, int idx){
+	std::stringstream ss;
+	unsigned int i;
+	for(i = 0; i<src.length() && match(&src[i]); i += epos(idx)){
+	  //DBGP("'" << ss.str() << "' <- '" << &src[i] << "'");
+	  //DBGP("match  " << (re.spos(idx)) << " , " << (re.epos(idx)));
+	  //DBGP("'" << src.substr(i, re.spos(idx)) << "'");
+	  ss << src.substr(i, spos(idx)) << repl;
+	}
+	if(i<src.length()) ss << src.substr(i);
+	//DBGP("'" << ss.str() << "' <- '" << &str[i] << "'");
+	return ss.str();
+  }
+  
 };
 
 #ifdef TEST
@@ -146,20 +163,16 @@ void test(const string &rx_str, const string &str1, const string &str2){
 }
 
 void test_replace(){
-#warning TODO
-  RegEx re("\\\\[$]");
-  std::string str("sample string \\escape \\$");
-  
-  if( re.match(str) ){
-	for(int i=0; i<re.length(); i++){
-	  DBGP(" match[" << i << "] '" << re.get(i) << "' " << re.spos(i) << " , " << re.epos(i));
-	  DBGP(str.substr(0, re.spos(i)) << "," << str.substr(re.epos(i)));
-	}
-  }
+  RegEx re("hello");
+  std::string str("hello, world!!");
+  std::string repl("good night");
 
+  DBGP("'" << re.replace(str, repl) << "' <- '" << str << "'");
 }
 
 int main(){
+  test_replace();
+  //*
   test("([[:digit:]]+), (([[:digit:]]+), ([[:digit:]]+))", 
 	   "123, 456, 789", "Hello");
 
@@ -168,7 +181,7 @@ int main(){
 
   test("(日本語)?のテスト",
 	   "日本語のテスト", "英語のテスト");
-  
+  //*/
   return 0;
 }
 #endif

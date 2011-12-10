@@ -37,6 +37,14 @@ namespace nl{
 	// 部分文字列の個数
 	int length() const{ return idx_list.size(); }
 	
+	/// 置換
+	// src 内のマッチした部分文字列を repl で置き換える
+	// @param src  元の文字列
+	// @param repl 置き換え後の部分文字列
+	// @param idx  何番目の match を置き換えるか
+	// @return 置き換え後の文字列
+	std::string replace(const std::string &src, const std::string &repl, int idx = 0);
+
   private:
 	bool valid;
 	mutable regex_t *reg; // smart pointer として使う。

@@ -146,7 +146,7 @@ void test(const string &rx_str, const string &str1, const string &str2){
   cout << "str : '" << str1 << "'" << endl;
   if( re.match(str1) ){
 	for(int i=0; i<re.length(); i++){
-	  cout << " match[" << i << "] " << re.get(i) << endl;
+	  cout << " match[" << i << "] " << re.get(i) << " " << re.spos(i) << endl;
 	}
   }else{
 	cout << " no match" << endl;
@@ -155,24 +155,39 @@ void test(const string &rx_str, const string &str1, const string &str2){
   cout << "str : '" << str2 << "'" << endl;
   if( re.match(str2) ){
 	for(int i=0; i<re.length(); i++){
-	  cout << " match[" << i << "] " << re.get(i) << endl;
+	  cout << " match[" << i << "] " << re.get(i) << " " << re.spos(i) << endl;
 	}
   }else{
 	cout << " no match" << endl;
   }
 }
 
-void test_replace(){
-  RegEx re("hello");
-  std::string str("hello, world!!");
-  std::string repl("good night");
+std::string my_replace(const std::string &src){
+  RegEx re("(a.)");
+  std::stringstream ss;
+  unsigned int i;
+  for(i = 0; i<src.length() && re.match(&src[i]); i += re.epos(0)){
+	if(re.get(0) == "ab") ss << src.substr(i, re.spos(0)) << "b";
+	else                  ss << src.substr(i, re.epos(0));
+  }
+  if(i<src.length()) ss << src.substr(i);
+  return ss.str();
+}
 
-  DBGP("'" << re.replace(str, repl) << "' <- '" << str << "'");
+
+void test_replace(const std::string &re_str, const std::string &str, const std::string &repl, int idx = 0){
+  RegEx re(re_str);
+  DBGP("'" << re.replace(str, repl, idx) << "' <- '" << str << "'");
 }
 
 int main(){
-  test_replace();
-  //*
+  test_replace("hello", "hello,world!!", "good night");
+
+  DBGP("" << my_replace("zzzab"));
+  DBGP("" << my_replace("zzzaab"));
+  DBGP("" << my_replace("zzzaaab"));
+
+  /*
   test("([[:digit:]]+), (([[:digit:]]+), ([[:digit:]]+))", 
 	   "123, 456, 789", "Hello");
 

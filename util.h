@@ -8,8 +8,10 @@
 #define ERRP(MSG) std::cerr << __FILE__ << ":" << __LINE__ << ": error in " << __FUNCTION__ << "(): " << MSG << std::endl
 
 namespace nl{
-//  template <typename T>
-//  bool has(const std::set<T> &container, const T &val);
+  // @return container に val が含まれれば true
+  template <typename T>
+  bool has(const std::set<T> &container, const T &val);
 };
+
 
 #endif

@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/09 01:48:06
+// last updated : 2011/12/14 13:55:26
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -34,8 +34,8 @@ namespace nl{
 	// パース
 	XmlNode &parse(const std::string &file_name);	// ファイル内容をパース このオブジェクトをルートノードにする
 	XmlNode &parseText(const std::string &text); // 文字列をパース
-	static XmlNode create(const std::string &file_name); // XmlNode を生成
-	static XmlNode createFromText(const std::string &text); // XmlNode を生成
+	static XmlNode create(const std::string &file_name); // ファイル名から XmlNode を生成
+	static XmlNode createFromText(const std::string &text); // XML文字列から XmlNode を生成
 	
 	// 文字列に変換
 	void writeToFile(const std::string &file_name); // ファイルに書き出し

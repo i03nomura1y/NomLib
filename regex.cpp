@@ -87,8 +87,8 @@ namespace nl{
 	return false;
   }
   /// 前回の実行によりマッチした部分文字列の idx 番目のものを返す
-  std::string RegEx::get(int idx) const{
-	if( idx<0 || idx>=(int)idx_list.size() ){
+  std::string RegEx::get(unsigned int idx) const{
+	if( idx>=idx_list.size() ){
 	  ERRP("size "<< idx_list.size() << "  arg " << idx);
 	  throw std::out_of_range("in RegEx::get(int)");
 	}
@@ -96,15 +96,15 @@ namespace nl{
 	//std::cout << str << "," << (str.substr(0,1)) << std::endl;
 	return str.substr( idx_list[idx].first, idx_list[idx].second );
   }
-  int RegEx::spos(int idx) const{
-	if( idx<0 || idx>=(int)idx_list.size() ){
+  int RegEx::spos(unsigned int idx) const{
+	if( idx>=idx_list.size() ){
 	  ERRP("size "<< idx_list.size() << "  arg " << idx);
 	  throw std::out_of_range("in RegEx::spos(int)");
 	}
 	return idx_list[idx].first;
   }
-  int RegEx::epos(int idx) const{
-	if( idx<0 || idx>=(int)idx_list.size() ){
+  int RegEx::epos(unsigned int idx) const{
+	if( idx>=idx_list.size() ){
 	  ERRP("size "<< idx_list.size() << "  arg " << idx);
 	  throw std::out_of_range("in RegEx::epos(int)");
 	}

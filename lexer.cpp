@@ -54,6 +54,8 @@ namespace nl{
   // 前回の get() を無かったことにする
   void Lexer::unget(){ idx = pre_idx; }
   
+  // 読み取り中の行を返す。idx は進めない。
+  const std::string &Lexer::getLine() const{ return str; }
   // 読み取り中の行の残り部分を返す。idx は進める。
   std::string Lexer::getRest(){
 	int tmp = idx;
@@ -85,12 +87,14 @@ namespace nl{
   // idx が行末まで来た
   //   -> 次の行を読む
   //      行末に \ があれば、次の行と接続。
+  // @return データをすべて読み終わっていたら false
   bool Lexer::updateString(){
 	// 行末じゃない -> このままでOK
 	if( !eol() ) return true;
 	// 行末なので getline
 	idx = 0; pre_idx = 0; line_no++;
 	if( is == NULL || !getline(*is, str) ){
+	  // 次の行がない -> false
 	  is = NULL;
 	  str = "";
 	  return false;
@@ -122,22 +126,24 @@ using nl::RuleList;
 
 int main(){
   Lexer lexer;
-  lexer.open("../test_input/rule1.txt");  // ファイル開く
-  lexer.open("dat","// comment line.\nint a=0;\nint b=0;");
+  lexer.open("TestData/input.txt");  // ファイル開く
+  //lexer.open("dat","// comment line.\nint a=0;\nint b=0;");
 
   // タイプと正規表現のリストを作成
   RuleList rule_list;
-  rule_list.push_back( Rule("(^\\s+)|(^$)", 0 )); // white-space | 空行
-  rule_list.push_back( Rule("^\\w+",        1 )); // リテラル
-  rule_list.push_back( Rule("^\\d+",        2 )); // 数値
-  rule_list.push_back( Rule("^//.*$",       3 )); // コメント行
-  rule_list.push_back( Rule("^.*$",       100 )); //
+  rule_list.push_back( Rule("(^\\s+)|(^$)", 0,   0 )); // whitespace | 空行
+  rule_list.push_back( Rule("^\\w+",        0,   1 )); // リテラル
+  rule_list.push_back( Rule("^\\d+",        0,   2 )); // 数値
+  rule_list.push_back( Rule("^\"(((\\\\.)|[^\"])*)\"", 1, 3 )); // 文字列
+  rule_list.push_back( Rule("^//.*$",       0,   4 )); // コメント行
+  rule_list.push_back( Rule("^.*$",         0, 100 )); //
 
   lexer.setRule(&rule_list);
   Rule *ret;
   while( (ret = lexer.get()) != NULL ){
-	DBGP("[" << lexer.getPosStr() << "] " << ret->type << "  '" << ret->get(0) << "'");
+	DBGP("[" << lexer.getPosStr() << "] " << ret->type << "  '" << ret->str() << "'");
   }
+  if(!lexer.eod()) DBGP("parse error.");
   
   return 0;
 }

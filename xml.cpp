@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/10 18:53:44
+// last updated : 2011/12/14 13:57:17
 
 #include "util.h"
 
@@ -139,7 +139,7 @@ int main(){
 }
 
 void test_XmlNode_scan(){
-  XmlNode doc = XmlNode::create("TestData/input.xml");
+  XmlNode doc = XmlNode::create("TestData/input.xml"); // ファイルから
   doc.dump();
   cout << " ---------------- ---------------------- ---------------------- " << endl;
   doc.parseText("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"

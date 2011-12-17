@@ -29,13 +29,13 @@ namespace nl{
 	// @return  マッチしたら true
 	bool match(const std::string &str_);
 	/// 前回の実行によりマッチした部分文字列の idx 番目のものを返す
-	std::string get(int idx) const; // 部分文字列
+	std::string get(unsigned int idx) const; // 部分文字列
 	//int getStartPos(int idx) const; // 開始インデクス
 	//int getEndPos(int idx) const;   // 終了インデクス
-	int spos(int idx) const; // 開始インデクス
-	int epos(int idx) const;   // 終了インデクス
+	int spos(unsigned int idx) const; // 開始インデクス
+	int epos(unsigned int idx) const;   // 終了インデクス
 	// 部分文字列の個数
-	int length() const{ return idx_list.size(); }
+	unsigned int length() const{ return idx_list.size(); }
 	
 	/// 置換
 	// src 内のマッチした部分文字列を repl で置き換える

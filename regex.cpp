@@ -127,6 +127,21 @@ namespace nl{
 	return ss.str();
   }
   
+  /*
+  // sample: \$ -> $
+  std::string RegEx::replace_dollar( const std::string &str ){
+	RegEx re("\\\\.");
+	std::stringstream ss;
+	unsigned int i;
+	for(i = 0; i<str.length() && re.match(&str[i]); i += re.epos(0)){
+	  if(re.get(0)[1] == '$') ss << str.substr(i, re.spos(0)) << "$";
+	  else                    ss << str.substr(i, re.epos(0));
+	}
+	if(i<str.length()) ss << str.substr(i);
+	return ss.str();
+	}//*/
+
+  
 };
 
 #ifdef TEST

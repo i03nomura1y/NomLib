@@ -73,6 +73,7 @@ namespace nl{
   void Lexer::init(){
 	if( ifs.is_open() ) ifs.close();
 	ss.str("");
+	ss.clear();
 	file_name = "";
 	is = NULL;
 
@@ -124,13 +125,20 @@ using nl::Lexer;
 using nl::Rule;
 using nl::RuleList;
 
-int main(){
-  Lexer lexer;
-  lexer.open("TestData/input.txt");  // ファイル開く
-  //lexer.open("dat","// comment line.\nint a=0;\nint b=0;");
+Lexer lexer;
+RuleList rule_list;
 
+void func(){
+  Rule *ret;
+  lexer.setRule(&rule_list);
+  while( (ret = lexer.get()) != NULL ){
+	DBGP("[" << lexer.getPosStr() << "] " << ret->type << "  '" << ret->str() << "'");
+  }
+  if(!lexer.eod()) DBGP("parse error.");
+}
+
+int main(){
   // タイプと正規表現のリストを作成
-  RuleList rule_list;
   rule_list.push_back( Rule("(^\\s+)|(^$)", 0,   0 )); // whitespace | 空行
   rule_list.push_back( Rule("^\\w+",        0,   1 )); // リテラル
   rule_list.push_back( Rule("^\\d+",        0,   2 )); // 数値
@@ -138,13 +146,17 @@ int main(){
   rule_list.push_back( Rule("^//.*$",       0,   4 )); // コメント行
   rule_list.push_back( Rule("^.*$",         0, 100 )); //
 
-  lexer.setRule(&rule_list);
-  Rule *ret;
-  while( (ret = lexer.get()) != NULL ){
-	DBGP("[" << lexer.getPosStr() << "] " << ret->type << "  '" << ret->str() << "'");
-  }
-  if(!lexer.eod()) DBGP("parse error.");
-  
+
+  //lexer.open("TestData/input.txt");  // ファイル開く
+  //func();
+
+  //lexer.open("dat","// comment line.\nint a=0;\nint b=0;");
+  lexer.open("dat","// comment line.\n");
+  func();
+
+  lexer.open("dat2","a*b");
+  func();
+
   return 0;
 }
 

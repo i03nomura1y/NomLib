@@ -93,8 +93,9 @@ namespace nl{
 	Rule &operator=(Rule &obj){ swap(obj); return *this; }	// 代入演算子 swap する
 	void swap(Rule &obj){ RegEx::swap(obj); std::swap(idx, obj.idx); std::swap(type, obj.type); }
 	std::string str() const{ return ( idx<length() )?get(idx):""; }
-  public:
+  private:
 	unsigned int idx;
+  public:
 	unsigned int type;
   };
   

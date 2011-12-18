@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/18 14:36:15
+// last updated : 2011/12/18 15:03:11
 
 #include "util.h"
 
@@ -130,12 +130,13 @@ namespace nl{
 
   // 確認用表示
   void XmlNode::dump(){
+	if(depth_ == 0) DBGP("nl::XmlNode::dump() ------------------");
 	char buf[512];
 	for(int i=0;i<depth_;i++) buf[i] = ' ';
 	buf[depth_] = '\0';
-	DBGP(buf << name_); // DBGP(content_);
+	std::cout << buf << name_ << std::endl; // DBGP(content_);
 	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
-	  DBGP(buf << "(" << ite->first << " = " << ite->second << ")");
+	  std:: cout << buf << "(" << ite->first << " = " << ite->second << ")" << std::endl;
 	for( NodeList::iterator ite = children.begin(); ite!=children.end(); ++ite)
 	  ite->dump();
   }

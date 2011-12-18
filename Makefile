@@ -28,6 +28,8 @@ ifdef TEST
 all: clean_testobj $(OBJ) $(TEST)
 clean_testobj:
 	rm -f $(TEST).o
+run: all
+	./$(TEST)
 else
 all: $(OBJ)
 endif

@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/14 13:57:17
+// last updated : 2011/12/18 14:36:15
 
 #include "util.h"
 
@@ -9,15 +9,28 @@ namespace nl{
 
   XmlNode::XmlNode()
 	: //ns(""),
-	  name_(""), content_(""), attrs_(), children(), parent_(NULL), depth_(0){};
+	  name_(""), content_(""), attrs_(), children(), parent_(NULL), depth_(0){
+  }
   XmlNode::XmlNode(const std::string &name) :
 	//ns(""), 
-	name_(name), content_(""), attrs_(), children(), parent_(NULL), depth_(0){};
+	name_(name), content_(""), attrs_(), children(), parent_(NULL), depth_(0){
+  }
+  XmlNode::XmlNode(XmlScanner &s)
+	: //ns(""),
+	name_(""), content_(""), attrs_(), children(), parent_(NULL), depth_(0){
+	parse(s);
+  }
+
+  XmlNode::~XmlNode(){
+  }
+
   XmlNode::XmlNode(const XmlNode &obj) :
 	//ns(obj.ns),
 	name_(obj.name_), content_(obj.content_),
 	attrs_(obj.attrs_), children(obj.children), parent_(obj.parent_),
-	depth_(obj.depth_){}
+	depth_(obj.depth_){
+  }
+
   XmlNode &XmlNode::operator=(const XmlNode &obj){
 	//ns       = obj.ns;
 	name_	 = obj.name_;
@@ -65,8 +78,14 @@ namespace nl{
 	return parse(s);
   }
 
-  XmlNode XmlNode::create(const std::string &file_name){ return XmlNode().parse(file_name); }
-  XmlNode XmlNode::createFromText(const std::string &text){ return XmlNode().parseText(text); }
+  XmlNode XmlNode::create(const std::string &file_name){
+	XmlScanner s(file_name);
+	return XmlNode(s);
+  }
+  XmlNode XmlNode::createFromText(const std::string &text){
+	XmlScanner s("text", text);
+	return XmlNode(s);
+  }
 
 
   XmlNode &XmlNode::parse(XmlScanner &s){
@@ -74,8 +93,10 @@ namespace nl{
 	content_ = s.getContent();
 	attrs_   = s.getAttrList();
 
-	for( s.child(); s.valid(); s.next() )
-	  add( XmlNode().parse(s) );
+	for( s.child(); s.valid(); s.next() ){
+	  XmlNode n(s);
+	  add( n );
+	}
 	s.parent();
 	
 	return *this;
@@ -112,7 +133,7 @@ namespace nl{
 	char buf[512];
 	for(int i=0;i<depth_;i++) buf[i] = ' ';
 	buf[depth_] = '\0';
-	DBGP(buf << name_);
+	DBGP(buf << name_); // DBGP(content_);
 	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
 	  DBGP(buf << "(" << ite->first << " = " << ite->second << ")");
 	for( NodeList::iterator ite = children.begin(); ite!=children.end(); ++ite)
@@ -129,13 +150,20 @@ namespace nl{
 using namespace std;
 using nl::XmlNode;
 
+void test();
 void test_XmlNode_scan();
 void test_XmlNode_print();
 
 int main(){
+  //test();
   test_XmlNode_scan();
-  test_XmlNode_print();
+  //test_XmlNode_print();
   return 0;
+}
+
+void test(){
+  XmlNode doc = XmlNode::create("TestData/simple.xml"); // ファイルから
+  doc.dump();
 }
 
 void test_XmlNode_scan(){

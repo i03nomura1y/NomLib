@@ -1,0 +1,6 @@
+// comment line.
+int a=0;
+int b=0;
+a = b + 1;
+string str = "hello, world!!";
+"hello, world!!" "bye!!"

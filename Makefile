@@ -12,7 +12,8 @@ ifeq ($(OS),Windows_NT)			# Windows
 	CFLAGS = -Wall -Wextra -O3
 	EXE_LIST =  $(OBJ:.o=.exe)
 #   LOADLIBES = $(shell ls *.o | grep -v $@) -lregex
-	LOADLIBES = $(filter-out $(TEST).o, $(OBJ)) -lregex -lxml2 -lws2_32
+#	LOADLIBES = $(filter-out $(TEST).o, $(OBJ)) -lregex -lxml2 -lws2_32
+	LOADLIBES = $(filter-out $(TEST).o, $(OBJ)) -lregex -lxml2 -lz -liconv -lws2_32 -Wl,--enable-auto-import
 else							# Linux
 	CFLAGS = -Wall -Wextra -O3 -I/usr/include/libxml2
 	EXE_LIST =  $(OBJ:.o=)

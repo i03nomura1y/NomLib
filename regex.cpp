@@ -160,7 +160,7 @@ void test(const string &rx_str, const string &str1, const string &str2){
   cout << "rx  : " << re.rx_str() << endl;
   cout << "str : '" << str1 << "'" << endl;
   if( re.match(str1) ){
-	for(int i=0; i<re.length(); i++){
+	for(unsigned int i=0; i<re.length(); i++){
 	  cout << " match[" << i << "] " << re.get(i) << " " << re.spos(i) << endl;
 	}
   }else{
@@ -169,7 +169,7 @@ void test(const string &rx_str, const string &str1, const string &str2){
 
   cout << "str : '" << str2 << "'" << endl;
   if( re.match(str2) ){
-	for(int i=0; i<re.length(); i++){
+	for(unsigned int i=0; i<re.length(); i++){
 	  cout << " match[" << i << "] " << re.get(i) << " " << re.spos(i) << endl;
 	}
   }else{

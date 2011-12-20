@@ -15,9 +15,9 @@ ifeq ($(OS),Windows_NT)			# Windows
 #	LOADLIBES = $(filter-out $(TEST).o, $(OBJ)) -lregex -lxml2 -lws2_32
 	LOADLIBES = $(filter-out $(TEST).o, $(OBJ)) -lregex -lxml2 -lz -liconv -lws2_32 -Wl,--enable-auto-import
 else							# Linux
-	CFLAGS = -Wall -Wextra -O3 -I/usr/include/libxml2
+	CFLAGS = -Wall -Wextra -O3 -I/usr/include/libxml2 -I/usr/local/ssl/include
 	EXE_LIST =  $(OBJ:.o=)
-	LOADLIBES = $(filter-out $(TEST).o, $(OBJ)) -lxml2
+	LOADLIBES = $(filter-out $(TEST).o, $(OBJ)) -lxml2 -L/usr/local/ssl/lib -lcrypto
 endif
 
 

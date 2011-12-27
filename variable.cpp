@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2011/12/25 20:42:14
+// last updated : 2011/12/27 21:56:10
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -12,19 +12,18 @@
 using namespace std;
 
 namespace nl{
-  static char buf_valiable[1024];
+  static char buf_variable[1024];
 
   const int         Variable::undef_int = 0;
   const std::string Variable::undef_str = "#undef";
 
   Variable::Variable(Type type, const std::string &val)
-	: type_(type), val_int(undef_int), val_str(undef_str), constant(false), function(false){
+	: type_(type), val_int(undef_int), val_str(undef_str), ptr_v(NULL), ptr_f(NULL), constant(false){
 	assign(type, val);
   }
   // val を指定したTypeに変換して代入
   void Variable::assign(Type type, const std::string &val){
 	type_ = type;
-	function = false;
 	switch(type_){
 	case Undef:   break;
 	case Integer: val_int = atoi(val.c_str()); break;
@@ -46,7 +45,7 @@ namespace nl{
   std::string Variable::asStr() const{
 	switch(type_){
 	case Undef: return undef_str;
-	case Integer: snprintf(buf_valiable, 1023, "%d", val_int); return buf_valiable;
+	case Integer: snprintf(buf_variable, 1023, "%d", val_int); return buf_variable;
 	case String: return val_str;
 	default:
 	  ERRP("unimplemented.");

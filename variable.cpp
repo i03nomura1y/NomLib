@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2011/12/28 15:34:03
+// last updated : 2011/12/28 23:44:14
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -18,7 +18,7 @@ namespace nl{
   const std::string Variable::undef_str = "#undef";
 
   Variable::Variable(Type type, const std::string &val)
-	: type_(type), val_int(undef_int), val_str(undef_str), ptr_v(NULL), ptr_f(NULL), constant(false){
+	: type_(type), val_int(undef_int), val_str(undef_str), ptr_v(NULL), ptr_f(NULL), ptr_nt(NULL), constant(false){
 	assign(type, val);
   }
   // val を指定したTypeに変換して代入
@@ -64,8 +64,9 @@ namespace nl{
 	case String: return "string|"+val_str;
 	case Pointer:
 	  return
-		(ptr_v!=NULL)?"(pointer: "+ptr_v->dump_str()+")":
-		(ptr_f!=NULL)?"(function: '"+ptr_f->name()+"')":"(pointer: NULL)";
+		(ptr_v !=NULL)?"(pointer: "+ptr_v->dump_str()+")":
+		(ptr_f !=NULL)?"(function: '"+ptr_f->name()+"')":
+		(ptr_nt!=NULL)?"(nameTable: '"+ptr_nt->name()+"')":"(pointer: NULL)";
 	default:
 	  ERRP("unimplemented.");
 	}

@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/28 21:07:14
+// last updated : 2011/12/29 04:38:54
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -27,12 +27,18 @@ namespace nl{
 	~XmlNode();
 	XmlNode(const XmlNode &obj);
 	XmlNode &operator=(const XmlNode &obj);
+	// 属性追加
 	XmlNode &attr(const std::string &name, const std::string &val);
 	XmlNode &attr(const std::string &name, const int val);
+	// 子ノード追加
 	XmlNode &add(XmlNode &node);
-	XmlNode &content(const std::string &con){ content_ = con; return *this; }
-	const std::string &name() const{ return name_; }
+	// content 
+	XmlNode &content(const std::string &con){ content_.assign(con); return *this; }
 
+	// getter
+	const std::string &name() const{ return name_; } // タグ名
+	nl::Variable &content(){ return content_; }
+	nl::Variable *find(const std::string &name); // 属性へのポインタを返す。無ければ NULL
 	List &children(){ return children_; }
 
 	// パース
@@ -57,8 +63,8 @@ namespace nl{
   private:
 	//std::string ns;      // namespace
 	std::string name_;    // tag name
-	std::string content_; //
-	AttrList attrs_; // xml_io.h で typedef
+	nl::Variable content_; // string の代わりに Variable を使用
+	AttrList attrs_; // xml_io.h で typedef std::list< pair<string name, nl::Variable > >
 	List children_; //std::list<XmlNode> children;
 	mutable XmlNode *parent_; // 親ノードへのポインタ
 	int depth_; // ルートから数えた深さ。ルートは0

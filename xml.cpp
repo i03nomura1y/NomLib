@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/18 15:03:11
+// last updated : 2011/12/28 21:02:30
 
 #include "util.h"
 
@@ -9,15 +9,15 @@ namespace nl{
 
   XmlNode::XmlNode()
 	: //ns(""),
-	  name_(""), content_(""), attrs_(), children(), parent_(NULL), depth_(0){
+	  name_(""), content_(""), attrs_(), children_(), parent_(NULL), depth_(0){
   }
   XmlNode::XmlNode(const std::string &name) :
 	//ns(""), 
-	name_(name), content_(""), attrs_(), children(), parent_(NULL), depth_(0){
+	name_(name), content_(""), attrs_(), children_(), parent_(NULL), depth_(0){
   }
   XmlNode::XmlNode(XmlScanner &s)
 	: //ns(""),
-	name_(""), content_(""), attrs_(), children(), parent_(NULL), depth_(0){
+	name_(""), content_(""), attrs_(), children_(), parent_(NULL), depth_(0){
 	parse(s);
   }
 
@@ -27,7 +27,7 @@ namespace nl{
   XmlNode::XmlNode(const XmlNode &obj) :
 	//ns(obj.ns),
 	name_(obj.name_), content_(obj.content_),
-	attrs_(obj.attrs_), children(obj.children), parent_(obj.parent_),
+	attrs_(obj.attrs_), children_(obj.children_), parent_(obj.parent_),
 	depth_(obj.depth_){
   }
 
@@ -36,7 +36,7 @@ namespace nl{
 	name_	 = obj.name_;
 	content_ = obj.content_;
 	attrs_   = obj.attrs_;
-	children = obj.children;
+	children_ = obj.children_;
 	parent_  = obj.parent_;
 	depth_   = obj.depth_;
 	return *this;
@@ -55,13 +55,13 @@ namespace nl{
   XmlNode &XmlNode::add(XmlNode &node){
 	node.parent_ = this;
 	node.updateDepth(depth_+1);
-	children.push_back(node);
+	children_.push_back(node);
 	return *this;
   }
   // 深さを更新
   void XmlNode::updateDepth(int newDepth){
 	depth_ = newDepth;
-	for( NodeList::iterator ite = children.begin(); ite!=children.end(); ++ite)
+	for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite)
 	  ite->updateDepth(depth_+1);
   }
 
@@ -121,7 +121,7 @@ namespace nl{
 	  p.attr(ite->first, ite->second);
 	p.content(content_);
 
-	for( NodeList::iterator ite=children.begin(); ite!=children.end(); ++ite)
+	for( List::iterator ite=children_.begin(); ite!=children_.end(); ++ite)
 	  ite->write(p);
 	
 	p.end();
@@ -137,7 +137,7 @@ namespace nl{
 	std::cout << buf << name_ << std::endl; // DBGP(content_);
 	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
 	  std:: cout << buf << "(" << ite->first << " = " << ite->second << ")" << std::endl;
-	for( NodeList::iterator ite = children.begin(); ite!=children.end(); ++ite)
+	for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite)
 	  ite->dump();
   }
 

@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2011/12/27 21:56:10
+// last updated : 2011/12/28 15:34:03
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -25,9 +25,9 @@ namespace nl{
   void Variable::assign(Type type, const std::string &val){
 	type_ = type;
 	switch(type_){
-	case Undef:   break;
-	case Integer: val_int = atoi(val.c_str()); break;
-	case String:  val_str = val; break;
+	case Undef:   assign_undef(); break;
+	case Integer: assign(atoi(val.c_str())); break;
+	case String:  assign(val); break;
 	default:
 	  ERRP("unimplemented.");
 	}
@@ -54,9 +54,24 @@ namespace nl{
   }
   
   
-  void Variable::dump(){
-	cout << type_ << "|" << asStr() << endl;
+  void Variable::dump() const{
+	cout << dump_str() << endl;
   }
+  std::string Variable::dump_str() const{
+	switch(type_){
+	case Undef: return "#undef";
+	case Integer: snprintf(buf_variable, 1023, "%d", val_int); return "int|"+std::string(buf_variable);
+	case String: return "string|"+val_str;
+	case Pointer:
+	  return
+		(ptr_v!=NULL)?"(pointer: "+ptr_v->dump_str()+")":
+		(ptr_f!=NULL)?"(function: '"+ptr_f->name()+"')":"(pointer: NULL)";
+	default:
+	  ERRP("unimplemented.");
+	}
+	return "#undef";
+  }
+
 }
 
 #ifdef TEST

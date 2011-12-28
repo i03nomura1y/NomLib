@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/18 14:30:23
+// last updated : 2011/12/28 21:07:14
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -14,11 +14,12 @@
 
 namespace nl{
   class XmlNode;
-  typedef std::list<XmlNode> NodeList;
-
+  // std::list<XmlNode> XmlNode::List;
   
   // Xml のひとつのタグを表す
   class XmlNode{
+  public:
+	typedef std::list<XmlNode> List;
   public:
 	XmlNode();
 	explicit XmlNode(const std::string &name); // タグ名を指定して初期化
@@ -31,6 +32,8 @@ namespace nl{
 	XmlNode &add(XmlNode &node);
 	XmlNode &content(const std::string &con){ content_ = con; return *this; }
 	const std::string &name() const{ return name_; }
+
+	List &children(){ return children_; }
 
 	// パース
 	XmlNode &parse(const std::string &file_name);	// ファイル内容をパース このオブジェクトをルートノードにする
@@ -56,7 +59,7 @@ namespace nl{
 	std::string name_;    // tag name
 	std::string content_; //
 	AttrList attrs_; // xml_io.h で typedef
-	NodeList children; //std::list<XmlNode> children;
+	List children_; //std::list<XmlNode> children;
 	mutable XmlNode *parent_; // 親ノードへのポインタ
 	int depth_; // ルートから数えた深さ。ルートは0
   };

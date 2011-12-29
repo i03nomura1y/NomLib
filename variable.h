@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2011/12/29 03:17:09
+// last updated : 2011/12/29 15:39:41
 // 動的型 dynamic type
 
 #include <string>
@@ -51,34 +51,27 @@ namespace nl{
 	
   public:
 	// undef で初期化。vector<> のために public にする
-	Variable() : type_(Undef), val_int(undef_int), val_str(undef_str), ptr_v(NULL), ptr_f(NULL), ptr_nt(NULL), constant(false){}
+	Variable();
 	// #undef な Variable を生成
 	static Variable undef(){ return Variable(); }
 
-	explicit Variable(int val) : type_(Integer), val_int(val), val_str(undef_str), ptr_v(NULL), ptr_f(NULL), ptr_nt(NULL), constant(false){}
-	explicit Variable(const std::string &val) : type_(String), val_int(undef_int), val_str(val), ptr_v(NULL), ptr_f(NULL), ptr_nt(NULL), constant(false){}
-	explicit Variable(Variable *var) : type_(Pointer), val_int(undef_int), val_str(undef_str), ptr_v(var), ptr_f(NULL), ptr_nt(NULL), constant(false){}
-	explicit Variable(AbsFunction *func) : type_(Pointer), val_int(undef_int), val_str(undef_str), ptr_v(NULL), ptr_f(func), ptr_nt(NULL), constant(false){}
+	explicit Variable(int val);
+	explicit Variable(const std::string &val);
+	explicit Variable(Variable *var);
+	explicit Variable(AbsFunction *func);
 	Variable(Type type, const std::string &val); // val を指定したTypeに変換して初期化
-	~Variable(){}
+	virtual ~Variable(){}
 	
-	Variable(const Variable &obj)
-	  : type_(obj.type_), val_int(obj.val_int), val_str(obj.val_str),
-		ptr_v(obj.ptr_v), ptr_f(obj.ptr_f), ptr_nt(obj.ptr_nt), 
-		constant(obj.constant){}
-	Variable &operator=(const Variable &obj){
-	  type_=obj.type_;
-	  val_int = obj.val_int; val_str = obj.val_str;
-	  ptr_v = obj.ptr_v; ptr_f = obj.ptr_f; ptr_nt = obj.ptr_nt; 
-	  constant = obj.constant;
-	  return *this;
-	}
+	Variable(const Variable &obj);
+	Variable &operator=(const Variable &obj);
 
-	void assign_undef(){                 type_=Undef;   val_int = undef_int; val_str = undef_str; ptr_v = NULL; ptr_f = NULL; ptr_nt = NULL; }
-	void assign(int val){                type_=Integer; val_int = val;       val_str = undef_str; ptr_v = NULL; ptr_f = NULL; ptr_nt = NULL;  }
-	void assign(const std::string &val){ type_=String;  val_int = undef_int; val_str = val;       ptr_v = NULL; ptr_f = NULL; ptr_nt = NULL;  }
-	void assign(Type type, const std::string &val); // val を指定したTypeに変換して代入
-	
+	/// assign
+	Variable &assign_undef(); // undef を代入
+	Variable &assign(int val);
+	Variable &assign(const std::string &val);
+	Variable &assign(const Variable &obj);
+	Variable &assign(Type type, const std::string &val); // val を指定したTypeに変換して代入
+
 	// accessor
 	void type(Type t) { type_ = t; }
 	Type type() const{ return type_; }
@@ -93,8 +86,12 @@ namespace nl{
 	// for debug
 	void dump() const;
 	std::string dump_str() const;
-
-
+	
+	/// 演算
+	Variable  operator+ (const Variable& o);
+	Variable& operator+=(const Variable& o);
+	static Variable add(const Variable &l, const Variable &r); // return l+r;
+	
   private:
 	Type type_;
 	

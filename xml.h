@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/29 04:38:54
+// last updated : 2012/01/09 21:46:56
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -33,12 +33,12 @@ namespace nl{
 	// 子ノード追加
 	XmlNode &add(XmlNode &node);
 	// content 
-	XmlNode &content(const std::string &con){ content_.assign(con); return *this; }
+	XmlNode &content(const std::string &con){ content_->assign(con); return *this; }
 
 	// getter
 	const std::string &name() const{ return name_; } // タグ名
-	nl::Variable &content(){ return content_; }
-	nl::Variable *find(const std::string &name); // 属性へのポインタを返す。無ければ NULL
+	nl::Variable::Ptr content(){ return content_; }
+	nl::Variable::Ptr find(const std::string &name); // 属性へのポインタを返す。無ければ NULL
 	List &children(){ return children_; }
 
 	// パース
@@ -63,7 +63,7 @@ namespace nl{
   private:
 	//std::string ns;      // namespace
 	std::string name_;    // tag name
-	nl::Variable content_; // string の代わりに Variable を使用
+	nl::Variable::Ptr content_; // string の代わりに Variable::Ptr を使用
 	AttrList attrs_; // xml_io.h で typedef std::list< pair<string name, nl::Variable > >
 	List children_; //std::list<XmlNode> children;
 	mutable XmlNode *parent_; // 親ノードへのポインタ

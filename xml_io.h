@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_IO_H__
 #define __NOMLIB_XML_IO_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/28 22:13:25
+// last updated : 2012/01/09 21:46:28
 // xml_c.h の c++ 版
 // XmlScanner / XmlPrinter
 // -lxml2 -lws2_32
@@ -15,7 +15,7 @@
 namespace nl{
   class XmlScanner;
   class XmlPrinter;
-  typedef std::pair<std::string, nl::Variable> Attr;
+  typedef std::pair<std::string, nl::Variable::Ptr> Attr;
   typedef std::list<Attr> AttrList;
   
   
@@ -66,7 +66,7 @@ namespace nl{
 	  if(!valid()) return ret;
 	  for(xmlAttrPtr attr = s->ptr->properties; attr; attr=attr->next){
 		ret.push_back(Attr((const char*)attr->name,
-						   Variable((const char*)attr->children->content)));
+						   Variable::Ptr(new Variable((const char*)attr->children->content))));
 	  }
 	  return ret;
 	}
@@ -112,7 +112,7 @@ namespace nl{
 	XmlPrinter &attr(const std::string &name, float val){ XML_putAttrFloat(p,name.c_str(), val); return *this; }
 	XmlPrinter &attr(const AttrList &attrs){
 	  for(AttrList::const_iterator ite=attrs.begin(); ite!=attrs.end(); ++ite)
-		attr(ite->first, ite->second.asStr());
+		attr(ite->first, ite->second->asStr());
 	  return *this;
 	}
 	// 中身を出力

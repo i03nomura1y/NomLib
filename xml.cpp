@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2011/12/28 22:54:57
+// last updated : 2012/01/09 21:47:48
 
 #include "util.h"
 
@@ -9,15 +9,15 @@ namespace nl{
 
   XmlNode::XmlNode()
 	: //ns(""),
-	  name_(""), content_(""), attrs_(), children_(), parent_(NULL), depth_(0){
+	name_(""), content_(new Variable()), attrs_(), children_(), parent_(NULL), depth_(0){
   }
   XmlNode::XmlNode(const std::string &name) :
 	//ns(""), 
-	name_(name), content_(""), attrs_(), children_(), parent_(NULL), depth_(0){
+	name_(name), content_(new Variable()), attrs_(), children_(), parent_(NULL), depth_(0){
   }
   XmlNode::XmlNode(XmlScanner &s)
 	: //ns(""),
-	name_(""), content_(""), attrs_(), children_(), parent_(NULL), depth_(0){
+	name_(""), content_(new Variable()), attrs_(), children_(), parent_(NULL), depth_(0){
 	parse(s);
   }
 
@@ -43,7 +43,7 @@ namespace nl{
   }
   
   XmlNode &XmlNode::attr(const std::string &name, const std::string &val){
-	attrs_.push_back(Attr(name, nl::Variable(val)));
+	attrs_.push_back(Attr(name, nl::Variable::Ptr(new nl::Variable(val))));
 	return *this;
   }
   XmlNode &XmlNode::attr(const std::string &name, const int val){
@@ -60,10 +60,10 @@ namespace nl{
   }
   
   // 属性へのポインタを返す
-  nl::Variable *XmlNode::find(const std::string &name){
+  nl::Variable::Ptr XmlNode::find(const std::string &name){
 	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
-	  if( ite->first == name ) return &(ite->second);
-	return NULL;
+	  if( ite->first == name ) return ite->second;
+	return nl::Variable::NullPtr;
   }
 
 
@@ -99,7 +99,7 @@ namespace nl{
 
   XmlNode &XmlNode::parse(XmlScanner &s){
 	name_    = s.getName();
-	content_.assign(s.getContent());
+	content_->assign(s.getContent());
 	attrs_   = s.getAttrList();
 
 	for( s.child(); s.valid(); s.next() ){
@@ -127,8 +127,8 @@ namespace nl{
   void XmlNode::write(XmlPrinter &p){
 	p.start(name_);
 	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
-	  p.attr(ite->first, ite->second.asStr());
-	p.content(content_.asStr());
+	  p.attr(ite->first, ite->second->asStr());
+	p.content(content_->asStr());
 
 	for( List::iterator ite=children_.begin(); ite!=children_.end(); ++ite)
 	  ite->write(p);
@@ -145,7 +145,7 @@ namespace nl{
 	buf[depth_] = '\0';
 	std::cout << buf << name_ << std::endl; // DBGP(content_);
 	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
-	  std:: cout << buf << "(" << ite->first << " = " << ite->second.asStr() << ")" << std::endl;
+	  std:: cout << buf << "(" << ite->first << " = " << ite->second->asStr() << ")" << std::endl;
 	for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite)
 	  ite->dump();
   }

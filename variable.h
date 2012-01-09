@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/09 20:16:48
+// last updated : 2012/01/09 22:31:11
 // 動的型 dynamic type
 
 #include <string>
@@ -13,7 +13,6 @@ namespace nl{
   class AbsFunction;  // 抽象クラス: 関数
   class AbsNameTable; // 抽象クラス: 名前表
   class Variable;     // 動的型 変数。 AbsFunction, AbsNameTable へのポインタを持つ
-
 
   // 抽象クラス: 関数を表す
   class AbsFunction{
@@ -31,11 +30,13 @@ namespace nl{
 	typedef std::tr1::shared_ptr<AbsNameTable> Ptr;
 	static const Ptr NullPtr;
 
-	virtual ~AbsNameTable(){}
+	AbsNameTable();
+	virtual ~AbsNameTable();
 	virtual const std::string &name() const = 0; // 名前表の名前(識別子)
 	
-	virtual bool add(const std::string &name, nl::Variable *var) = 0;
-	virtual nl::Variable *find(const std::string &name) = 0;
+	bool add(const std::string &name, Variable *var){ return add(name, std::tr1::shared_ptr<Variable>(var)); }
+	virtual bool add(const std::string &name, std::tr1::shared_ptr<Variable> var) = 0;
+	virtual std::tr1::shared_ptr<Variable> find(const std::string &name) = 0;
 	virtual void dump() = 0;
 	//virtual bool add(const std::string &name, nl::Variable &var) = 0;	// 追加
 	//virtual Variable *find(const std::string &name) = 0;	// 取得
@@ -97,7 +98,8 @@ namespace nl{
 	AbsFunction::Ptr  ptrF()  const{ return (type_==Pointer)?ptr_f :AbsFunction::NullPtr; };
 	AbsNameTable::Ptr ptrNT() const{ return (type_==Pointer)?ptr_nt:AbsNameTable::NullPtr; };
 
-	bool isFunction() const{ return (type_==Pointer && (bool)ptr_f); }
+	bool isFunction()  const{ return ptrF();  }
+	bool isNameTable() const{ return ptrNT(); }
 	
 	// for debug
 	void dump() const;

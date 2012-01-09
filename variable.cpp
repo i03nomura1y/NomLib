@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/09 20:33:10
+// last updated : 2012/01/09 22:20:30
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -20,6 +20,10 @@ namespace nl{
   const AbsFunction::Ptr  AbsFunction::NullPtr  = AbsFunction::Ptr();
   const AbsNameTable::Ptr AbsNameTable::NullPtr = AbsNameTable::Ptr();
   const Variable::Ptr     Variable::NullPtr     = Variable::Ptr();
+
+  AbsNameTable::AbsNameTable(){ nl_INC(); }
+  AbsNameTable::~AbsNameTable(){ nl_DEC(); }
+
 
   Variable::~Variable(){ nl_DEC(); }
 

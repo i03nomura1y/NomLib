@@ -1,6 +1,6 @@
 // -*- mode:c++ -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2012/01/09 16:43:27
+// last updated : 2012/01/09 22:24:21
 
 #include "util.h"
 
@@ -38,7 +38,7 @@ namespace nl{
 	DBGP("");
 	for( std::map<std::string, int>::iterator ite = alloc_cnt.begin();
 		 ite!=alloc_cnt.end(); ++ite)
-	  std::cout << " " <<  abi::__cxa_demangle(ite->first.c_str(),0,0,NULL) << " : " << ite->second << std::endl;
+	  if(ite->second != 0) std::cout << " " <<  abi::__cxa_demangle(ite->first.c_str(),0,0,NULL) << " : " << ite->second << std::endl;
   }
 
   // 文字列 text が suffix で終わっていれば true

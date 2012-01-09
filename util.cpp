@@ -1,10 +1,13 @@
 // -*- mode:c++ -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2011/12/30 00:02:29
+// last updated : 2012/01/09 16:43:27
 
 #include "util.h"
 
 #include <cstdio>
+
+#include <cxxabi.h> // for demangle
+#include <map>
 
 namespace nl{
   static char buf_dec2hex[1024];
@@ -16,6 +19,26 @@ namespace nl{
   const std::string toHex(void *ptr){
 	snprintf(buf_dec2hex, 1023, "%08x", (unsigned int)ptr);
 	return buf_dec2hex;
+  }
+
+  /// カウンタ new/delete のチェック用
+  //static unsigned int alloc_cnt = 0;
+  static std::map<std::string, int> alloc_cnt;
+  void inc(const std::string &key){
+	//DBGP(key);
+	std::map<std::string, int>::iterator ite = alloc_cnt.find(key);
+	if( ite == alloc_cnt.end() ) alloc_cnt.insert(std::pair<std::string, int>(key,1));
+	else ite->second++;
+  }
+  void dec(const std::string &key){
+	//DBGP(key);
+	alloc_cnt.find(key)->second--;
+  }
+  void dump_alloc_status(){
+	DBGP("");
+	for( std::map<std::string, int>::iterator ite = alloc_cnt.begin();
+		 ite!=alloc_cnt.end(); ++ite)
+	  std::cout << " " <<  abi::__cxa_demangle(ite->first.c_str(),0,0,NULL) << " : " << ite->second << std::endl;
   }
 
   // 文字列 text が suffix で終わっていれば true

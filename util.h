@@ -1,19 +1,29 @@
 // -*- mode: cpp -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2011/12/30 00:01:49
+// last updated : 2012/01/09 15:16:46
 #ifndef __NOMLIB_UTIL_H__
 #define __NOMLIB_UTIL_H__
 
 #include <iostream>
 #include <set>
+#include <typeinfo> // for typeid()
 
 #define DBGP(MSG) std::cout << __FILE__ << ":" << __LINE__ << ": dbg in " << __FUNCTION__ << "(): " << MSG << std::endl
 #define ERRP(MSG) std::cerr << __FILE__ << ":" << __LINE__ << ": error in " << __FUNCTION__ << "(): " << MSG << std::endl
+
+// new/delete のチェック用
+#define nl_INC() nl::inc( typeid(*this).name() )
+#define nl_DEC() nl::dec( typeid(*this).name() )
 
 namespace nl{
   // 16進文字列に変換
   const std::string toHex(int dec);
   const std::string toHex(void *ptr);
+  
+  /// new/delete のチェック用カウンタ
+  void inc(const std::string &key);
+  void dec(const std::string &key);
+  void dump_alloc_status();
   
   /// String
   // 文字列 text が suffix で終わっていれば true

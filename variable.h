@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/09 22:31:11
+// last updated : 2012/01/10 02:25:16
 // 動的型 dynamic type
 
 #include <string>
@@ -13,6 +13,8 @@ namespace nl{
   class AbsFunction;  // 抽象クラス: 関数
   class AbsNameTable; // 抽象クラス: 名前表
   class Variable;     // 動的型 変数。 AbsFunction, AbsNameTable へのポインタを持つ
+
+  typedef std::tr1::shared_ptr<Variable> Variable_Ptr;
 
   // 抽象クラス: 関数を表す
   class AbsFunction{
@@ -34,12 +36,20 @@ namespace nl{
 	virtual ~AbsNameTable();
 	virtual const std::string &name() const = 0; // 名前表の名前(識別子)
 	
-	bool add(const std::string &name, Variable *var){ return add(name, std::tr1::shared_ptr<Variable>(var)); }
-	virtual bool add(const std::string &name, std::tr1::shared_ptr<Variable> var) = 0;
-	virtual std::tr1::shared_ptr<Variable> find(const std::string &name) = 0;
+	bool add(const std::string &name, Variable *var){ return add(name, Variable_Ptr(var)); }
+	virtual bool add(const std::string &name, Variable_Ptr var) = 0;
+	virtual Variable_Ptr find(const std::string &name) = 0;
+	virtual Variable_Ptr find(unsigned int idx) = 0;
+	Variable_Ptr find(const Variable &var);
+
 	virtual void dump() = 0;
-	//virtual bool add(const std::string &name, nl::Variable &var) = 0;	// 追加
-	//virtual Variable *find(const std::string &name) = 0;	// 取得
+
+	static Ptr push(Ptr parent, Ptr child);
+	static Ptr pop (Ptr nt);
+	
+  public:
+	// 親へのポインタ
+	Ptr parent_;
   };
 
 
@@ -69,12 +79,15 @@ namespace nl{
 	Variable();
 	// #undef な Variable を生成
 	static Variable undef(){ return Variable(); }
+	// true/false
+	static Variable True() { return Variable("true"); }
+	static Variable False(){ return undef(); }
 
 	explicit Variable(int val);
 	explicit Variable(const std::string &val);
-	explicit Variable(Variable     *p);
-	explicit Variable(AbsFunction  *p);
-	explicit Variable(AbsNameTable *p);
+	explicit Variable(Variable::Ptr     p);
+	explicit Variable(AbsFunction::Ptr  p);
+	explicit Variable(AbsNameTable::Ptr p);
 	Variable(Type type, const std::string &val); // val を指定したTypeに変換して初期化
 	virtual ~Variable();
 	
@@ -94,6 +107,7 @@ namespace nl{
 	Type type() const{ return type_; }
 	int asInt() const;
 	std::string asStr() const;
+	bool asBool() const;
 	Variable::Ptr     ptrV()  const{ return (type_==Pointer)?ptr_v :Variable::NullPtr; };
 	AbsFunction::Ptr  ptrF()  const{ return (type_==Pointer)?ptr_f :AbsFunction::NullPtr; };
 	AbsNameTable::Ptr ptrNT() const{ return (type_==Pointer)?ptr_nt:AbsNameTable::NullPtr; };

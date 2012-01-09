@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/09 22:20:30
+// last updated : 2012/01/10 02:23:24
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -21,8 +21,28 @@ namespace nl{
   const AbsNameTable::Ptr AbsNameTable::NullPtr = AbsNameTable::Ptr();
   const Variable::Ptr     Variable::NullPtr     = Variable::Ptr();
 
-  AbsNameTable::AbsNameTable(){ nl_INC(); }
+  AbsNameTable::AbsNameTable() : parent_() { nl_INC(); }
   AbsNameTable::~AbsNameTable(){ nl_DEC(); }
+  Variable_Ptr AbsNameTable::find(const Variable &var){
+	switch( var.type() ){
+	case Variable::String: return find(var.asStr());
+	case Variable::Integer: return find(var.asInt());
+	default: return nl::Variable::NullPtr;
+	}
+  }
+
+  AbsNameTable::Ptr AbsNameTable::push(Ptr parent, Ptr child){
+	if( parent ) child->parent_ = parent;
+	return child;
+  }
+  
+  AbsNameTable::Ptr AbsNameTable::pop(Ptr nt){
+	if( !nt ) return nt;
+	Ptr ret = nt->parent_;
+	nt->parent_.reset();
+	return ret;
+  }
+
 
 
   Variable::~Variable(){ nl_DEC(); }
@@ -31,9 +51,9 @@ namespace nl{
   Variable::Variable()                          : type_(Undef  ), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(int val)                   : type_(Integer), val_int(val      ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const string &val)         : type_(String ), val_int(undef_int), val_str(val      ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(Variable     *p)           : type_(Pointer), val_int(undef_int), val_str(undef_str), ptr_v(p), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(AbsFunction  *p)           : type_(Pointer), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f(p), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(AbsNameTable *p)           : type_(Pointer), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt(p), constant(false){ nl_INC(); }
+  Variable::Variable(Variable::Ptr     p)           : type_(Pointer), val_int(undef_int), val_str(undef_str), ptr_v(p), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(AbsFunction::Ptr  p)           : type_(Pointer), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f(p), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(AbsNameTable::Ptr p)           : type_(Pointer), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt(p), constant(false){ nl_INC(); }
   Variable::Variable(Type type, const string &val) : type_(type), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC();  assign(type, val); }
   Variable::Variable(const Variable &o)         : type_(o.type_), val_int(o.val_int), val_str(o.val_str), ptr_v(o.ptr_v), ptr_f(o.ptr_f), ptr_nt(o.ptr_nt), constant(o.constant){ nl_INC(); }
   Variable &Variable::operator=(const Variable &obj){ return assign(obj); }
@@ -76,6 +96,18 @@ namespace nl{
 	}
 	return undef_str;
   }
+  bool Variable::asBool() const{
+	switch(type_){
+	case Undef:   return false;
+	case Integer: return (val_int!=0);
+	case String:  return (val_str!="");
+	case Pointer: return (ptr_v || ptr_f || ptr_nt);
+	default:
+	  ERRP("uninplemented");
+	}
+	return false;
+  }
+
   
   // 型を合わせる。合わなければ TypeMissMatch
   static Variable::Type fitType(const Variable::Type &lt, const Variable::Type &rt){
@@ -135,9 +167,9 @@ namespace nl{
 	case String: return "string|"+val_str;
 	case Pointer:
 	  return
-		(ptr_v !=NULL)?"(pointer: "+ptr_v->dump_str()+")":
-		(ptr_f !=NULL)?"(function: '"+ptr_f->name()+"')":
-		(ptr_nt!=NULL)?"(nameTable: '"+ptr_nt->name()+"')":"(pointer: NULL)";
+		(ptr_v )?"(pointer: "+ptr_v->dump_str()+")":
+		(ptr_f )?"(function: '"+ptr_f->name()+"')":
+		(ptr_nt)?"(nameTable: '"+ptr_nt->name()+"')":"(pointer: NULL)";
 	default:
 	  ERRP("unimplemented.");
 	}

@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/09 21:47:48
+// last updated : 2012/01/10 00:40:41
 
 #include "util.h"
 
@@ -63,6 +63,11 @@ namespace nl{
   nl::Variable::Ptr XmlNode::find(const std::string &name){
 	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
 	  if( ite->first == name ) return ite->second;
+	return nl::Variable::NullPtr;
+  }
+  nl::Variable::Ptr XmlNode::find(unsigned int idx){
+	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite, idx--)
+	  if( idx == 0 ) return ite->second;
 	return nl::Variable::NullPtr;
   }
 

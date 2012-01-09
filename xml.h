@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/09 21:46:56
+// last updated : 2012/01/10 00:40:10
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -39,6 +39,7 @@ namespace nl{
 	const std::string &name() const{ return name_; } // タグ名
 	nl::Variable::Ptr content(){ return content_; }
 	nl::Variable::Ptr find(const std::string &name); // 属性へのポインタを返す。無ければ NULL
+	nl::Variable::Ptr find(unsigned int idx); // idx 番目の属性へのポインタを返す。無ければ NULL
 	List &children(){ return children_; }
 
 	// パース

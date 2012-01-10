@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/10 00:40:41
+// last updated : 2012/01/10 15:41:19
 
 #include "util.h"
 
@@ -42,15 +42,17 @@ namespace nl{
 	return *this;
   }
   
-  XmlNode &XmlNode::attr(const std::string &name, const std::string &val){
-	attrs_.push_back(Attr(name, nl::Variable::Ptr(new nl::Variable(val))));
+  XmlNode &XmlNode::attr(const std::string &name, nl::Variable::Ptr val){
+	attrs_.push_back(Attr(name, val));
 	return *this;
+  }
+  XmlNode &XmlNode::attr(const std::string &name, const std::string &val){
+	return attr(name, nl::Variable::Ptr(new nl::Variable(val)));
   }
   XmlNode &XmlNode::attr(const std::string &name, const int val){
 	char buf[256];
 	sprintf(buf, "%d", val);
-	attr(name, buf);
-	return *this;
+	return attr(name, buf);
   }
   XmlNode &XmlNode::add(XmlNode &node){
 	node.parent_ = this;

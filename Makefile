@@ -26,13 +26,15 @@ endif
 
 ifdef TEST
 # create executable file
-all: clean_testobj $(OBJ) $(TEST)
-clean_testobj:
+all: $(OBJ) $(TEST)
+clean:
 	rm -f $(TEST).o
 run: all
 	./$(TEST)
 else
 all: $(OBJ)
+clean:
+	@rm -f $(OBJ) $(EXE_LIST)
 endif
 
 .cpp.o .c.o:
@@ -41,9 +43,6 @@ endif
 	else \
 	  echo "create $@"; $(CC) -c $< -o $@ $(CFLAGS); \
 	fi
-
-clean:
-	@rm -f $(OBJ) $(EXE_LIST)
 
 remake: clean all
 

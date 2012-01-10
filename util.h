@@ -1,6 +1,6 @@
 // -*- mode: cpp -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2012/01/09 15:16:46
+// last updated : 2012/01/10 21:45:58
 #ifndef __NOMLIB_UTIL_H__
 #define __NOMLIB_UTIL_H__
 
@@ -9,6 +9,7 @@
 #include <typeinfo> // for typeid()
 
 #define DBGP(MSG) std::cout << __FILE__ << ":" << __LINE__ << ": dbg in " << __FUNCTION__ << "(): " << MSG << std::endl
+#define DBGNL()   std::cout << std::endl
 #define ERRP(MSG) std::cerr << __FILE__ << ":" << __LINE__ << ": error in " << __FUNCTION__ << "(): " << MSG << std::endl
 
 // new/delete のチェック用

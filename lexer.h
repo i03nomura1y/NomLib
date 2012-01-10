@@ -39,6 +39,7 @@ namespace nl{
 	// 現在の行/列番号の取得
 	int getLineNo() const{ return line_no; }
 	int getColumnNo() const{ return pre_idx; }
+	const std::string &getFileName() const{ return file_name; }
 
 	// ルールをセット
 	void setRule( RuleList *rule_list_ ){ rule_list = rule_list_; }

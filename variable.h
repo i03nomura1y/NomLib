@@ -2,45 +2,56 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/10 02:25:16
+// last updated : 2012/01/10 18:37:33
 // 動的型 dynamic type
 
 #include <string>
-#include <tr1/memory>
+#include <vector>
+#include <tr1/memory> // shared_ptr, weak_ptr
 
 namespace nl{
-  
+  using std::tr1::shared_ptr;
+  using std::tr1::weak_ptr;
+
   class AbsFunction;  // 抽象クラス: 関数
   class AbsNameTable; // 抽象クラス: 名前表
   class Variable;     // 動的型 変数。 AbsFunction, AbsNameTable へのポインタを持つ
 
-  typedef std::tr1::shared_ptr<Variable> Variable_Ptr;
-
+  typedef shared_ptr<Variable> Variable_Ptr;
+  typedef std::vector<Variable> Arguments; // 実引数リスト
+  
   // 抽象クラス: 関数を表す
   class AbsFunction{
   public:
-	typedef std::tr1::shared_ptr<AbsFunction> Ptr;
+	typedef shared_ptr<AbsFunction> Ptr;
+	typedef weak_ptr<AbsFunction>   WeakPtr;
 	static const Ptr NullPtr;
 
 	virtual ~AbsFunction(){}
 	virtual const std::string &name() const = 0;
+	// 渡された実引数リストを実行できるか ( = 引数の個数・型が正しいか)
+	virtual bool acceptable(const Arguments &args) const = 0;
   };
 
   // 抽象クラス: 名前表インタフェース
   class AbsNameTable{
   public:
-	typedef std::tr1::shared_ptr<AbsNameTable> Ptr;
+	typedef shared_ptr<AbsNameTable> Ptr;
+	typedef weak_ptr<AbsNameTable>   WeakPtr;
 	static const Ptr NullPtr;
 
 	AbsNameTable();
 	virtual ~AbsNameTable();
 	virtual const std::string &name() const = 0; // 名前表の名前(識別子)
 	
-	bool add(const std::string &name, Variable *var){ return add(name, Variable_Ptr(var)); }
-	virtual bool add(const std::string &name, Variable_Ptr var) = 0;
-	virtual Variable_Ptr find(const std::string &name) = 0;
-	virtual Variable_Ptr find(unsigned int idx) = 0;
-	Variable_Ptr find(const Variable &var);
+	template <class T>
+	Variable_Ptr add(const T &name, Variable *var){ return add(name, Variable_Ptr(var)); }
+	virtual Variable_Ptr add (const Variable    &name, Variable_Ptr var);
+	virtual Variable_Ptr add (const std::string &, Variable_Ptr ) = 0;
+	virtual Variable_Ptr add (const int, Variable_Ptr) = 0;
+	virtual Variable_Ptr find(const Variable    &name);
+	virtual Variable_Ptr find(const std::string &) = 0;
+	virtual Variable_Ptr find(const int) = 0;
 
 	virtual void dump() = 0;
 
@@ -56,7 +67,8 @@ namespace nl{
   // 動的型 変数
   class Variable{
   public:
-	typedef std::tr1::shared_ptr<Variable> Ptr;
+	typedef shared_ptr<Variable> Ptr;
+	typedef weak_ptr<Variable>   WeakPtr;
 	static const Ptr NullPtr;
 	// 変数の型
 	//  型が違った場合などに どうするか(エラーにするか?警告か?) は処理系依存。

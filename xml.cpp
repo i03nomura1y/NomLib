@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/13 03:04:51
+// last updated : 2012/01/13 03:24:55
 
 #include "util.h"
 
@@ -99,6 +99,10 @@ namespace nl{
 	if( name == "_content" ){
 	  if( ret ) DBGP("warning: reserved word '" << name << "'is used as attr-name");
 	  return content();
+	}
+	if( name == "_name" ){
+	  if( ret ) DBGP("warning: reserved word '" << name << "'is used as attr-name");
+	  return Variable::Ptr(new Variable(this->name()));
 	}
 	if( name == "this" ){
 	  if( ret ) DBGP("warning: reserved word '" << name << "'is used as attr-name");

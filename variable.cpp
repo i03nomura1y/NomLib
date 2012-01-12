@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/12 21:08:46
+// last updated : 2012/01/13 00:08:28
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -162,9 +162,21 @@ namespace nl{
 	case Undef:   return undef();
 	case Integer:
 	  if( op == "+" ){ return Variable( val_int + o.val_int );  }
+	  if( op == "-" ){ return Variable( val_int - o.val_int );  }
+	  if( op == "*" ){ return Variable( val_int * o.val_int );  }
+	  if( op == "/" ){ return Variable( val_int / o.val_int );  }
+	  if( op == "%" ){ return Variable( val_int % o.val_int );  }
+	  if( op == "=="){ return Bool(val_int == o.val_int);  }
+	  if( op == "!="){ return Bool(val_int != o.val_int);  }
+	  if( op == "<" ){ return Bool(val_int <  o.val_int);  }
+	  if( op == "<="){ return Bool(val_int <= o.val_int);  }
+	  if( op == ">" ){ return Bool(val_int >  o.val_int);  }
+	  if( op == ">="){ return Bool(val_int >= o.val_int);  }
 	  break;
 	case String:
 	  if( op == "+" ){ return Variable( val_str + o.val_str );  }
+	  if( op == "=="){ return Bool(val_str == o.val_str);  }
+	  if( op == "!="){ return Bool(val_str != o.val_str);  }
 	  break;
 	default:
 	  break;

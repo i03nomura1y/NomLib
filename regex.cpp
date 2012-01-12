@@ -23,6 +23,7 @@ namespace nl{
 	if(ret != 0){
 	  regerror(ret, reg, errbuf, sizeof errbuf);
 	  ERRP("regcomp error:" << errbuf);
+	  ERRP("  rx str: '" << rxstr << "'");
 	  delete reg;
 	}
 	valid = (ret == 0); // コンパイルに成功したら true

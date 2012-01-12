@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/12 21:24:22
+// last updated : 2012/01/13 00:07:41
 // 動的型 dynamic type
 
 #include <string>
@@ -100,6 +100,7 @@ namespace nl{
 	// true/false
 	static Variable True() { return Variable("true"); }
 	static Variable False(){ return undef(); }
+	static Variable Bool(bool b){ return b?True():False(); }
 
 	explicit Variable(int val);
 	explicit Variable(const std::string &val);

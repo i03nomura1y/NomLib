@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/10 15:41:19
+// last updated : 2012/01/13 02:40:53
 
 #include "util.h"
 
@@ -9,19 +9,23 @@ namespace nl{
 
   XmlNode::XmlNode()
 	: //ns(""),
-	name_(""), content_(new Variable()), attrs_(), children_(), parent_(NULL), depth_(0){
+	name_(""), content_(new Variable()), attrs_(), children_(), parent_(NULL), depth_(0), this_ptr(){
+	nl_INC();
   }
   XmlNode::XmlNode(const std::string &name) :
 	//ns(""), 
-	name_(name), content_(new Variable()), attrs_(), children_(), parent_(NULL), depth_(0){
+	name_(name), content_(new Variable()), attrs_(), children_(), parent_(NULL), depth_(0), this_ptr(){
+	nl_INC();
   }
   XmlNode::XmlNode(XmlScanner &s)
 	: //ns(""),
-	name_(""), content_(new Variable()), attrs_(), children_(), parent_(NULL), depth_(0){
+	name_(""), content_(new Variable()), attrs_(), children_(), parent_(NULL), depth_(0), this_ptr(){
 	parse(s);
+	nl_INC();
   }
 
   XmlNode::~XmlNode(){
+	nl_DEC();
   }
 
   XmlNode::XmlNode(const XmlNode &obj) :
@@ -29,6 +33,7 @@ namespace nl{
 	name_(obj.name_), content_(obj.content_),
 	attrs_(obj.attrs_), children_(obj.children_), parent_(obj.parent_),
 	depth_(obj.depth_){
+	nl_INC();
   }
 
   XmlNode &XmlNode::operator=(const XmlNode &obj){
@@ -42,12 +47,12 @@ namespace nl{
 	return *this;
   }
   
-  XmlNode &XmlNode::attr(const std::string &name, nl::Variable::Ptr val){
+  XmlNode &XmlNode::attr(const std::string &name, Variable::Ptr val){
 	attrs_.push_back(Attr(name, val));
 	return *this;
   }
   XmlNode &XmlNode::attr(const std::string &name, const std::string &val){
-	return attr(name, nl::Variable::Ptr(new nl::Variable(val)));
+	return attr(name, Variable::Ptr(new Variable(val)));
   }
   XmlNode &XmlNode::attr(const std::string &name, const int val){
 	char buf[256];
@@ -61,19 +66,50 @@ namespace nl{
 	return *this;
   }
   
+  Variable::Ptr XmlNode::add(const std::string &name, Variable::Ptr var){
+	if( find(name) ){
+	  DBGP("warning: multiple definition '" << name << "'");
+	  return Variable::NullPtr;
+	}
+	attr(name, var);
+	return var;
+  }
+  Variable::Ptr XmlNode::add(const int idx, Variable::Ptr ){
+	if( find(idx) ){
+	  DBGP("warning: multiple definition '" << idx << "'");
+	  return Variable::NullPtr;
+	}
+	return ERRP("cannot add variable to Xml '" << idx), Variable::NullPtr;
+  }
+
   // 属性へのポインタを返す
-  nl::Variable::Ptr XmlNode::find(const std::string &name){
+  Variable::Ptr XmlNode::find(const std::string &name){
+	Variable::Ptr ret;
 	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
-	  if( ite->first == name ) return ite->second;
-	return nl::Variable::NullPtr;
+	  if( ite->first == name ){ ret = ite->second; break; }
+	
+	if( name == "_content" ){
+	  if( ret ) DBGP("warning: reserved word '" << name << "'is used as attr-name");
+	  return content();
+	}
+	if( name == "this" ){
+	  if( ret ) DBGP("warning: reserved word '" << name << "'is used as attr-name");
+	  if( !this_ptr.lock() ) ERRP("error: this_ptr is not set");
+	  return Variable::Ptr(new Variable(this_ptr.lock()));
+	}
+	return ret;
   }
-  nl::Variable::Ptr XmlNode::find(unsigned int idx){
-	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite, idx--)
-	  if( idx == 0 ) return ite->second;
-	return nl::Variable::NullPtr;
+  
+  Variable::Ptr XmlNode::find(const int idx){
+	if(idx < 0) return Variable::NullPtr;
+	int i = idx;
+	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite, i--)
+	  if( i == 0 ) return ite->second;
+	return Variable::NullPtr;
   }
 
 
+  
   // 深さを更新
   void XmlNode::updateDepth(int newDepth){
 	depth_ = newDepth;
@@ -120,7 +156,7 @@ namespace nl{
 
   /// to string ------------------------------------------------------------------------------
   // ファイルに書き出し
-  void XmlNode::writeToFile(const std::string &file_name){
+  void XmlNode::save(const std::string &file_name){
 	XmlPrinter p(file_name);
 	write(p);
   }
@@ -146,7 +182,7 @@ namespace nl{
 
   // 確認用表示
   void XmlNode::dump(){
-	if(depth_ == 0) DBGP("nl::XmlNode::dump() ------------------");
+	if(depth_ == 0) DBGP("XmlNode::dump() ------------------");
 	char buf[512];
 	for(int i=0;i<depth_;i++) buf[i] = ' ';
 	buf[depth_] = '\0';
@@ -175,6 +211,8 @@ int main(){
   //test();
   test_XmlNode_scan();
   //test_XmlNode_print();
+
+  nl::dump_alloc_status();
   return 0;
 }
 
@@ -209,7 +247,7 @@ void test_XmlNode_print(){
 		  );
   doc.dump();
   
-  doc.writeToFile("TestData/output3.xml");
+  doc.save("TestData/output3.xml");
 
   cout << "write to 'TestData/output3.xml'" << endl;
 

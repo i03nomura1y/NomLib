@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/13 00:08:28
+// last updated : 2012/01/13 01:35:13
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -156,27 +156,43 @@ namespace nl{
 	return *this;
   }
 
+  // 前置 単項演算子
+  Variable Variable::asgn_oper(const std::string &op, bool except){
+	switch( type_ ){
+	case Undef:   return undef();
+	case Integer:
+	  if( op == "++"){ ++val_int; return *this; }
+	  if( op == "--"){ --val_int; return *this; }
+	  break;
+	default:
+	  break;
+	}
+	if(except) throw 0;
+	ERRP("unimplemented operation '"<< op << "' (" << dump_str() << ")");
+	return undef();
+  }
+
   // 非代入系の演算
   Variable Variable::oper(const std::string &op, const Variable &o, bool except) const{
 	switch( fitType(type_, o.type_) ){
 	case Undef:   return undef();
 	case Integer:
-	  if( op == "+" ){ return Variable( val_int + o.val_int );  }
-	  if( op == "-" ){ return Variable( val_int - o.val_int );  }
-	  if( op == "*" ){ return Variable( val_int * o.val_int );  }
-	  if( op == "/" ){ return Variable( val_int / o.val_int );  }
-	  if( op == "%" ){ return Variable( val_int % o.val_int );  }
-	  if( op == "=="){ return Bool(val_int == o.val_int);  }
-	  if( op == "!="){ return Bool(val_int != o.val_int);  }
-	  if( op == "<" ){ return Bool(val_int <  o.val_int);  }
-	  if( op == "<="){ return Bool(val_int <= o.val_int);  }
-	  if( op == ">" ){ return Bool(val_int >  o.val_int);  }
-	  if( op == ">="){ return Bool(val_int >= o.val_int);  }
+	  if( op == "+" ) return Variable( val_int + o.val_int );
+	  if( op == "-" ) return Variable( val_int - o.val_int );
+	  if( op == "*" ) return Variable( val_int * o.val_int );
+	  if( op == "/" ) return Variable( val_int / o.val_int );
+	  if( op == "%" ) return Variable( val_int % o.val_int );
+	  if( op == "==") return Bool(val_int == o.val_int);
+	  if( op == "!=") return Bool(val_int != o.val_int);
+	  if( op == "<" ) return Bool(val_int <  o.val_int);
+	  if( op == "<=") return Bool(val_int <= o.val_int);
+	  if( op == ">" ) return Bool(val_int >  o.val_int);
+	  if( op == ">=") return Bool(val_int >= o.val_int);
 	  break;
 	case String:
-	  if( op == "+" ){ return Variable( val_str + o.val_str );  }
-	  if( op == "=="){ return Bool(val_str == o.val_str);  }
-	  if( op == "!="){ return Bool(val_str != o.val_str);  }
+	  if( op == "+" ) return Variable( val_str + o.val_str );
+	  if( op == "==") return Bool(val_str == o.val_str);
+	  if( op == "!=") return Bool(val_str != o.val_str);
 	  break;
 	default:
 	  break;
@@ -185,6 +201,23 @@ namespace nl{
 	ERRP("unimplemented operation '"<< op << "' (" << dump_str() << ", " << o.dump_str() << ")");
 	return undef();
   }
+
+  // 前置 単項演算子
+  Variable Variable::oper(const std::string &op, bool except) const{
+	switch( type_ ){
+	case Undef:   return undef();
+	case Integer:
+	  if( op == "+" ) return *this;
+	  if( op == "-" ) return Variable( - val_int );
+	  break;
+	default:
+	  break;
+	}
+	if(except) throw 0;
+	ERRP("unimplemented operation '"<< op << "' (" << dump_str() << ")");
+	return undef();
+  }
+
 
   void Variable::dump() const{
 	cout << dump_str() << endl;

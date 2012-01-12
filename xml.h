@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/10 15:39:37
+// last updated : 2012/01/13 02:35:41
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -16,8 +16,8 @@ namespace nl{
   class XmlNode;
   // std::list<XmlNode> XmlNode::List;
   
-  // Xml のひとつのタグを表す
-  class XmlNode{
+  // Xml のひとつのタグを表す。
+  class XmlNode : public AbsNameTable{
   public:
 	typedef std::list<XmlNode> List;
   public:
@@ -39,8 +39,11 @@ namespace nl{
 	// getter
 	const std::string &name() const{ return name_; } // タグ名
 	nl::Variable::Ptr content(){ return content_; }
+	Variable::Ptr add(const std::string &name, Variable::Ptr var);
+	Variable::Ptr add(const int idx, Variable::Ptr var);
 	nl::Variable::Ptr find(const std::string &name); // 属性へのポインタを返す。無ければ NULL
-	nl::Variable::Ptr find(unsigned int idx); // idx 番目の属性へのポインタを返す。無ければ NULL
+	nl::Variable::Ptr find(const int idx); // idx 番目の属性へのポインタを返す。無ければ NULL
+	int size() const{ return attrs_.size(); } // 登録されている属性の個数
 	List &children(){ return children_; }
 
 	// パース
@@ -50,11 +53,13 @@ namespace nl{
 	static XmlNode createFromText(const std::string &text); // XML文字列から XmlNode を生成
 	
 	// 文字列に変換
-	void writeToFile(const std::string &file_name); // ファイルに書き出し
+	void save(const std::string &file_name); // ファイルに書き出し
 	std::string toStr(); // XML文字列に変換
 	
 	// 表示
 	void dump();	// 確認用表示
+
+	void setThisPtr( AbsNameTable::Ptr p){ this_ptr = p; }
 
   private:
 	XmlNode *parent() const{ return parent_; }
@@ -67,9 +72,13 @@ namespace nl{
 	std::string name_;    // tag name
 	nl::Variable::Ptr content_; // string の代わりに Variable::Ptr を使用
 	AttrList attrs_; // xml_io.h で typedef std::list< pair<string name, nl::Variable > >
+  protected:
 	List children_; //std::list<XmlNode> children;
+  private:
 	mutable XmlNode *parent_; // 親ノードへのポインタ
 	int depth_; // ルートから数えた深さ。ルートは0
+	
+	AbsNameTable::WeakPtr this_ptr; // 自分自身へのポインタ
   };
 
 

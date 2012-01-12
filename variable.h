@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/13 00:07:41
+// last updated : 2012/01/13 01:35:47
 // 動的型 dynamic type
 
 #include <string>
@@ -44,6 +44,7 @@ namespace nl{
 	AbsNameTable();
 	virtual ~AbsNameTable();
 	virtual const std::string &name() const = 0; // 名前表の名前(識別子)
+	virtual int size() const = 0; // 登録されている変数の数
 	
 	template <class T>
 	Variable_Ptr add(const T &name, Variable *var){ return add(name, Variable_Ptr(var)); }
@@ -53,7 +54,7 @@ namespace nl{
 	virtual Variable_Ptr find(const Variable    &name);
 	virtual Variable_Ptr find(const std::string &) = 0;
 	virtual Variable_Ptr find(const int) = 0;
-
+	
 	virtual void dump() = 0;
 	void dump_stack();
 	
@@ -143,7 +144,9 @@ namespace nl{
 	Variable& operator+=(const Variable& o){ return asgn_oper("+=", o); }
 	// except を true にすると、エラー時に throw 0; する。
 	Variable &asgn_oper(const std::string &op, const Variable &o, bool except = false); // 代入系
+	Variable  asgn_oper(const std::string &op, bool except = false); // 前置 単項演算子
 	Variable oper(const std::string &op, const Variable &o, bool except = false) const; // 非代入
+	Variable oper(const std::string &op, bool except = false) const; // 前置 単項演算子
 	
 
   private:	/// member

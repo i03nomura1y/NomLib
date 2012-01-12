@@ -1,6 +1,6 @@
 // -*- mode:c++ -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2012/01/09 22:24:21
+// last updated : 2012/01/13 02:38:43
 
 #include "util.h"
 
@@ -21,7 +21,7 @@ namespace nl{
 	return buf_dec2hex;
   }
 
-  /// カウンタ new/delete のチェック用
+  /// new/delete のチェック用カウンタ
   //static unsigned int alloc_cnt = 0;
   static std::map<std::string, int> alloc_cnt;
   void inc(const std::string &key){

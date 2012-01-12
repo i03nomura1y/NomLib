@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/12 17:59:57
+// last updated : 2012/01/12 21:08:46
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -65,9 +65,9 @@ namespace nl{
   Variable::Variable()                          : type_(Undef  ), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(int val)                   : type_(Integer), val_int(val      ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const string &val)         : type_(String ), val_int(undef_int), val_str(val      ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(Variable::Ptr     p)           : type_(Pointer), val_int(undef_int), val_str(undef_str), ptr_v(p), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(AbsFunction::Ptr  p)           : type_(Pointer), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f(p), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(AbsNameTable::Ptr p)           : type_(Pointer), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt(p), constant(false){ nl_INC(); }
+  Variable::Variable(Variable::Ptr     p)       : type_(VoidPtr), val_int(undef_int), val_str(undef_str), ptr_v(p), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(AbsFunction::Ptr  p)       : type_(FuncPtr), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f(p), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(AbsNameTable::Ptr p)       : type_(Array  ), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt(p), constant(false){ nl_INC(); }
   Variable::Variable(Type type, const string &val) : type_(type), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC();  assign(type, val); }
   Variable::Variable(const Variable &o)         : type_(o.type_), val_int(o.val_int), val_str(o.val_str), ptr_v(o.ptr_v), ptr_f(o.ptr_f), ptr_nt(o.ptr_nt), constant(o.constant){ nl_INC(); }
   Variable &Variable::operator=(const Variable &obj){ return assign(obj); }
@@ -76,7 +76,7 @@ namespace nl{
   Variable &Variable::assign_undef()           { type_=Undef;   val_int = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
   Variable &Variable::assign(int val)          { type_=Integer; val_int = val;       val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
   Variable &Variable::assign(const string &val){ type_=String;  val_int = undef_int; val_str = val;       ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
-  Variable &Variable::assign(AbsNameTable::Ptr p){ type_=Pointer; val_int = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = p;     return *this; }
+  Variable &Variable::assign(AbsNameTable::Ptr p){ type_=Array; val_int = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = p;     return *this; }
   Variable &Variable::assign(const Variable &o){ type_=o.type_; val_int = o.val_int; val_str = o.val_str; ptr_v = o.ptr_v; ptr_f = o.ptr_f; ptr_nt = o.ptr_nt; constant = o.constant; return *this; }
   Variable &Variable::assign(Type type, const string &val){  // val を指定したTypeに変換して代入
 	type_ = type;
@@ -104,9 +104,10 @@ namespace nl{
 	case Undef: return undef_str;
 	case Integer: snprintf(buf_variable, 1023, "%d", val_int); return buf_variable;
 	case String: return val_str;
-	case Pointer: if(isFunction()) return ptr_f->name();
+	case FuncPtr: if(ptr_f) return ptr_f->name();
 	default:
 	  ERRP("unimplemented.");
+	  dump();
 	}
 	return undef_str;
   }
@@ -114,8 +115,10 @@ namespace nl{
 	switch(type_){
 	case Undef:   return false;
 	case Integer: return (val_int!=0);
-	case String:  return (val_str!="");
-	case Pointer: return (ptr_v || ptr_f || ptr_nt);
+	case String : return (val_str!="");
+	case VoidPtr: return (ptr_v);
+	case FuncPtr: return (ptr_f);
+	case Array  : return (ptr_nt);
 	default:
 	  ERRP("uninplemented");
 	}
@@ -179,11 +182,9 @@ namespace nl{
 	case Undef: return "#undef";
 	case Integer: snprintf(buf_variable, 1023, "%d", val_int); return "int|"+string(buf_variable);
 	case String: return "string|"+val_str;
-	case Pointer:
-	  return
-		(ptr_v )?"(pointer: "+ptr_v->dump_str()+")":
-		(ptr_f )?"(function: '"+ptr_f->name()+"')":
-		(ptr_nt)?"(nameTable: '"+ptr_nt->name()+"')":"(pointer: NULL)";
+	case VoidPtr: return "(pointer: "+(ptr_v?(ptr_v->dump_str()):"NULL")+")";
+	case FuncPtr: return "(function: "+(ptr_f?(ptr_f->name()):"NULL")+")";
+	case Array  : return "(nameTable: "+(ptr_nt?(ptr_nt->name()):"NULL")+")";
 	default:
 	  ERRP("unimplemented.");
 	}

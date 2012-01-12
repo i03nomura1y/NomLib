@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/12 17:45:21
+// last updated : 2012/01/12 21:24:22
 // 動的型 dynamic type
 
 #include <string>
@@ -18,8 +18,9 @@ namespace nl{
   class Variable;     // 動的型 変数。 AbsFunction, AbsNameTable へのポインタを持つ
 
   typedef shared_ptr<Variable> Variable_Ptr;
-  typedef std::vector<Variable> Arguments; // 実引数リスト
-  
+  typedef std::vector<Variable> Arguments; // 実引数リスト(Function用)
+  typedef std::pair<std::string, Variable_Ptr> NTEntry; // 名前と値のペア(NameTable用)
+
   // 抽象クラス: 関数を表す
   class AbsFunction{
   public:
@@ -77,9 +78,13 @@ namespace nl{
 	typedef enum{
 	  TypeMissMatch = -1, // fitType() の戻り値用 
 	  Undef = 0, // 未定義
+	  Dynamic,   // 代入されたときに決定。挙動はUndefと同じ
 	  Integer,
 	  String,
-	  Pointer, // void* しか考えない。関数, 名前表 の場合もこの値になる
+		//Pointer, // void* しか考えない。関数, 名前表 の場合もこの値になる
+	  VoidPtr,  // Variable へのポインタ
+	  FuncPtr, // 関数
+	  Array  , // 名前表
 	}Type;
 	
   private:
@@ -121,9 +126,9 @@ namespace nl{
 	int asInt() const;
 	std::string asStr() const;
 	bool asBool() const;
-	Variable::Ptr     ptrV()  const{ return (type_==Pointer)?ptr_v :Variable::NullPtr; };
-	AbsFunction::Ptr  ptrF()  const{ return (type_==Pointer)?ptr_f :AbsFunction::NullPtr; };
-	AbsNameTable::Ptr ptrNT() const{ return (type_==Pointer)?ptr_nt:AbsNameTable::NullPtr; };
+	Variable::Ptr     ptrV()  const{ return (type_==VoidPtr)?ptr_v :Variable::NullPtr; };
+	AbsFunction::Ptr  ptrF()  const{ return (type_==FuncPtr)?ptr_f :AbsFunction::NullPtr; };
+	AbsNameTable::Ptr ptrNT() const{ return (type_==Array  )?ptr_nt:AbsNameTable::NullPtr; };
 
 	bool isFunction()  const{ return ptrF();  }
 	bool isNameTable() const{ return ptrNT(); }

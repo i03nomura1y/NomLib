@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/13 02:40:53
+// last updated : 2012/01/13 03:04:51
 
 #include "util.h"
 
@@ -26,6 +26,8 @@ namespace nl{
 
   XmlNode::~XmlNode(){
 	nl_DEC();
+	for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite)
+	  (*ite)->parent_ = NULL;
   }
 
   XmlNode::XmlNode(const XmlNode &obj) :
@@ -59,9 +61,15 @@ namespace nl{
 	sprintf(buf, "%d", val);
 	return attr(name, buf);
   }
-  XmlNode &XmlNode::add(XmlNode &node){
-	node.parent_ = this;
-	node.updateDepth(depth_+1);
+
+  XmlNode &XmlNode::add(const XmlNode &node){
+	XmlNode::Ptr n = XmlNode::Ptr( new XmlNode(node) );
+	n->setThisPtr(n);
+	return add(n);
+  }
+  XmlNode &XmlNode::add(XmlNode::Ptr node){
+	node->parent_ = this;
+	node->updateDepth(depth_+1);
 	children_.push_back(node);
 	return *this;
   }
@@ -114,7 +122,7 @@ namespace nl{
   void XmlNode::updateDepth(int newDepth){
 	depth_ = newDepth;
 	for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite)
-	  ite->updateDepth(depth_+1);
+	  (*ite)->updateDepth(depth_+1);
   }
 
 
@@ -130,13 +138,17 @@ namespace nl{
 	return parse(s);
   }
 
-  XmlNode XmlNode::create(const std::string &file_name){
+  XmlNode::Ptr XmlNode::create(const std::string &file_name){
 	XmlScanner s(file_name);
-	return XmlNode(s);
+	XmlNode::Ptr ptr = XmlNode::Ptr(new XmlNode(s));
+	ptr->setThisPtr(ptr);
+	return ptr;
   }
-  XmlNode XmlNode::createFromText(const std::string &text){
+  XmlNode::Ptr XmlNode::createFromText(const std::string &text){
 	XmlScanner s("text", text);
-	return XmlNode(s);
+	XmlNode::Ptr ptr = XmlNode::Ptr(new XmlNode(s));
+	ptr->setThisPtr(ptr);
+	return ptr;
   }
 
 
@@ -146,8 +158,7 @@ namespace nl{
 	attrs_   = s.getAttrList();
 
 	for( s.child(); s.valid(); s.next() ){
-	  XmlNode n(s);
-	  add( n );
+	  add( XmlNode(s) );
 	}
 	s.parent();
 	
@@ -174,7 +185,7 @@ namespace nl{
 	p.content(content_->asStr());
 
 	for( List::iterator ite=children_.begin(); ite!=children_.end(); ++ite)
-	  ite->write(p);
+	  (*ite)->write(p);
 	
 	p.end();
   }
@@ -190,7 +201,7 @@ namespace nl{
 	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
 	  std:: cout << buf << "(" << ite->first << " = " << ite->second->asStr() << ")" << std::endl;
 	for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite)
-	  ite->dump();
+	  (*ite)->dump();
   }
 
 };
@@ -208,29 +219,29 @@ void test_XmlNode_scan();
 void test_XmlNode_print();
 
 int main(){
-  //test();
+  test();
   test_XmlNode_scan();
-  //test_XmlNode_print();
+  test_XmlNode_print();
 
   nl::dump_alloc_status();
   return 0;
 }
 
 void test(){
-  XmlNode doc = XmlNode::create("TestData/simple.xml"); // ファイルから
-  doc.dump();
+  XmlNode::Ptr doc = XmlNode::create("TestData/simple.xml"); // ファイルから
+  doc->dump();
 }
 
 void test_XmlNode_scan(){
-  XmlNode doc = XmlNode::create("TestData/input.xml"); // ファイルから
-  doc.dump();
+  XmlNode::Ptr doc = XmlNode::create("TestData/input.xml"); // ファイルから
+  doc->dump();
   cout << " ---------------- ---------------------- ---------------------- " << endl;
-  doc.parseText("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				"<root>\n"
-				"<message>Hello from String</message>"
-				"<fruit> <name>Orange</name> </fruit>"
-				"</root>\n");
-  cout << doc.toStr() << endl;
+  doc->parseText("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+				 "<root>\n"
+				 "<message>Hello from String</message>"
+				 "<fruit> <name>Orange</name> </fruit>"
+				 "</root>\n");
+  cout << doc->toStr() << endl;
 }
 
 void test_XmlNode_print(){

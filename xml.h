@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/13 02:35:41
+// last updated : 2012/01/13 03:02:44
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -19,7 +19,8 @@ namespace nl{
   // Xml のひとつのタグを表す。
   class XmlNode : public AbsNameTable{
   public:
-	typedef std::list<XmlNode> List;
+	typedef shared_ptr<XmlNode> Ptr;
+	typedef std::list<XmlNode::Ptr> List;
   public:
 	XmlNode();
 	explicit XmlNode(const std::string &name); // タグ名を指定して初期化
@@ -32,7 +33,8 @@ namespace nl{
 	XmlNode &attr(const std::string &name, const std::string &val);
 	XmlNode &attr(const std::string &name, const int val);
 	// 子ノード追加
-	XmlNode &add(XmlNode &node);
+	XmlNode &add(const XmlNode &node);
+	XmlNode &add(XmlNode::Ptr node);
 	// content 
 	XmlNode &content(const std::string &con){ content_->assign(con); return *this; }
 
@@ -49,8 +51,8 @@ namespace nl{
 	// パース
 	XmlNode &parse(const std::string &file_name);	// ファイル内容をパース このオブジェクトをルートノードにする
 	XmlNode &parseText(const std::string &text); // 文字列をパース
-	static XmlNode create(const std::string &file_name); // ファイル名から XmlNode を生成
-	static XmlNode createFromText(const std::string &text); // XML文字列から XmlNode を生成
+	static XmlNode::Ptr create(const std::string &file_name); // ファイル名から XmlNode を生成
+	static XmlNode::Ptr createFromText(const std::string &text); // XML文字列から XmlNode を生成
 	
 	// 文字列に変換
 	void save(const std::string &file_name); // ファイルに書き出し
@@ -71,11 +73,9 @@ namespace nl{
 	//std::string ns;      // namespace
 	std::string name_;    // tag name
 	nl::Variable::Ptr content_; // string の代わりに Variable::Ptr を使用
-	AttrList attrs_; // xml_io.h で typedef std::list< pair<string name, nl::Variable > >
-  protected:
-	List children_; //std::list<XmlNode> children;
-  private:
-	mutable XmlNode *parent_; // 親ノードへのポインタ
+	AttrList attrs_; // xml_io.h で typedef std::list< pair<string name, nl::Variable::Ptr > >
+	List children_; //std::list<XmlNode::Ptr> children;
+	XmlNode *parent_; // 親ノードへのポインタ
 	int depth_; // ルートから数えた深さ。ルートは0
 	
 	AbsNameTable::WeakPtr this_ptr; // 自分自身へのポインタ

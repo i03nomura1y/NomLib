@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rootNode from="xml.cpp"> <text id="0001" number="102">Hello</text>
+<rootNode from="xml.cpp">#undef <text id="0001" number="102">Hello</text>
  <text>Bye</text>
- <fruit>  <name lang="en">Apple</name>
+ <fruit>#undef  <name lang="en">Apple</name>
   <name lang="ja">りんご</name>
  </fruit>
 </rootNode>

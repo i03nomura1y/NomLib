@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/10 14:58:12
+// last updated : 2012/01/12 17:59:57
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -50,10 +50,13 @@ namespace nl{
   AbsNameTable::Ptr AbsNameTable::pop(Ptr nt){
 	if( !nt ) return nt;
 	Ptr ret = nt->parent_;
-	nt->parent_.reset();
+	//nt->parent_.reset();
 	return ret;
   }
-
+  void AbsNameTable::dump_stack(){
+	  DBGP(" TableName: '" << name() );
+	  if(parent_) parent_->dump_stack();
+	}
 
 
   Variable::~Variable(){ nl_DEC(); }

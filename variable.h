@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/10 18:37:33
+// last updated : 2012/01/12 17:45:21
 // 動的型 dynamic type
 
 #include <string>
@@ -54,7 +54,8 @@ namespace nl{
 	virtual Variable_Ptr find(const int) = 0;
 
 	virtual void dump() = 0;
-
+	void dump_stack();
+	
 	static Ptr push(Ptr parent, Ptr child);
 	static Ptr pop (Ptr nt);
 	

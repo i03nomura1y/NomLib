@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/13 11:37:42
+// last updated : 2012/01/14 02:54:21
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -62,22 +62,29 @@ namespace nl{
   Variable::~Variable(){ nl_DEC(); }
 
   // undef で初期化。vector<> のために public にする
-  Variable::Variable()                          : type_(Undef  ), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(int val)                   : type_(Integer), val_int(val      ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(const string &val)         : type_(String ), val_int(undef_int), val_str(val      ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(Variable::Ptr     p)       : type_(VoidPtr), val_int(undef_int), val_str(undef_str), ptr_v(p), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(AbsFunction::Ptr  p)       : type_(FuncPtr), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f(p), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(AbsNameTable::Ptr p)       : type_(Array  ), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt(p), constant(false){ nl_INC(); }
-  Variable::Variable(Type type, const string &val) : type_(type), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC();  assign(type, val); }
-  Variable::Variable(const Variable &o)         : type_(o.type_), val_int(o.val_int), val_str(o.val_str), ptr_v(o.ptr_v), ptr_f(o.ptr_f), ptr_nt(o.ptr_nt), constant(o.constant){ nl_INC(); }
-  Variable &Variable::operator=(const Variable &obj){ return assign(obj); }
+  Variable::Variable()                : type_(Undef  ), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const int    &v) : type_(Integer), val_int(v        ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const bool   &v) : type_(Boolean), val_int(v?1:0    ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const char   *v) : type_(String ), val_int(undef_int), val_str(v        ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const uchar *v) : type_(String ), val_int(undef_int), val_str((const char*)v ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const string &v) : type_(String ), val_int(undef_int), val_str(v        ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const PtrV   &p) : type_(VoidPtr), val_int(undef_int), val_str(undef_str), ptr_v(p), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const PtrF   &p) : type_(FuncPtr), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f(p), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const PtrNT  &p) : type_(Array  ), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt(p), constant(false){ nl_INC(); }
+  Variable::Variable(const Variable &o) : type_(o.type_), val_int(o.val_int), val_str(o.val_str), ptr_v(o.ptr_v), ptr_f(o.ptr_f), ptr_nt(o.ptr_nt), constant(o.constant){ nl_INC(); }
+  Variable::Variable(Type type, const string &val) : type_(type),    val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC();  assign(type, val); }
 
   /// assign()
-  Variable &Variable::assign_undef()           { type_=Undef;   val_int = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
-  Variable &Variable::assign(int val)          { type_=Integer; val_int = val;       val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
-  Variable &Variable::assign(const string &val){ type_=String;  val_int = undef_int; val_str = val;       ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
-  Variable &Variable::assign(AbsNameTable::Ptr p){ type_=Array; val_int = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = p;     return *this; }
+  Variable &Variable::assign_undef()         { type_=Undef;   val_int = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const int    &v){ type_=Integer; val_int = v;         val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const bool   &v){ type_=Boolean; val_int = (v?1:0);   val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const char *v){ type_=String;  val_int = undef_int; val_str = v;         ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const uchar *v){ type_=String;  val_int = undef_int; val_str = (const char*)v;         ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const string &v){ type_=String;  val_int = undef_int; val_str = v;         ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const PtrNT  &p){ type_=Array;   val_int = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = p;                     return *this; }
   Variable &Variable::assign(const Variable &o){ type_=o.type_; val_int = o.val_int; val_str = o.val_str; ptr_v = o.ptr_v; ptr_f = o.ptr_f; ptr_nt = o.ptr_nt; constant = o.constant; return *this; }
+  Variable &Variable::operator=(const Variable &obj){ return assign(obj); }
+  
   Variable &Variable::assign(Type type, const string &val){  // val を指定したTypeに変換して代入
 	type_ = type;
 	switch(type_){
@@ -94,6 +101,7 @@ namespace nl{
 	switch(type_){
 	case Undef:   return undef_int;
 	case Integer: return val_int;
+	case Boolean: return val_int;
 	default:
 	  ERRP("unimplemented.");
 	}
@@ -103,7 +111,8 @@ namespace nl{
 	switch(type_){
 	case Undef: return undef_str;
 	case Integer: snprintf(buf_variable, 1023, "%d", val_int); return buf_variable;
-	case String: return val_str;
+	case Boolean: return (val_int!=0)?"true":"false";
+	case String:  return val_str;
 	case FuncPtr: if(ptr_f) return ptr_f->name();
 	default:
 	  ERRP("unimplemented.");
@@ -115,6 +124,7 @@ namespace nl{
 	switch(type_){
 	case Undef:   return false;
 	case Integer: return (val_int!=0);
+	case Boolean: return (val_int!=0);
 	case String : return (val_str!="");
 	case VoidPtr: return (ptr_v);
 	case FuncPtr: return (ptr_f);
@@ -178,32 +188,35 @@ namespace nl{
   // 非代入系の演算
   Variable Variable::oper(const std::string &op, const Variable &o, bool except) const{
 	
-	if( op == "&&") return Bool( asBool() && o.asBool() );
-	if( op == "||") return Bool( asBool() || o.asBool() );
+	if( op == "&&") return Variable( asBool() && o.asBool() );
+	if( op == "||") return Variable( asBool() || o.asBool() );
 	
 	switch( fitType(type_, o.type_) ){
 	case Undef:   return undef();
 	case Integer:
-	  if( op == "+" ) return Variable( val_int + o.val_int );
-	  if( op == "-" ) return Variable( val_int - o.val_int );
-	  if( op == "*" ) return Variable( val_int * o.val_int );
-	  if( op == "/" ) return Variable( val_int / o.val_int );
-	  if( op == "%" ) return Variable( val_int % o.val_int );
-	  if( op == "==") return Bool(val_int == o.val_int);
-	  if( op == "!=") return Bool(val_int != o.val_int);
-	  if( op == "<" ) return Bool(val_int <  o.val_int);
-	  if( op == "<=") return Bool(val_int <= o.val_int);
-	  if( op == ">" ) return Bool(val_int >  o.val_int);
-	  if( op == ">=") return Bool(val_int >= o.val_int);
+	  if( op == "+" ) return Variable( val_int +  o.val_int );
+	  if( op == "-" ) return Variable( val_int -  o.val_int );
+	  if( op == "*" ) return Variable( val_int *  o.val_int );
+	  if( op == "/" ) return Variable( val_int /  o.val_int );
+	  if( op == "%" ) return Variable( val_int %  o.val_int );
+	  if( op == "<" ) return Variable( val_int <  o.val_int );
+	  if( op == "<=") return Variable( val_int <= o.val_int );
+	  if( op == ">" ) return Variable( val_int >  o.val_int );
+	  if( op == ">=") return Variable( val_int >= o.val_int );
+	  if( op == "==") return Variable( val_int == o.val_int );
+	  if( op == "!=") return Variable( val_int != o.val_int );
 	  break;
+	case Boolean:
+	  if( op == "==") return Variable( val_int == o.val_int );
+	  if( op == "!=") return Variable( val_int != o.val_int );
 	case String:
-	  if( op == "+" ) return Variable( val_str + o.val_str );
-	  if( op == "==") return Bool(val_str == o.val_str);
-	  if( op == "!=") return Bool(val_str != o.val_str);
+	  if( op == "+" ) return Variable( val_str +  o.val_str );
+	  if( op == "==") return Variable( val_str == o.val_str );
+	  if( op == "!=") return Variable( val_str != o.val_str );
 	  break;
 	case TypeMissMatch:
-	  if( op == "==") return Bool(false);
-	  if( op == "!=") return Bool(true );
+	  if( op == "==") return Variable(false);
+	  if( op == "!=") return Variable(true );
 	default:
 	  break;
 	}
@@ -214,6 +227,8 @@ namespace nl{
 
   // 前置 単項演算子
   Variable Variable::oper(const std::string &op, bool except) const{
+	if( op == "!") return Variable( !asBool() );
+
 	switch( type_ ){
 	case Undef:   return undef();
 	case Integer:
@@ -235,10 +250,11 @@ namespace nl{
   std::string Variable::dump_str() const{
 	switch(type_){
 	case Undef: return "#undef";
-	case Integer: snprintf(buf_variable, 1023, "%d", val_int); return "int|"+string(buf_variable);
-	case String: return "string|"+val_str;
-	case VoidPtr: return "(pointer: "+(ptr_v?(ptr_v->dump_str()):"NULL")+")";
-	case FuncPtr: return "(function: "+(ptr_f?(ptr_f->name()):"NULL")+")";
+	case Integer: return "int|"   +asStr();
+	case Boolean: return "bool|"  +asStr();
+	case String : return "string|"+val_str;
+	case VoidPtr: return "(pointer: "  +(ptr_v?(ptr_v->dump_str()):"NULL")+")";
+	case FuncPtr: return "(function: " +(ptr_f?(ptr_f->name()):"NULL")+")";
 	case Array  : return "(nameTable: "+(ptr_nt?(ptr_nt->name()):"NULL")+")";
 	default:
 	  ERRP("unimplemented.");

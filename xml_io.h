@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_IO_H__
 #define __NOMLIB_XML_IO_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/12 21:24:29
+// last updated : 2012/01/14 02:41:35
 // xml_c.h の c++ 版
 // XmlScanner / XmlPrinter
 // -lxml2 -lws2_32
@@ -66,8 +66,8 @@ namespace nl{
 	  AttrList ret;
 	  if(!valid()) return ret;
 	  for(xmlAttrPtr attr = s->ptr->properties; attr; attr=attr->next){
-		ret.push_back(Attr((const char*)attr->name,
-						   Variable::Ptr(new Variable((const char*)attr->children->content))));
+		ret.push_back(Attr(std::string((const char*)attr->name),
+						   Variable::Ptr(new Variable(attr->children->content))));
 	  }
 	  return ret;
 	}

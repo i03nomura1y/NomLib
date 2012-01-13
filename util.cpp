@@ -1,6 +1,6 @@
 // -*- mode:c++ -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2012/01/13 02:38:43
+// last updated : 2012/01/14 03:11:45
 
 #include "util.h"
 
@@ -70,7 +70,8 @@ namespace nl{
   }
 
 
-
+  /// Container
+  
   // @return container に val が含まれれば true
   template <typename T>
   bool has(const std::set<T> &container, const T &val){
@@ -81,5 +82,4 @@ namespace nl{
   bool has(const std::set<std::string> &container, const std::string &val){
 	return (container.find(val)!=container.end());
   }
-  
 }; // namespace nl

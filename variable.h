@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/13 01:35:47
+// last updated : 2012/01/14 02:54:29
 // 動的型 dynamic type
 
 #include <string>
@@ -73,6 +73,11 @@ namespace nl{
 	typedef shared_ptr<Variable> Ptr;
 	typedef weak_ptr<Variable>   WeakPtr;
 	static const Ptr NullPtr;
+	// alias
+	typedef Ptr               PtrV;
+	typedef AbsFunction::Ptr  PtrF;
+	typedef AbsNameTable::Ptr PtrNT;
+	typedef unsigned char uchar;
 	// 変数の型
 	//  型が違った場合などに どうするか(エラーにするか?警告か?) は処理系依存。
 	//  オーバーロードを利用して 型推論する。
@@ -82,8 +87,8 @@ namespace nl{
 	  Dynamic,   // 代入されたときに決定。挙動はUndefと同じ
 	  Integer,
 	  String,
-		//Pointer, // void* しか考えない。関数, 名前表 の場合もこの値になる
-	  VoidPtr,  // Variable へのポインタ
+	  Boolean, // 内部の値は int。
+	  VoidPtr, // Variable へのポインタ。void* しか考えない
 	  FuncPtr, // 関数
 	  Array  , // 名前表
 	}Type;
@@ -98,27 +103,29 @@ namespace nl{
 	Variable();
 	// #undef な Variable を生成
 	static Variable undef(){ return Variable(); }
-	// true/false
-	static Variable True() { return Variable("true"); }
-	static Variable False(){ return undef(); }
-	static Variable Bool(bool b){ return b?True():False(); }
-
-	explicit Variable(int val);
+	
+	explicit Variable(const int &val);
+	explicit Variable(const bool &val);
+	explicit Variable(const char *val);
+	explicit Variable(const unsigned char *val);
 	explicit Variable(const std::string &val);
-	explicit Variable(Variable::Ptr     p);
-	explicit Variable(AbsFunction::Ptr  p);
-	explicit Variable(AbsNameTable::Ptr p);
+	explicit Variable(const PtrV  &p);
+	explicit Variable(const PtrF  &p);
+	explicit Variable(const PtrNT &p);
+	Variable(const Variable &obj);
 	Variable(Type type, const std::string &val); // val を指定したTypeに変換して初期化
 	virtual ~Variable();
 	
-	Variable(const Variable &obj);
 	Variable &operator=(const Variable &obj);
 
 	/// assign
 	Variable &assign_undef(); // undef を代入
-	Variable &assign(int val);
-	Variable &assign(const std::string &val);
-	Variable &assign(AbsNameTable::Ptr p);
+	Variable &assign(const int  &v);
+	Variable &assign(const bool &v);
+	Variable &assign(const char *v);
+	Variable &assign(const unsigned char *v);
+	Variable &assign(const std::string &v);
+	Variable &assign(const PtrNT &p);
 	Variable &assign(const Variable &obj);
 	Variable &assign(Type type, const std::string &val); // val を指定したTypeに変換して代入
 
@@ -128,9 +135,9 @@ namespace nl{
 	int asInt() const;
 	std::string asStr() const;
 	bool asBool() const;
-	Variable::Ptr     ptrV()  const{ return (type_==VoidPtr)?ptr_v :Variable::NullPtr; };
-	AbsFunction::Ptr  ptrF()  const{ return (type_==FuncPtr)?ptr_f :AbsFunction::NullPtr; };
-	AbsNameTable::Ptr ptrNT() const{ return (type_==Array  )?ptr_nt:AbsNameTable::NullPtr; };
+	PtrV  ptrV()  const{ return (type_==VoidPtr)?ptr_v :Variable::NullPtr; };
+	PtrF  ptrF()  const{ return (type_==FuncPtr)?ptr_f :AbsFunction::NullPtr; };
+	PtrNT ptrNT() const{ return (type_==Array  )?ptr_nt:AbsNameTable::NullPtr; };
 
 	bool isFunction()  const{ return ptrF();  }
 	bool isNameTable() const{ return ptrNT(); }
@@ -154,9 +161,9 @@ namespace nl{
 	
 	int val_int;
 	std::string val_str;
-	Variable::Ptr     ptr_v;
-	AbsFunction::Ptr  ptr_f; // 関数へのポインタ
-	AbsNameTable::Ptr ptr_nt; // 名前表へのポインタ
+	PtrV  ptr_v;
+	PtrF  ptr_f; // 関数へのポインタ
+	PtrNT ptr_nt; // 名前表へのポインタ
 	
 	// flag
 	bool constant; // 定数?

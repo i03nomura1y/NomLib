@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/13 15:33:04
+// last updated : 2012/01/14 02:35:09
 
 #include "util.h"
 
@@ -247,11 +247,6 @@ void test(){
   XmlNode::Ptr doc = XmlNode::create("TestData/simple.xml"); // ファイルから
 
   doc->dump();
-
-  for( XmlNode::List::iterator ite = doc->children().begin(); ite!=doc->children().end(); ++ite){
-	DBGP( "name: " << (*ite)->name() );
-	DBGP( "parent:  " << (*ite)->find("_parent")->ptrNT()->name() );
-  }
 
 }
 

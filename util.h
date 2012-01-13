@@ -1,11 +1,12 @@
 // -*- mode: cpp -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2012/01/10 21:45:58
+// last updated : 2012/01/14 03:11:48
 #ifndef __NOMLIB_UTIL_H__
 #define __NOMLIB_UTIL_H__
 
 #include <iostream>
 #include <set>
+#include <list>
 #include <typeinfo> // for typeid()
 
 #define DBGP(MSG) std::cout << __FILE__ << ":" << __LINE__ << ": dbg in " << __FUNCTION__ << "(): " << MSG << std::endl

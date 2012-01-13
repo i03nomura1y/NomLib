@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/13 03:24:55
+// last updated : 2012/01/13 15:33:04
 
 #include "util.h"
 
@@ -9,17 +9,17 @@ namespace nl{
 
   XmlNode::XmlNode()
 	: //ns(""),
-	name_(""), content_(new Variable()), attrs_(), children_(), parent_(NULL), depth_(0), this_ptr(){
+	name_(""), content_(new Variable()), attrs_(), children_(), parent_(), depth_(0), this_ptr(){
 	nl_INC();
   }
   XmlNode::XmlNode(const std::string &name) :
 	//ns(""), 
-	name_(name), content_(new Variable()), attrs_(), children_(), parent_(NULL), depth_(0), this_ptr(){
+	name_(name), content_(new Variable()), attrs_(), children_(), parent_(), depth_(0), this_ptr(){
 	nl_INC();
   }
   XmlNode::XmlNode(XmlScanner &s)
 	: //ns(""),
-	name_(""), content_(new Variable()), attrs_(), children_(), parent_(NULL), depth_(0), this_ptr(){
+	name_(""), content_(new Variable()), attrs_(), children_(), parent_(), depth_(0), this_ptr(){
 	parse(s);
 	nl_INC();
   }
@@ -27,7 +27,7 @@ namespace nl{
   XmlNode::~XmlNode(){
 	nl_DEC();
 	for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite)
-	  (*ite)->parent_ = NULL;
+	  (*ite)->parent_  = AbsNameTable::NullPtr;
   }
 
   XmlNode::XmlNode(const XmlNode &obj) :
@@ -62,13 +62,9 @@ namespace nl{
 	return attr(name, buf);
   }
 
-  XmlNode &XmlNode::add(const XmlNode &node){
-	XmlNode::Ptr n = XmlNode::Ptr( new XmlNode(node) );
-	n->setThisPtr(n);
-	return add(n);
-  }
   XmlNode &XmlNode::add(XmlNode::Ptr node){
-	node->parent_ = this;
+	node->setThisPtr(node);
+	node->parent_ = this_ptr;
 	node->updateDepth(depth_+1);
 	children_.push_back(node);
 	return *this;
@@ -108,6 +104,14 @@ namespace nl{
 	  if( ret ) DBGP("warning: reserved word '" << name << "'is used as attr-name");
 	  if( !this_ptr.lock() ) ERRP("error: this_ptr is not set");
 	  return Variable::Ptr(new Variable(this_ptr.lock()));
+	}
+	if( name == "_parent" ){
+	  if( ret ) DBGP("warning: reserved word '" << name << "'is used as attr-name");
+	  if( !parent_.lock() ){
+		ERRP( "error: parent is not set. " << this->name());
+		return Variable::Ptr(new Variable(AbsNameTable::NullPtr));
+	  }
+	  return Variable::Ptr(new Variable(parent_.lock()));
 	}
 	return ret;
   }
@@ -162,7 +166,7 @@ namespace nl{
 	attrs_   = s.getAttrList();
 
 	for( s.child(); s.valid(); s.next() ){
-	  add( XmlNode(s) );
+	  add( new XmlNode(s) );
 	}
 	s.parent();
 	
@@ -208,6 +212,14 @@ namespace nl{
 	  (*ite)->dump();
   }
 
+  void XmlNode::setThisPtr( AbsNameTable::Ptr p){
+	this_ptr = p;
+	for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite){
+	  (*ite)->parent_ = p;
+	  (*ite)->setThisPtr(*ite);
+	}
+  }
+
 };
 
 
@@ -224,8 +236,8 @@ void test_XmlNode_print();
 
 int main(){
   test();
-  test_XmlNode_scan();
-  test_XmlNode_print();
+  //test_XmlNode_scan();
+  //test_XmlNode_print();
 
   nl::dump_alloc_status();
   return 0;
@@ -233,7 +245,14 @@ int main(){
 
 void test(){
   XmlNode::Ptr doc = XmlNode::create("TestData/simple.xml"); // ファイルから
+
   doc->dump();
+
+  for( XmlNode::List::iterator ite = doc->children().begin(); ite!=doc->children().end(); ++ite){
+	DBGP( "name: " << (*ite)->name() );
+	DBGP( "parent:  " << (*ite)->find("_parent")->ptrNT()->name() );
+  }
+
 }
 
 void test_XmlNode_scan(){

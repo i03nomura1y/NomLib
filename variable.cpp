@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/13 01:35:13
+// last updated : 2012/01/13 11:37:42
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -144,6 +144,9 @@ namespace nl{
 	case Undef:   return *this;
 	case Integer:
 	  if( op == "+="){ return assign(val_int + o.val_int); }
+	  if( op == "-="){ return assign(val_int - o.val_int); }
+	  if( op == "*="){ return assign(val_int * o.val_int); }
+	  if( op == "/="){ return assign(val_int / o.val_int); }
 	  break;
 	case String:
 	  if( op == "+="){ return assign(val_str + o.val_str); }
@@ -174,6 +177,10 @@ namespace nl{
 
   // 非代入系の演算
   Variable Variable::oper(const std::string &op, const Variable &o, bool except) const{
+	
+	if( op == "&&") return Bool( asBool() && o.asBool() );
+	if( op == "||") return Bool( asBool() || o.asBool() );
+	
 	switch( fitType(type_, o.type_) ){
 	case Undef:   return undef();
 	case Integer:
@@ -194,6 +201,9 @@ namespace nl{
 	  if( op == "==") return Bool(val_str == o.val_str);
 	  if( op == "!=") return Bool(val_str != o.val_str);
 	  break;
+	case TypeMissMatch:
+	  if( op == "==") return Bool(false);
+	  if( op == "!=") return Bool(true );
 	default:
 	  break;
 	}

@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/13 03:02:44
+// last updated : 2012/01/13 15:31:24
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -11,6 +11,8 @@
 #include <list>
 
 #include "xml_io.h"
+
+#include "util.h"
 
 namespace nl{
   class XmlNode;
@@ -33,7 +35,8 @@ namespace nl{
 	XmlNode &attr(const std::string &name, const std::string &val);
 	XmlNode &attr(const std::string &name, const int val);
 	// 子ノード追加
-	XmlNode &add(const XmlNode &node);
+	XmlNode &add(const XmlNode &node){ return add( new XmlNode(node) ); }
+	XmlNode &add(      XmlNode *node){ return add( XmlNode::Ptr( node ) ); }
 	XmlNode &add(XmlNode::Ptr node);
 	// content 
 	XmlNode &content(const std::string &con){ content_->assign(con); return *this; }
@@ -61,10 +64,12 @@ namespace nl{
 	// 表示
 	void dump();	// 確認用表示
 
-	void setThisPtr( AbsNameTable::Ptr p){ this_ptr = p; }
+	void setThisPtr( AbsNameTable::Ptr p);
+	
 
   private:
-	XmlNode *parent() const{ return parent_; }
+	//AbsNameTable::WeakPtr parent() const{ return parent_; }
+	//void parent(AbsNameTable::WeakPtr p){ parent_ = p; }
 	void updateDepth(int newDepth);	// 深さを更新
 	XmlNode &parse(XmlScanner &s); // XmlScanner から読み込み
 	void write(XmlPrinter &p); // XmlPrinter に書き出し
@@ -75,7 +80,7 @@ namespace nl{
 	nl::Variable::Ptr content_; // string の代わりに Variable::Ptr を使用
 	AttrList attrs_; // xml_io.h で typedef std::list< pair<string name, nl::Variable::Ptr > >
 	List children_; //std::list<XmlNode::Ptr> children;
-	XmlNode *parent_; // 親ノードへのポインタ
+	AbsNameTable::WeakPtr parent_; // 親ノードへのポインタ
 	int depth_; // ルートから数えた深さ。ルートは0
 	
 	AbsNameTable::WeakPtr this_ptr; // 自分自身へのポインタ

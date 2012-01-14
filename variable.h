@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/14 02:54:29
+// last updated : 2012/01/14 22:21:39
 // 動的型 dynamic type
 
 #include <string>
@@ -43,6 +43,7 @@ namespace nl{
 
 	AbsNameTable();
 	virtual ~AbsNameTable();
+	virtual AbsNameTable::Ptr clone() const = 0;	// clone (Deep Copy)
 	virtual const std::string &name() const = 0; // 名前表の名前(識別子)
 	virtual int size() const = 0; // 登録されている変数の数
 	
@@ -69,7 +70,7 @@ namespace nl{
 
   // 動的型 変数
   class Variable{
-  public:
+  public: // alias, const
 	typedef shared_ptr<Variable> Ptr;
 	typedef weak_ptr<Variable>   WeakPtr;
 	static const Ptr NullPtr;
@@ -93,22 +94,23 @@ namespace nl{
 	  Array  , // 名前表
 	}Type;
 	
-  private:
+  private: // const
 	// undef のときの値
-	static const int undef_int;
+	static const long  undef_int;
 	static const std::string undef_str;
 	
-  public:
+  public: // method
 	// undef で初期化。vector<> のために public にする
 	Variable();
 	// #undef な Variable を生成
 	static Variable undef(){ return Variable(); }
 	
-	explicit Variable(const int &val);
-	explicit Variable(const bool &val);
-	explicit Variable(const char *val);
-	explicit Variable(const unsigned char *val);
-	explicit Variable(const std::string &val);
+	explicit Variable(const int  &v);
+	explicit Variable(const long &v);
+	explicit Variable(const bool &v);
+	explicit Variable(const char *v);
+	explicit Variable(const unsigned char *v);
+	explicit Variable(const std::string &v);
 	explicit Variable(const PtrV  &p);
 	explicit Variable(const PtrF  &p);
 	explicit Variable(const PtrNT &p);
@@ -121,6 +123,7 @@ namespace nl{
 	/// assign
 	Variable &assign_undef(); // undef を代入
 	Variable &assign(const int  &v);
+	Variable &assign(const long &v);
 	Variable &assign(const bool &v);
 	Variable &assign(const char *v);
 	Variable &assign(const unsigned char *v);
@@ -129,11 +132,15 @@ namespace nl{
 	Variable &assign(const Variable &obj);
 	Variable &assign(Type type, const std::string &val); // val を指定したTypeに変換して代入
 
+	/// clone (Deep Copy)
+	Variable::Ptr clone() const;
+	
 	// accessor
 	void type(Type t) { type_ = t; }
 	Type type() const{ return type_; }
 	int asInt() const;
 	std::string asStr() const;
+	const std::string &refOf_val_str() const{ return val_str; } // 
 	bool asBool() const;
 	PtrV  ptrV()  const{ return (type_==VoidPtr)?ptr_v :Variable::NullPtr; };
 	PtrF  ptrF()  const{ return (type_==FuncPtr)?ptr_f :AbsFunction::NullPtr; };
@@ -147,8 +154,8 @@ namespace nl{
 	std::string dump_str() const;
 	
 	/// 演算
-	Variable  operator+ (const Variable& o){ return oper("+",o);        };
-	Variable& operator+=(const Variable& o){ return asgn_oper("+=", o); }
+	//Variable  operator+ (const Variable& o){ return oper("+",o);        };
+	//Variable& operator+=(const Variable& o){ return asgn_oper("+=", o); }
 	// except を true にすると、エラー時に throw 0; する。
 	Variable &asgn_oper(const std::string &op, const Variable &o, bool except = false); // 代入系
 	Variable  asgn_oper(const std::string &op, bool except = false); // 前置 単項演算子
@@ -159,7 +166,7 @@ namespace nl{
   private:	/// member
 	Type type_;
 	
-	int val_int;
+	long val_int;
 	std::string val_str;
 	PtrV  ptr_v;
 	PtrF  ptr_f; // 関数へのポインタ

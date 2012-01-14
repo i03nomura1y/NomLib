@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/14 02:54:21
+// last updated : 2012/01/14 22:33:14
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -14,7 +14,7 @@ using namespace std;
 namespace nl{
   static char buf_variable[1024];
 
-  const int    Variable::undef_int = 0;
+  const long   Variable::undef_int = 0;
   const string Variable::undef_str = "#undef";
 
   const AbsFunction::Ptr  AbsFunction::NullPtr  = AbsFunction::Ptr();
@@ -64,6 +64,7 @@ namespace nl{
   // undef で初期化。vector<> のために public にする
   Variable::Variable()                : type_(Undef  ), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const int    &v) : type_(Integer), val_int(v        ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const long   &v) : type_(Integer), val_int(v        ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const bool   &v) : type_(Boolean), val_int(v?1:0    ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const char   *v) : type_(String ), val_int(undef_int), val_str(v        ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const uchar *v) : type_(String ), val_int(undef_int), val_str((const char*)v ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
@@ -77,6 +78,7 @@ namespace nl{
   /// assign()
   Variable &Variable::assign_undef()         { type_=Undef;   val_int = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
   Variable &Variable::assign(const int    &v){ type_=Integer; val_int = v;         val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const long   &v){ type_=Integer; val_int = v;         val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
   Variable &Variable::assign(const bool   &v){ type_=Boolean; val_int = (v?1:0);   val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
   Variable &Variable::assign(const char *v){ type_=String;  val_int = undef_int; val_str = v;         ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
   Variable &Variable::assign(const uchar *v){ type_=String;  val_int = undef_int; val_str = (const char*)v;         ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
@@ -89,34 +91,48 @@ namespace nl{
 	type_ = type;
 	switch(type_){
 	case Undef:   assign_undef(); break;
-	case Integer: assign(atoi(val.c_str())); break;
+	case Integer: assign(atol(val.c_str())); break;
 	case String:  assign(val); break;
 	default:
-	  ERRP("unimplemented.");
+	  ERRP("unimplemented. " << dump_str());
 	}
 	return *this;
   }
 
+  /// clone (Deep Copy)
+  Variable::Ptr Variable::clone() const{
+	Variable::Ptr ptr = Variable::Ptr(new Variable() );
+	ptr->type_    = type_   ;
+	ptr->val_int  = val_int ;
+	ptr->val_str  = val_str ;
+	ptr->constant = constant;
+	ptr->ptr_f    = ptr_f   ; // Function はcloneしない
+	if(ptr_v)  ptr->ptr_v   = ptr_v ->clone();
+	if(ptr_nt) ptr->ptr_nt  = ptr_nt->clone();
+	return ptr;
+  }
+	
+
   int Variable::asInt() const{
 	switch(type_){
-	case Undef:   return undef_int;
+	case Undef  : return undef_int;
 	case Integer: return val_int;
 	case Boolean: return val_int;
+	case String : return atol(val_str.c_str());
 	default:
-	  ERRP("unimplemented.");
+	  ERRP("unimplemented. " << dump_str());
 	}
 	return undef_int;
   }
   std::string Variable::asStr() const{
 	switch(type_){
 	case Undef: return undef_str;
-	case Integer: snprintf(buf_variable, 1023, "%d", val_int); return buf_variable;
+	case Integer: snprintf(buf_variable, 1023, "%ld", val_int); return buf_variable;
 	case Boolean: return (val_int!=0)?"true":"false";
 	case String:  return val_str;
 	case FuncPtr: if(ptr_f) return ptr_f->name();
 	default:
-	  ERRP("unimplemented.");
-	  dump();
+	  ERRP("unimplemented. " << dump_str());
 	}
 	return undef_str;
   }
@@ -217,6 +233,12 @@ namespace nl{
 	case TypeMissMatch:
 	  if( op == "==") return Variable(false);
 	  if( op == "!=") return Variable(true );
+
+	  if( op == "<" ) return Variable( asInt() <  o.asInt() );
+	  if( op == "<=") return Variable( asInt() <= o.asInt() );
+	  if( op == ">" ) return Variable( asInt() >  o.asInt() );
+	  if( op == ">=") return Variable( asInt() >= o.asInt() );
+	  break;
 	default:
 	  break;
 	}
@@ -257,7 +279,7 @@ namespace nl{
 	case FuncPtr: return "(function: " +(ptr_f?(ptr_f->name()):"NULL")+")";
 	case Array  : return "(nameTable: "+(ptr_nt?(ptr_nt->name()):"NULL")+")";
 	default:
-	  ERRP("unimplemented.");
+	  ERRP("unimplemented. type_ : " << type_);
 	}
 	return "#undef";
   }

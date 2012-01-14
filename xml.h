@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/13 15:31:24
+// last updated : 2012/01/14 21:50:25
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -20,29 +20,34 @@ namespace nl{
   
   // Xml のひとつのタグを表す。
   class XmlNode : public AbsNameTable{
-  public:
+  public: // alias
 	typedef shared_ptr<XmlNode> Ptr;
 	typedef std::list<XmlNode::Ptr> List;
-  public:
+  public: // method
 	XmlNode();
 	explicit XmlNode(const std::string &name); // タグ名を指定して初期化
 	explicit XmlNode(XmlScanner &s); // パース
 	~XmlNode();
 	XmlNode(const XmlNode &obj);
 	XmlNode &operator=(const XmlNode &obj);
+
 	// 属性追加
 	XmlNode &attr(const std::string &name, nl::Variable::Ptr val);
 	XmlNode &attr(const std::string &name, const std::string &val);
 	XmlNode &attr(const std::string &name, const int val);
+	// content 
+	XmlNode &content(const std::string &con){ content_->assign(con); return *this; }
+
 	// 子ノード追加
 	XmlNode &add(const XmlNode &node){ return add( new XmlNode(node) ); }
 	XmlNode &add(      XmlNode *node){ return add( XmlNode::Ptr( node ) ); }
 	XmlNode &add(XmlNode::Ptr node);
-	// content 
-	XmlNode &content(const std::string &con){ content_->assign(con); return *this; }
+	XmlNode &insertAfter(const XmlNode *key, XmlNode::Ptr node); // key の後ろに node を追加
+	// 子ノード削除
+	void remove(const XmlNode *key); // key を削除
 
 	// getter
-	const std::string &name() const{ return name_; } // タグ名
+	const std::string &name() const{ return name_->refOf_val_str(); } // タグ名
 	nl::Variable::Ptr content(){ return content_; }
 	Variable::Ptr add(const std::string &name, Variable::Ptr var);
 	Variable::Ptr add(const int idx, Variable::Ptr var);
@@ -56,6 +61,9 @@ namespace nl{
 	XmlNode &parseText(const std::string &text); // 文字列をパース
 	static XmlNode::Ptr create(const std::string &file_name); // ファイル名から XmlNode を生成
 	static XmlNode::Ptr createFromText(const std::string &text); // XML文字列から XmlNode を生成
+	// clone = DeppCopy
+	AbsNameTable::Ptr clone() const{ return cloneC(); }
+	XmlNode::Ptr      cloneC() const; // concrete
 	
 	// 文字列に変換
 	void save(const std::string &file_name); // ファイルに書き出し
@@ -67,17 +75,17 @@ namespace nl{
 	void setThisPtr( AbsNameTable::Ptr p);
 	
 
-  private:
+  private: // method
 	//AbsNameTable::WeakPtr parent() const{ return parent_; }
 	//void parent(AbsNameTable::WeakPtr p){ parent_ = p; }
 	void updateDepth(int newDepth);	// 深さを更新
 	XmlNode &parse(XmlScanner &s); // XmlScanner から読み込み
 	void write(XmlPrinter &p); // XmlPrinter に書き出し
 
-  private:
+  private: // member
 	//std::string ns;      // namespace
-	std::string name_;    // tag name
-	nl::Variable::Ptr content_; // string の代わりに Variable::Ptr を使用
+	nl::Variable::Ptr name_;    // tag name  string の代わりに Variable::Ptr を使用
+	nl::Variable::Ptr content_; //           string の代わりに Variable::Ptr を使用
 	AttrList attrs_; // xml_io.h で typedef std::list< pair<string name, nl::Variable::Ptr > >
 	List children_; //std::list<XmlNode::Ptr> children;
 	AbsNameTable::WeakPtr parent_; // 親ノードへのポインタ

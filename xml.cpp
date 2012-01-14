@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/14 02:35:09
+// last updated : 2012/01/14 21:51:10
 
 #include "util.h"
 
@@ -9,17 +9,17 @@ namespace nl{
 
   XmlNode::XmlNode()
 	: //ns(""),
-	name_(""), content_(new Variable()), attrs_(), children_(), parent_(), depth_(0), this_ptr(){
+	name_(new Variable("")), content_(new Variable()), attrs_(), children_(), parent_(), depth_(0), this_ptr(){
 	nl_INC();
   }
   XmlNode::XmlNode(const std::string &name) :
 	//ns(""), 
-	name_(name), content_(new Variable()), attrs_(), children_(), parent_(), depth_(0), this_ptr(){
+	name_(new Variable(name)), content_(new Variable()), attrs_(), children_(), parent_(), depth_(0), this_ptr(){
 	nl_INC();
   }
   XmlNode::XmlNode(XmlScanner &s)
 	: //ns(""),
-	name_(""), content_(new Variable()), attrs_(), children_(), parent_(), depth_(0), this_ptr(){
+	name_(new Variable("")), content_(new Variable()), attrs_(), children_(), parent_(), depth_(0), this_ptr(){
 	parse(s);
 	nl_INC();
   }
@@ -70,6 +70,29 @@ namespace nl{
 	return *this;
   }
   
+  XmlNode &XmlNode::insertAfter(const XmlNode *key, XmlNode::Ptr node){
+	node->setThisPtr(node);
+	node->parent_ = this_ptr;
+	node->updateDepth(depth_+1);
+	for(List::iterator ite = children_.begin(); ite!=children_.end(); ++ite){
+	  if((*ite).get() == key){
+		++ite;
+		children_.insert(ite, node);
+	  }
+	}
+	return *this;
+  }
+  // 子ノード削除
+  void XmlNode::remove(const XmlNode *key){
+	for(List::iterator ite = children_.begin(); ite!=children_.end(); ++ite){
+	  if((*ite).get() == key){
+		(*ite)->parent_ = XmlNode::NullPtr;
+		children_.erase(ite);
+		return;
+	  }
+	}
+  }
+
   Variable::Ptr XmlNode::add(const std::string &name, Variable::Ptr var){
 	if( find(name) ){
 	  DBGP("warning: multiple definition '" << name << "'");
@@ -98,7 +121,7 @@ namespace nl{
 	}
 	if( name == "_name" ){
 	  if( ret ) DBGP("warning: reserved word '" << name << "'is used as attr-name");
-	  return Variable::Ptr(new Variable(this->name()));
+	  return name_;
 	}
 	if( name == "this" ){
 	  if( ret ) DBGP("warning: reserved word '" << name << "'is used as attr-name");
@@ -161,7 +184,7 @@ namespace nl{
 
 
   XmlNode &XmlNode::parse(XmlScanner &s){
-	name_    = s.getName();
+	name_   ->assign(s.getName()   );
 	content_->assign(s.getContent());
 	attrs_   = s.getAttrList();
 
@@ -171,6 +194,22 @@ namespace nl{
 	s.parent();
 	
 	return *this;
+  }
+
+  // clone = DeppCopy
+  XmlNode::Ptr XmlNode::cloneC() const{
+	XmlNode::Ptr ptr = XmlNode::Ptr(new XmlNode(name_->refOf_val_str()));
+	ptr->setThisPtr(ptr);
+	ptr->content_ = content_->clone();
+	// attrs
+	for( AttrList::const_iterator ite = attrs_.begin(); ite != attrs_.end(); ++ite){
+	  ptr->attr( ite->first, ite->second->clone() );
+	}
+	// children
+	for( List::const_iterator ite = children_.begin(); ite != children_.end(); ++ite){
+	  ptr->add( (*ite)->cloneC() );
+	}
+	return ptr;
   }
 
   /// to string ------------------------------------------------------------------------------
@@ -187,7 +226,7 @@ namespace nl{
   }
 
   void XmlNode::write(XmlPrinter &p){
-	p.start(name_);
+	p.start(name_->refOf_val_str());
 	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
 	  p.attr(ite->first, ite->second->asStr());
 	p.content(content_->asStr());
@@ -205,7 +244,7 @@ namespace nl{
 	char buf[512];
 	for(int i=0;i<depth_;i++) buf[i] = ' ';
 	buf[depth_] = '\0';
-	std::cout << buf << name_ << std::endl; // DBGP(content_);
+	std::cout << buf << name_->asStr() << std::endl; // DBGP(content_);
 	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
 	  std:: cout << buf << "(" << ite->first << " = " << ite->second->asStr() << ")" << std::endl;
 	for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite)

@@ -1,10 +1,11 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/15 17:59:17
+// last updated : 2012/01/15 21:59:41
 // 動的型 dynamic type
 
 #include "variable.h"
 
 #include "util.h"
+#include "regex.h"
 
 #include <cstdio> // for sprintf()
 #include <cstdlib> // for atoi()
@@ -65,9 +66,10 @@ namespace nl{
   Variable::Variable()                : type_(Undef  ), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const int    &v) : type_(Integer), val_int(v        ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const long   &v) : type_(Integer), val_int(v        ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  //Variable::Variable(const dbl    &v) : type_(Float  ), val_int(v        ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const bool   &v) : type_(Boolean), val_int(v?1:0    ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const char   *v) : type_(String ), val_int(undef_int), val_str(v        ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(const uchar *v) : type_(String ), val_int(undef_int), val_str((const char*)v ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const uchar  *v) : type_(String ), val_int(undef_int), val_str((const char*)v ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const string &v) : type_(String ), val_int(undef_int), val_str(v        ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const PtrV   &p) : type_(VoidPtr), val_int(undef_int), val_str(undef_str), ptr_v(p), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const PtrF   &p) : type_(FuncPtr), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f(p), ptr_nt( ), constant(false){ nl_INC(); }
@@ -89,11 +91,20 @@ namespace nl{
   Variable &Variable::operator=(const Variable &obj){ return assign(obj); }
   
   Variable &Variable::assign(Type type, const string &val){  // val を指定したTypeに変換して代入
+	static RegEx rx_int("^[+-]?[0-9]+?$");
+	static RegEx rx_dbl("^[+-]?[0-9]+([.][0-9]*)?$");
 	type_ = type;
 	switch(type_){
-	case Undef:   assign_undef(); break;
-	case Integer: assign(atol(val.c_str())); break;
-	case String:  assign(val); break;
+	case Undef  : return assign_undef();
+	case Integer: return assign(atol(val.c_str()));
+	case String : return assign(val);
+	case Boolean: return assign(val == "true"  || val == "TRUE" ); // true, TRUE なら真
+	case Auto: // 自動判定
+	  if(val == "true"  || val == "TRUE" ) return assign(true);  // true,  TRUE  なら 真
+	  if(val == "false" || val == "FALSE") return assign(false); // false, FALSE なら 偽
+	  if( rx_int.match(val) ) return assign( atol(val.c_str()) ); // int正規表現にマッチ -> int
+	  //if( rx_dbl.match(val) ) return assign( atof(val.c_str()) ); // int正規表現にマッチ -> double
+	  return assign(val);
 	default:
 	  ERRP("unimplemented. " << dump_str());
 	}
@@ -104,9 +115,9 @@ namespace nl{
 	type_ = type;
 	switch(type_){
 	case Undef:   assign_undef(); break;
-	case Integer: assign( val.asInt() ); break;
+	case Integer: assign( val.asInt()  ); break;
 	case Boolean: assign( val.asBool() ); break;
-	case String:  assign( val.asStr() ); break;
+	case String:  assign( val.asStr()  ); break;
 	default:
 	  ERRP("unimplemented. " << dump_str());
 	}

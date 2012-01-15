@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/14 22:21:39
+// last updated : 2012/01/15 17:54:54
 // 動的型 dynamic type
 
 #include <string>
@@ -116,6 +116,7 @@ namespace nl{
 	explicit Variable(const PtrNT &p);
 	Variable(const Variable &obj);
 	Variable(Type type, const std::string &val); // val を指定したTypeに変換して初期化
+	Variable(Type type, const Variable    &val); // val を指定したTypeに変換して代入
 	virtual ~Variable();
 	
 	Variable &operator=(const Variable &obj);
@@ -131,7 +132,8 @@ namespace nl{
 	Variable &assign(const PtrNT &p);
 	Variable &assign(const Variable &obj);
 	Variable &assign(Type type, const std::string &val); // val を指定したTypeに変換して代入
-
+	Variable &assign(Type type, const Variable    &val); // val を指定したTypeに変換して代入
+	
 	/// clone (Deep Copy)
 	Variable::Ptr clone() const;
 	

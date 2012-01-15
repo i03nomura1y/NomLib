@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/14 22:33:14
+// last updated : 2012/01/15 17:59:17
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -73,7 +73,8 @@ namespace nl{
   Variable::Variable(const PtrF   &p) : type_(FuncPtr), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f(p), ptr_nt( ), constant(false){ nl_INC(); }
   Variable::Variable(const PtrNT  &p) : type_(Array  ), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt(p), constant(false){ nl_INC(); }
   Variable::Variable(const Variable &o) : type_(o.type_), val_int(o.val_int), val_str(o.val_str), ptr_v(o.ptr_v), ptr_f(o.ptr_f), ptr_nt(o.ptr_nt), constant(o.constant){ nl_INC(); }
-  Variable::Variable(Type type, const string &val) : type_(type),    val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC();  assign(type, val); }
+  Variable::Variable(Type type, const string   &val) : type_(type),    val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC();  assign(type, val); }
+  Variable::Variable(Type type, const Variable &val) : type_(type),    val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC();  assign(type, val); }
 
   /// assign()
   Variable &Variable::assign_undef()         { type_=Undef;   val_int = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
@@ -93,6 +94,19 @@ namespace nl{
 	case Undef:   assign_undef(); break;
 	case Integer: assign(atol(val.c_str())); break;
 	case String:  assign(val); break;
+	default:
+	  ERRP("unimplemented. " << dump_str());
+	}
+	return *this;
+  }
+
+  Variable &Variable::assign(Type type, const Variable    &val){ // val を指定したTypeに変換して代入
+	type_ = type;
+	switch(type_){
+	case Undef:   assign_undef(); break;
+	case Integer: assign( val.asInt() ); break;
+	case Boolean: assign( val.asBool() ); break;
+	case String:  assign( val.asStr() ); break;
 	default:
 	  ERRP("unimplemented. " << dump_str());
 	}

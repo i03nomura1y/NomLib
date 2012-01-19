@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/14 21:50:25
+// last updated : 2012/01/20 00:12:05
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -38,13 +38,14 @@ namespace nl{
 	// content 
 	XmlNode &content(const std::string &con){ content_->assign(con); return *this; }
 
-	// 子ノード追加
+	/// 子ノード追加
 	XmlNode &add(const XmlNode &node){ return add( new XmlNode(node) ); }
 	XmlNode &add(      XmlNode *node){ return add( XmlNode::Ptr( node ) ); }
 	XmlNode &add(XmlNode::Ptr node);
-	XmlNode &insertAfter(const XmlNode *key, XmlNode::Ptr node); // key の後ろに node を追加
-	// 子ノード削除
-	void remove(const XmlNode *key); // key を削除
+	// key の後ろに node を追加。key が無ければ末尾に追加
+	XmlNode &insertAfter(const XmlNode *key, XmlNode::Ptr node);
+	/// 子ノード削除
+	bool remove(const XmlNode *key); // key を削除
 
 	// getter
 	const std::string &name() const{ return name_->refOf_val_str(); } // タグ名

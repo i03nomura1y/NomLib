@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/14 21:51:10
+// last updated : 2012/01/20 00:12:59
 
 #include "util.h"
 
@@ -78,19 +78,23 @@ namespace nl{
 	  if((*ite).get() == key){
 		++ite;
 		children_.insert(ite, node);
+		return *this;
 	  }
 	}
+	// key が見つからなかった -> 末尾
+	children_.push_back(node);
 	return *this;
   }
   // 子ノード削除
-  void XmlNode::remove(const XmlNode *key){
+  bool XmlNode::remove(const XmlNode *key){
 	for(List::iterator ite = children_.begin(); ite!=children_.end(); ++ite){
 	  if((*ite).get() == key){
 		(*ite)->parent_ = XmlNode::NullPtr;
 		children_.erase(ite);
-		return;
+		return true;
 	  }
 	}
+	return false;
   }
 
   Variable::Ptr XmlNode::add(const std::string &name, Variable::Ptr var){

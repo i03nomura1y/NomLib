@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/20 20:55:17
+// last updated : 2012/01/21 00:15:18
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -24,7 +24,7 @@ namespace nl{
 
   AbsNameTable::AbsNameTable() : parent_() { nl_INC(); }
   AbsNameTable::~AbsNameTable(){ nl_DEC(); }
-  Variable_Ptr AbsNameTable::add (const Variable &name, Variable_Ptr var){
+  PtrV AbsNameTable::add (const Variable &name, PtrV var){
 	switch( name.type() ){
 	case Variable::String:  return add( name.asStr(), var );
 	case Variable::Integer: return add( name.asInt(), var );
@@ -33,7 +33,7 @@ namespace nl{
 	  return Variable::NullPtr;
 	}
   }
-  Variable_Ptr AbsNameTable::find(const Variable &name){
+  PtrV AbsNameTable::find(const Variable &name){
 	switch( name.type() ){
 	case Variable::String:  return find( name.asStr() );
 	case Variable::Integer: return find( name.asInt() );

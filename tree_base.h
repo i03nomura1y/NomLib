@@ -2,7 +2,7 @@
 #ifndef NL_TREE_INTERFACE_H
 #define NL_TREE_INTERFACE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/21 00:03:22
+// last updated : 2012/01/21 00:15:59
 // 木構造を表す interface
 
 #include <list>
@@ -15,7 +15,7 @@ namespace nl{
   class AbsTree : public AbsNameTable , hasPtr<T>{
   public: // typedef
 	typedef typename hasPtr<T>::Ptr Ptr; // 子クラスへのポインタ
-	typedef typename AbsNameTable::Ptr PtrNT; // NameTable用ポインタ
+	//typedef typename AbsNameTable::Ptr PtrNT; // NameTable用ポインタ
 	typedef typename AbsNameTable::WeakPtr WeakPtrNT; // NameTable用ポインタ
 	typedef std::list< Ptr > List;       // 子クラスのリスト
 	

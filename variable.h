@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/20 21:57:37
+// last updated : 2012/01/21 00:14:57
 // 動的型 dynamic type
 
 #include <string>
@@ -14,9 +14,11 @@ namespace nl{
   class AbsNameTable; // 抽象クラス: 名前表
   class Variable;     // 動的型 変数。 AbsFunction, AbsNameTable へのポインタを持つ
 
-  typedef shared_ptr<Variable> Variable_Ptr;
+  typedef typename hasPtr<Variable>::Ptr     PtrV;
+  typedef typename hasPtr<AbsFunction>::Ptr  PtrF;
+  typedef typename hasPtr<AbsNameTable>::Ptr PtrNT;
   typedef std::vector<Variable> Arguments; // 実引数リスト(Function用)
-  typedef std::pair<std::string, Variable_Ptr> NTEntry; // 名前と値のペア(NameTable用)
+  typedef std::pair<std::string, PtrV> NTEntry; // 名前と値のペア(NameTable用)
 
   // 抽象クラス: 関数を表す
   class AbsFunction : public hasPtr<AbsFunction>{
@@ -41,13 +43,13 @@ namespace nl{
 	virtual int size() const = 0; // 登録されている変数の数
 	
 	template <class T>
-	Variable_Ptr add(const T &name, Variable *var){ return add(name, Variable_Ptr(var)); }
-	virtual Variable_Ptr add (const Variable    &name, Variable_Ptr var);
-	virtual Variable_Ptr add (const std::string &, Variable_Ptr ) = 0;
-	virtual Variable_Ptr add (const int, Variable_Ptr) = 0;
-	virtual Variable_Ptr find(const Variable    &name);
-	virtual Variable_Ptr find(const std::string &) = 0;
-	virtual Variable_Ptr find(const int) = 0;
+	PtrV add(const T &name, Variable *var){ return add(name, PtrV(var)); }
+	virtual PtrV add (const Variable    &name, PtrV var);
+	virtual PtrV add (const std::string &, PtrV ) = 0;
+	virtual PtrV add (const int, PtrV) = 0;
+	virtual PtrV find(const Variable    &name);
+	virtual PtrV find(const std::string &) = 0;
+	virtual PtrV find(const int) = 0;
 	
 	virtual void dump() = 0;
 	void dump_stack();
@@ -66,9 +68,6 @@ namespace nl{
   public: // alias, const
 	static const Ptr NullPtr;
 	// alias
-	typedef Ptr               PtrV;
-	typedef AbsFunction::Ptr  PtrF;
-	typedef AbsNameTable::Ptr PtrNT;
 	typedef unsigned char uchar;
 	//typedef double dbl;
 	// 変数の型

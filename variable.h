@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/20 20:55:40
+// last updated : 2012/01/20 21:57:37
 // 動的型 dynamic type
 
 #include <string>
@@ -30,7 +30,8 @@ namespace nl{
 
   // 抽象クラス: 名前表インタフェース
   class AbsNameTable : public hasPtr<AbsNameTable>{
-  public: static const Ptr NullPtr;
+  public:
+	static const Ptr NullPtr;
 
   public:
 	AbsNameTable();

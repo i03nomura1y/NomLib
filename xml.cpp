@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/20 00:12:59
+// last updated : 2012/01/20 22:11:52
 
 #include "util.h"
 
@@ -277,15 +277,6 @@ void test();
 void test_XmlNode_scan();
 void test_XmlNode_print();
 
-int main(){
-  test();
-  //test_XmlNode_scan();
-  //test_XmlNode_print();
-
-  nl::dump_alloc_status();
-  return 0;
-}
-
 void test(){
   XmlNode::Ptr doc = XmlNode::create("TestData/simple.xml"); // ファイルから
 
@@ -326,6 +317,15 @@ void test_XmlNode_print(){
   cout << "XmlString:" << endl << doc.toStr() << endl;
 }
 
+
+int main(){
+  test();
+  test_XmlNode_scan();
+  test_XmlNode_print();
+
+  nl::dump_alloc_status();
+  return 0;
+}
 
 #endif
 

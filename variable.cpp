@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/15 21:59:41
+// last updated : 2012/01/20 20:55:17
 // 動的型 dynamic type
 
 #include "variable.h"

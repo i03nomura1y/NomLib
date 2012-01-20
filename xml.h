@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/21 00:03:12
+// last updated : 2012/01/21 00:32:37
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -42,17 +42,20 @@ namespace nl{
 	/// 子ノード追加
 	XmlNode &add(const XmlNode &node){ AbsTree<XmlNode>::add(node); return *this; }
 	XmlNode &add(      XmlNode *node){ AbsTree<XmlNode>::add(node); return *this; }
-	XmlNode &add(XmlNode::Ptr node){   AbsTree<XmlNode>::add(node); return *this; }
+	XmlNode &add(      Ptr      node){ AbsTree<XmlNode>::add(node); return *this; }
 
 	// getter
 	const std::string &name() const{ return name_->refOf_val_str(); } // タグ名
 	nl::Variable::Ptr content(){ return content_; }
 
-	// NameTable
+	/// implement NameTable
 	Variable::Ptr add(const std::string &name, Variable::Ptr var);
 	Variable::Ptr add(const int idx, Variable::Ptr var);
 	nl::Variable::Ptr find(const std::string &name); // 属性へのポインタを返す。無ければ NULL
 	nl::Variable::Ptr find(const int idx); // idx 番目の属性へのポインタを返す。無ければ NULL
+	// clone = DeppCopy
+	AbsNameTable::Ptr clone() const{ return cloneC(); }
+	XmlNode::Ptr      cloneC() const; // concrete
 
 	//
 	int size() const{ return attrs_.size(); } // 登録されている属性の個数
@@ -62,9 +65,6 @@ namespace nl{
 	XmlNode &parseText(const std::string &text); // 文字列をパース
 	static XmlNode::Ptr create(const std::string &file_name); // ファイル名から XmlNode を生成
 	static XmlNode::Ptr createFromText(const std::string &text); // XML文字列から XmlNode を生成
-	// clone = DeppCopy
-	AbsNameTable::Ptr clone() const{ return cloneC(); }
-	XmlNode::Ptr      cloneC() const; // concrete
 	
 	// 文字列に変換
 	void save(const std::string &file_name); // ファイルに書き出し

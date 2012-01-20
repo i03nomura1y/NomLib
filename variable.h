@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/15 21:59:24
+// last updated : 2012/01/20 18:22:08
 // 動的型 dynamic type
 
 #include <string>
@@ -41,6 +41,7 @@ namespace nl{
 	typedef weak_ptr<AbsNameTable>   WeakPtr;
 	static const Ptr NullPtr;
 
+  public:
 	AbsNameTable();
 	virtual ~AbsNameTable();
 	virtual AbsNameTable::Ptr clone() const = 0;	// clone (Deep Copy)

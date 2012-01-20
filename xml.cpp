@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/20 22:11:52
+// last updated : 2012/01/21 00:04:36
 
 #include "util.h"
 
@@ -9,33 +9,31 @@ namespace nl{
 
   XmlNode::XmlNode()
 	: //ns(""),
-	name_(new Variable("")), content_(new Variable()), attrs_(), children_(), parent_(), depth_(0), this_ptr(){
+	name_(new Variable("")), content_(new Variable()), attrs_(){
 	nl_INC();
   }
   XmlNode::XmlNode(const std::string &name) :
 	//ns(""), 
-	name_(new Variable(name)), content_(new Variable()), attrs_(), children_(), parent_(), depth_(0), this_ptr(){
+	name_(new Variable(name)), content_(new Variable()), attrs_(){
 	nl_INC();
   }
   XmlNode::XmlNode(XmlScanner &s)
 	: //ns(""),
-	name_(new Variable("")), content_(new Variable()), attrs_(), children_(), parent_(), depth_(0), this_ptr(){
+	name_(new Variable("")), content_(new Variable()), attrs_(){
 	parse(s);
 	nl_INC();
   }
 
   XmlNode::~XmlNode(){
 	nl_DEC();
-	for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite)
-	  (*ite)->parent_  = AbsNameTable::NullPtr;
+	//for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite) (*ite)->parent_  = AbsNameTable::NullPtr;
   }
 
   XmlNode::XmlNode(const XmlNode &obj) :
 	//ns(obj.ns),
-	name_(obj.name_), content_(obj.content_),
-	attrs_(obj.attrs_), children_(obj.children_), parent_(obj.parent_),
-	depth_(obj.depth_){
+	name_(obj.name_), content_(obj.content_), attrs_(obj.attrs_){
 	nl_INC();
+	copy( &obj );
   }
 
   XmlNode &XmlNode::operator=(const XmlNode &obj){
@@ -43,9 +41,7 @@ namespace nl{
 	name_	 = obj.name_;
 	content_ = obj.content_;
 	attrs_   = obj.attrs_;
-	children_ = obj.children_;
-	parent_  = obj.parent_;
-	depth_   = obj.depth_;
+	copy(&obj);
 	return *this;
   }
   
@@ -60,41 +56,6 @@ namespace nl{
 	char buf[256];
 	sprintf(buf, "%d", val);
 	return attr(name, buf);
-  }
-
-  XmlNode &XmlNode::add(XmlNode::Ptr node){
-	node->setThisPtr(node);
-	node->parent_ = this_ptr;
-	node->updateDepth(depth_+1);
-	children_.push_back(node);
-	return *this;
-  }
-  
-  XmlNode &XmlNode::insertAfter(const XmlNode *key, XmlNode::Ptr node){
-	node->setThisPtr(node);
-	node->parent_ = this_ptr;
-	node->updateDepth(depth_+1);
-	for(List::iterator ite = children_.begin(); ite!=children_.end(); ++ite){
-	  if((*ite).get() == key){
-		++ite;
-		children_.insert(ite, node);
-		return *this;
-	  }
-	}
-	// key が見つからなかった -> 末尾
-	children_.push_back(node);
-	return *this;
-  }
-  // 子ノード削除
-  bool XmlNode::remove(const XmlNode *key){
-	for(List::iterator ite = children_.begin(); ite!=children_.end(); ++ite){
-	  if((*ite).get() == key){
-		(*ite)->parent_ = XmlNode::NullPtr;
-		children_.erase(ite);
-		return true;
-	  }
-	}
-	return false;
   }
 
   Variable::Ptr XmlNode::add(const std::string &name, Variable::Ptr var){
@@ -129,8 +90,8 @@ namespace nl{
 	}
 	if( name == "this" ){
 	  if( ret ) DBGP("warning: reserved word '" << name << "'is used as attr-name");
-	  if( !this_ptr.lock() ) ERRP("error: this_ptr is not set");
-	  return Variable::Ptr(new Variable(this_ptr.lock()));
+	  if( !this_ptr() ) ERRP("error: this_ptr is not set");
+	  return Variable::Ptr(new Variable(this_ptr()));
 	}
 	if( name == "_parent" ){
 	  if( ret ) DBGP("warning: reserved word '" << name << "'is used as attr-name");
@@ -150,17 +111,7 @@ namespace nl{
 	  if( i == 0 ) return ite->second;
 	return Variable::NullPtr;
   }
-
-
   
-  // 深さを更新
-  void XmlNode::updateDepth(int newDepth){
-	depth_ = newDepth;
-	for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite)
-	  (*ite)->updateDepth(depth_+1);
-  }
-
-
   /// parse -----------------------------------------------------------------------------------
   // ファイル内容をパース このオブジェクトをルートノードにする
   XmlNode &XmlNode::parse(const std::string &file_name){
@@ -176,13 +127,13 @@ namespace nl{
   XmlNode::Ptr XmlNode::create(const std::string &file_name){
 	XmlScanner s(file_name);
 	XmlNode::Ptr ptr = XmlNode::Ptr(new XmlNode(s));
-	ptr->setThisPtr(ptr);
+	ptr->this_ptr(ptr);
 	return ptr;
   }
   XmlNode::Ptr XmlNode::createFromText(const std::string &text){
 	XmlScanner s("text", text);
 	XmlNode::Ptr ptr = XmlNode::Ptr(new XmlNode(s));
-	ptr->setThisPtr(ptr);
+	ptr->this_ptr(ptr);
 	return ptr;
   }
 
@@ -202,8 +153,8 @@ namespace nl{
 
   // clone = DeppCopy
   XmlNode::Ptr XmlNode::cloneC() const{
-	XmlNode::Ptr ptr = XmlNode::Ptr(new XmlNode(name_->refOf_val_str()));
-	ptr->setThisPtr(ptr);
+	XmlNode::Ptr ptr = XmlNode::Ptr(new XmlNode(name()));
+	ptr->this_ptr(ptr);
 	ptr->content_ = content_->clone();
 	// attrs
 	for( AttrList::const_iterator ite = attrs_.begin(); ite != attrs_.end(); ++ite){
@@ -246,21 +197,13 @@ namespace nl{
   void XmlNode::dump(){
 	if(depth_ == 0) DBGP("XmlNode::dump() ------------------");
 	char buf[512];
-	for(int i=0;i<depth_;i++) buf[i] = ' ';
+	for(unsigned int i=0;i<depth_;i++) buf[i] = ' ';
 	buf[depth_] = '\0';
 	std::cout << buf << name_->asStr() << std::endl; // DBGP(content_);
 	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
 	  std:: cout << buf << "(" << ite->first << " = " << ite->second->asStr() << ")" << std::endl;
 	for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite)
 	  (*ite)->dump();
-  }
-
-  void XmlNode::setThisPtr( AbsNameTable::Ptr p){
-	this_ptr = p;
-	for( List::iterator ite = children_.begin(); ite!=children_.end(); ++ite){
-	  (*ite)->parent_ = p;
-	  (*ite)->setThisPtr(*ite);
-	}
   }
 
 };
@@ -300,14 +243,15 @@ void test_XmlNode_print(){
   cout << " ---------------- ---------------------- ---------------------- " << endl;
 
   XmlNode doc("rootNode");
-  doc.attr("from","xml.cpp");
-  doc
-	.add( XmlNode("text").attr("id", "0001").attr("number", 102).content("Hello") )
+  doc.attr("from",nl::Variable::Ptr(new nl::Variable("xml.cpp")));
+    doc
+	  .add( XmlNode("text").attr("id", "0001").attr("number", 102).content("Hello") )
 	.add( XmlNode("text").content("Bye") )
 	.add( XmlNode("fruit")
 		  .add( XmlNode("name").attr("lang","en").content("Apple") )
 		  .add( XmlNode("name").attr("lang","ja").content("りんご") )
-		  );
+		  )
+  ;
   doc.dump();
   
   doc.save("TestData/output3.xml");
@@ -319,8 +263,8 @@ void test_XmlNode_print(){
 
 
 int main(){
-  test();
-  test_XmlNode_scan();
+  //test();
+  //test_XmlNode_scan();
   test_XmlNode_print();
 
   nl::dump_alloc_status();

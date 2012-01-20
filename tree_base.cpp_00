@@ -1,6 +1,15 @@
 // created date : 2012/01/20 22:15:23
-// last updated : 2012/01/20 23:09:29
+// last updated : 2012/01/20 22:18:25
 // 
+
+#include "tree_base.h"
+#include "util.h"
+namespace nl{
+  template<class T>
+  AbsTree<T>::AbsTree() : depth_(0){ nl_INC(); }
+  template<class T>
+  AbsTree<T>::~AbsTree(){ nl_DEC(); }
+};
 
 #ifdef TEST
 #include <iostream>

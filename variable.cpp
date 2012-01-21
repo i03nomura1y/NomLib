@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/21 00:15:18
+// last updated : 2012/01/21 21:55:13
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -43,12 +43,12 @@ namespace nl{
 	}
   }
 
-  AbsNameTable::Ptr AbsNameTable::push(Ptr parent, Ptr child){
+  PtrNT AbsNameTable::push(Ptr parent, Ptr child){
 	if( parent ) child->parent_ = parent;
 	return child;
   }
   
-  AbsNameTable::Ptr AbsNameTable::pop(Ptr nt){
+  PtrNT AbsNameTable::pop(Ptr nt){
 	if( !nt ) return nt;
 	Ptr ret = nt->parent_;
 	//nt->parent_.reset();

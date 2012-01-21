@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/21 00:14:57
+// last updated : 2012/01/21 21:54:33
 // 動的型 dynamic type
 
 #include <string>
@@ -38,7 +38,7 @@ namespace nl{
   public:
 	AbsNameTable();
 	virtual ~AbsNameTable();
-	virtual AbsNameTable::Ptr clone() const = 0;	// clone (Deep Copy)
+	virtual PtrNT clone() const = 0;	// clone (Deep Copy)
 	virtual const std::string &name() const = 0; // 名前表の名前(識別子)
 	virtual int size() const = 0; // 登録されている変数の数
 	
@@ -129,7 +129,7 @@ namespace nl{
 	Variable &assign(Type type, const Variable    &val); // val を指定したTypeに変換して代入
 	
 	/// clone (Deep Copy)
-	Variable::Ptr clone() const;
+	PtrV clone() const;
 	
 	// accessor
 	void type(Type t) { type_ = t; }

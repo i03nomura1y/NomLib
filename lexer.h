@@ -3,8 +3,8 @@
 //  regex を利用。 -lregex
 // class:
 //   - Lexer
-//   - Rule
-//   - RuleList  <- typedef
+//   - LexRule
+//   - LexRuleList  <- typedef
 #ifndef __NOMLIB_LEXER_H__
 #define __NOMLIB_LEXER_H__
 
@@ -16,9 +16,10 @@
 #include "regex.h"
 
 namespace nl{
+  class Lexer;
   // クラスの宣言 中身は Lexer のあと
-  class Rule;  // 切り出しのルール
-  typedef std::list<Rule> RuleList;
+  class LexRule;  // 切り出しのルール
+  typedef std::list<LexRule> LexRuleList;
   
   // 登録されたルールに従って、入力ファイル/文字列 からトークンを切り出す
   class Lexer{
@@ -42,11 +43,11 @@ namespace nl{
 	const std::string &getFileName() const{ return file_name; }
 
 	// ルールをセット
-	void setRule( RuleList *rule_list_ ){ rule_list = rule_list_; }
+	void setRule( LexRuleList *rule_list_ ){ rule_list = rule_list_; }
 	// トークンをひとつ切り出す。
-	// @return マッチした Rule へのポインタ or NULL
-	Rule *get(); // RuleList は setRule で渡されたものを使う
-	Rule *get(RuleList &lst); // 渡した RuleList を使う。 rule_list は更新しない。
+	// @return マッチした LexRule へのポインタ or NULL
+	LexRule *get(); // LexRuleList は setRule で渡されたものを使う
+	LexRule *get(LexRuleList &lst); // 渡した LexRuleList を使う。 rule_list は更新しない。
 	const std::string &getLine() const;  // 読み取り中の行を返す。idx は進めない。
 	std::string getRest();	// 読み取り中の行の残り部分を返す。idx は進める。
 	/// 前回返したトークンの情報を返す
@@ -65,7 +66,7 @@ namespace nl{
 	bool updateString();
 
   private:
-	RuleList *rule_list;
+	LexRuleList *rule_list;
   
 	// File の内容
 	std::string str;
@@ -82,17 +83,17 @@ namespace nl{
   // 字句解析ルール
   //  正規表現で表す。
   //  ユーザ定義の type は正の値。
-  class Rule : public RegEx{
+  class LexRule : public RegEx{
   public:
 	// @param rxstr  正規表現 文字列
 	// @param idx    何番目のマッチを str() で返すか
 	// @param type_  識別用
-	Rule(const std::string &rxstr, unsigned int idx_, unsigned int type_)
+	LexRule(const std::string &rxstr, unsigned int idx_, unsigned int type_)
 	  : RegEx(rxstr), idx(idx_), type(type_){}
-	~Rule(){}
-	Rule(const Rule &obj) : RegEx(obj), idx(obj.idx), type(obj.type){}	// コピーコンストラクタ
-	Rule &operator=(Rule &obj){ swap(obj); return *this; }	// 代入演算子 swap する
-	void swap(Rule &obj){ RegEx::swap(obj); std::swap(idx, obj.idx); std::swap(type, obj.type); }
+	~LexRule(){}
+	LexRule(const LexRule &obj) : RegEx(obj), idx(obj.idx), type(obj.type){}	// コピーコンストラクタ
+	LexRule &operator=(LexRule &obj){ swap(obj); return *this; }	// 代入演算子 swap する
+	void swap(LexRule &obj){ RegEx::swap(obj); std::swap(idx, obj.idx); std::swap(type, obj.type); }
 	std::string str() const{ return ( idx<length() )?get(idx):""; }
   private:
 	unsigned int idx;

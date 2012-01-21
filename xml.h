@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/21 00:32:37
+// last updated : 2012/01/21 02:47:38
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -46,16 +46,16 @@ namespace nl{
 
 	// getter
 	const std::string &name() const{ return name_->refOf_val_str(); } // タグ名
-	nl::Variable::Ptr content(){ return content_; }
+	PtrV content(){ return content_; }
 
 	/// implement NameTable
-	Variable::Ptr add(const std::string &name, Variable::Ptr var);
-	Variable::Ptr add(const int idx, Variable::Ptr var);
-	nl::Variable::Ptr find(const std::string &name); // 属性へのポインタを返す。無ければ NULL
-	nl::Variable::Ptr find(const int idx); // idx 番目の属性へのポインタを返す。無ければ NULL
+	PtrV add(const std::string &name, Variable::Ptr var);
+	PtrV add(const int idx, Variable::Ptr var);
+	PtrV find(const std::string &name); // 属性へのポインタを返す。無ければ NULL
+	PtrV find(const int idx); // idx 番目の属性へのポインタを返す。無ければ NULL
 	// clone = DeppCopy
-	AbsNameTable::Ptr clone() const{ return cloneC(); }
-	XmlNode::Ptr      cloneC() const; // concrete
+	PtrNT clone() const{ return cloneC(); }
+	Ptr   cloneC() const; // concrete
 
 	//
 	int size() const{ return attrs_.size(); } // 登録されている属性の個数
@@ -63,8 +63,8 @@ namespace nl{
 	// パース
 	XmlNode &parse(const std::string &file_name);	// ファイル内容をパース このオブジェクトをルートノードにする
 	XmlNode &parseText(const std::string &text); // 文字列をパース
-	static XmlNode::Ptr create(const std::string &file_name); // ファイル名から XmlNode を生成
-	static XmlNode::Ptr createFromText(const std::string &text); // XML文字列から XmlNode を生成
+	static Ptr create(const std::string &file_name); // ファイル名から XmlNode を生成
+	static Ptr createFromText(const std::string &text); // XML文字列から XmlNode を生成
 	
 	// 文字列に変換
 	void save(const std::string &file_name); // ファイルに書き出し
@@ -81,8 +81,8 @@ namespace nl{
 
   private: // member
 	//std::string ns;      // namespace
-	nl::Variable::Ptr name_;    // tag name  string の代わりに Variable::Ptr を使用
-	nl::Variable::Ptr content_; //           string の代わりに Variable::Ptr を使用
+	PtrV name_;    // tag name  string の代わりに Variable::Ptr を使用
+	PtrV content_; //           string の代わりに Variable::Ptr を使用
 	AttrList attrs_; // xml_io.h で typedef std::list< pair<string name, nl::Variable::Ptr > >
   };
 

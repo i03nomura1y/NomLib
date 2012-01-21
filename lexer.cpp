@@ -34,14 +34,14 @@ namespace nl{
   }
   
   // トークンをひとつ切り出す。
-  // @return マッチした Rule へのポインタ or NULL
-  Rule *Lexer::get(){
-	if( rule_list == NULL ) return ERRP("rule_list is NULL."), (Rule*)NULL;
+  // @return マッチした LexRule へのポインタ or NULL
+  LexRule *Lexer::get(){
+	if( rule_list == NULL ) return ERRP("rule_list is NULL."), (LexRule*)NULL;
 	return get(*rule_list);
   }
-  Rule *Lexer::get(RuleList &lst){
-	if( !updateString()   ) return (Rule*)NULL;
-	for( RuleList::iterator ite = lst.begin(); ite != lst.end(); ++ite){
+  LexRule *Lexer::get(LexRuleList &lst){
+	if( !updateString()   ) return (LexRule*)NULL;
+	for( LexRuleList::iterator ite = lst.begin(); ite != lst.end(); ++ite){
 	  if( ite->match( &str[idx] ) ){
 		pre_idx = idx;
 		idx += ite->get(0).length();
@@ -122,14 +122,14 @@ namespace nl{
 using nl::RegEx;
 
 using nl::Lexer;
-using nl::Rule;
-using nl::RuleList;
+using nl::LexRule;
+using nl::LexRuleList;
 
 Lexer lexer;
-RuleList rule_list;
+LexRuleList rule_list;
 
 void func(){
-  Rule *ret;
+  LexRule *ret;
   lexer.setRule(&rule_list);
   while( (ret = lexer.get()) != NULL ){
 	DBGP("[" << lexer.getPosStr() << "] " << ret->type << "  '" << ret->str() << "'");
@@ -139,12 +139,12 @@ void func(){
 
 int main(){
   // タイプと正規表現のリストを作成
-  rule_list.push_back( Rule("(^\\s+)|(^$)", 0,   0 )); // whitespace | 空行
-  rule_list.push_back( Rule("^\\w+",        0,   1 )); // リテラル
-  rule_list.push_back( Rule("^\\d+",        0,   2 )); // 数値
-  rule_list.push_back( Rule("^\"(((\\\\.)|[^\"])*)\"", 1, 3 )); // 文字列
-  rule_list.push_back( Rule("^//.*$",       0,   4 )); // コメント行
-  rule_list.push_back( Rule("^.*$",         0, 100 )); //
+  rule_list.push_back( LexRule("(^\\s+)|(^$)", 0,   0 )); // whitespace | 空行
+  rule_list.push_back( LexRule("^\\w+",        0,   1 )); // リテラル
+  rule_list.push_back( LexRule("^\\d+",        0,   2 )); // 数値
+  rule_list.push_back( LexRule("^\"(((\\\\.)|[^\"])*)\"", 1, 3 )); // 文字列
+  rule_list.push_back( LexRule("^//.*$",       0,   4 )); // コメント行
+  rule_list.push_back( LexRule("^.*$",         0, 100 )); //
 
 
   //lexer.open("TestData/input.txt");  // ファイル開く

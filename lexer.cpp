@@ -6,31 +6,63 @@
 namespace nl{
   static RegEx re_lastEscape("^(((\\\\.)|[^\\\\])*)\\\\$");
   
-  Lexer::Lexer(){ init(); }
-  Lexer::Lexer(const std::string &file_name_){ init(); open(file_name_);}
-  Lexer::Lexer(const std::string &file_name_, const std::string &content_ ){
+  Lexer::Lexer() : is(NULL), ifs(NULL), ss(NULL){ init(); }
+  Lexer::Lexer(const std::string &file_name_,
+			   const int line_offs,
+			   const int idx_offs,
+			   const int start_idx_pos,
+			   const std::string &content_)
+	: is(NULL), ifs(NULL), ss(NULL){
 	init();
-	open(file_name_, content_);
+	open(file_name_, line_offs, idx_offs, start_idx_pos, &content_);
   }
+  Lexer::Lexer(const std::string &file_name_)
+	: is(NULL), ifs(NULL), ss(NULL){
+	init();
+	open(file_name_);
+  }
+  // コピーコンストラクタ 元のやつは壊す
+  Lexer::Lexer(const Lexer &obj) : is(NULL), ifs(NULL), ss(NULL){
+	rule_list = obj.rule_list;
+	str       = obj.str      ;
+	line_no   = obj.line_no  ;
+	idx 	  = obj.idx 	 ;
+	pre_idx   = obj.pre_idx  ;
+	file_name = obj.file_name;
+	swap(ifs, obj.ifs);
+	swap(ss , obj.ss );
+	is        = obj.is       ;
+	line_offset = obj.line_offset;
+	col_offset  = obj.col_offset;
+	start_col_pos = obj.start_col_pos;
+  }
+
   Lexer::~Lexer(){
-	if( ifs.is_open() ) ifs.close();
+	if( ifs != NULL ) delete ifs;
+	if( ss  != NULL ) delete ss;
 	is = NULL;
   }
 
-  // ファイルを開く
-  void Lexer::open(const std::string &file_name_){
+  void Lexer::open(const std::string &file_name_,
+				   const int line_offs,
+				   const int idx_offs,
+				   const int start_idx_pos,
+				   const std::string *content_){
 	init();
-	file_name = file_name_;
-	ifs.open( file_name.c_str(), std::ios::in | std::ios::binary );
-	if(!ifs.is_open()) ERRP("error: cannot open file " << file_name);
-	else is = &ifs;
-  }
-  // 文字列を入力ストリームにする
-  void Lexer::open(const std::string &file_name_, const std::string &content_){
-	init();
-	file_name = file_name_;
-	ss.str(content_);
-	is = &ss;
+	file_name     = file_name_;
+	line_offset   = line_offs;
+	col_offset    = idx_offs;
+	start_col_pos = start_idx_pos;
+	// コンテンツが NULL -> ファイルを開く
+	if( content_ == NULL ){
+	  ifs = new std::ifstream( file_name.c_str(), std::ios::in | std::ios::binary );
+	  if(!ifs->is_open()){ ERRP("error: cannot open file " << file_name); delete ifs; }
+	  else is = ifs;
+	}else{
+	  ss = new std::stringstream();
+	  ss->str(*content_);
+	  is = ss;
+	}
   }
   
   // トークンをひとつ切り出す。
@@ -40,6 +72,7 @@ namespace nl{
 	return get(*rule_list);
   }
   LexRule *Lexer::get(LexRuleList &lst){
+	
 	if( !updateString()   ) return (LexRule*)NULL;
 	for( LexRuleList::iterator ite = lst.begin(); ite != lst.end(); ++ite){
 	  if( ite->match( &str[idx] ) ){
@@ -66,19 +99,21 @@ namespace nl{
   // 前回返したトークンの位置情報を文字列で返す
   const char *Lexer::getPosStr() const{
 	static char buf[512];
-	sprintf(buf,"%s:%d:%d",file_name.c_str(),line_no, pre_idx);
+	sprintf(buf,"%s:%d:%d",file_name.c_str(), getLineNo(), getColumnNo() );
 	return buf;
   }
 
   void Lexer::init(){
-	if( ifs.is_open() ) ifs.close();
-	ss.str("");
-	ss.clear();
+	if( ifs != NULL ) delete ifs;
+	if( ss  != NULL ) delete ss;
+	ifs = NULL;
+	ss  = NULL;
 	file_name = "";
 	is = NULL;
 
 	str     = "";
 	line_no = idx = pre_idx =  0;
+	line_offset = col_offset = start_col_pos = 0;
   }
   // 行末を指している? == その行で読める文字はもうない?
   bool Lexer::eol() const{ return ((str.length()-idx) <= 0); }
@@ -93,7 +128,9 @@ namespace nl{
 	// 行末じゃない -> このままでOK
 	if( !eol() ) return true;
 	// 行末なので getline
-	idx = 0; pre_idx = 0; line_no++;
+	idx = 0; pre_idx = 0;
+	if( line_no > 0 ) start_col_pos = col_offset; // 最初の getline では更新しない。
+	line_no++;
 	if( is == NULL || !getline(*is, str) ){
 	  // 次の行がない -> false
 	  is = NULL;
@@ -147,8 +184,14 @@ int main(){
   rule_list.push_back( LexRule("^.*$",         0, 100 )); //
 
 
-  //lexer.open("TestData/input.txt");  // ファイル開く
-  //func();
+  std::string scr = "{\n";
+  //lexer.open("dat",10,20,30,&scr);
+  lexer.open("dat",0,0,0,&scr);
+  func();
+  return 0;
+
+  // lexer.open("TestData/input.txt");  // ファイル開く
+  // func();
 
   //lexer.open("dat","// comment line.\nint a=0;\nint b=0;");
   lexer.open("dat","// comment line.\n");

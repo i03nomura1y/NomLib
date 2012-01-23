@@ -25,23 +25,33 @@ namespace nl{
   class Lexer{
   public:
 	Lexer();
-	explicit Lexer(const std::string &file_name_);
-	Lexer(const std::string &file_name_, const std::string &content_ );
+	explicit Lexer(const std::string &file_name_,
+				   const int line_offs,
+				   const int idx_offs,
+				   const int start_idx_pos,
+				   const std::string &content_);
+	Lexer(const std::string &file_name_);
 	~Lexer();
+	Lexer(const Lexer &); // コピーコンストラクタ 元のやつは壊す
   private:
-	Lexer(const Lexer &){}	// コピーコンストラクタ
 	Lexer &operator=(Lexer &){ return *this; } // 代入演算子
   public:
-	// ファイルを開く
-	void open(const std::string &file_name_);
-	// 文字列を入力ストリームにする
-	void open(const std::string &file_name_, const std::string &content_);
+	void open(const std::string &file_name_, const std::string &content_){
+	  open(file_name_, 0, 0, 0, &content_);
+	}
+	// ファイルを開く / 文字列を入力ストリームにする
+	void open(const std::string &file_name_,
+			  const int line_offs = 0,
+			  const int idx_offs  = 0,
+			  const int start_idx_pos  = 0,
+			  const std::string *content_ = NULL);
   
 	// 現在の行/列番号の取得
-	int getLineNo() const{ return line_no; }
-	int getColumnNo() const{ return pre_idx; }
+	int getLineNo()       const{ return line_no   + line_offset  ; }
+	int getColumnNo()     const{ return pre_idx+1 + start_col_pos; } // 列番号は 1 から始まる
+	int getNextColumnNo() const{ return idx    +1 + start_col_pos; } //  今から読むトークンの開始位置
 	const std::string &getFileName() const{ return file_name; }
-
+	
 	// ルールをセット
 	void setRule( LexRuleList *rule_list_ ){ rule_list = rule_list_; }
 	// トークンをひとつ切り出す。
@@ -64,10 +74,10 @@ namespace nl{
 	//      行末に \ があれば、次の行と接続。
 	// @return データをすべて読み終わっていたら false
 	bool updateString();
-
+	
   private:
 	LexRuleList *rule_list;
-  
+	
 	// File の内容
 	std::string str;
 	int line_no; // 現在の str が何行目のものか
@@ -75,9 +85,13 @@ namespace nl{
 	int pre_idx; // 前回 get() が呼ばれたときの idx (unget用)
 	// File にあたる部分
 	std::string file_name;
-	std::istream *is;
-	std::ifstream ifs;
-	std::stringstream ss;
+	std::istream  *is;
+	mutable std::ifstream *ifs;
+	mutable std::stringstream *ss;
+	
+	int line_offset;   // オフセット
+	int col_offset;    // 
+	int start_col_pos; // col の初期位置
   };
   
   // 字句解析ルール

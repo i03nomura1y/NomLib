@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/21 00:04:36
+// last updated : 2012/01/25 14:18:10
 
 #include "util.h"
 
@@ -58,6 +58,7 @@ namespace nl{
 	return attr(name, buf);
   }
 
+  // 属性追加
   Variable::Ptr XmlNode::add(const std::string &name, Variable::Ptr var){
 	if( find(name) ){
 	  DBGP("warning: multiple definition '" << name << "'");
@@ -71,7 +72,7 @@ namespace nl{
 	  DBGP("warning: multiple definition '" << idx << "'");
 	  return Variable::NullPtr;
 	}
-	return ERRP("cannot add variable to Xml '" << idx), Variable::NullPtr;
+	return ERRP("cannot add variable with [integer] to Xml '" << idx), Variable::NullPtr;
   }
 
   // 属性へのポインタを返す
@@ -104,12 +105,11 @@ namespace nl{
 	return ret;
   }
   
+  // 子ノードへのポインタを返す
   Variable::Ptr XmlNode::find(const int idx){
-	if(idx < 0) return Variable::NullPtr;
-	int i = idx;
-	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite, i--)
-	  if( i == 0 ) return ite->second;
-	return Variable::NullPtr;
+	Ptr p = childAt(idx);
+	if( !p ) return nl::PtrV();
+	return nl::PtrV(new nl::Variable(nl::PtrNT(p)));
   }
   
   /// parse -----------------------------------------------------------------------------------

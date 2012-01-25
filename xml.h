@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/21 02:47:38
+// last updated : 2012/01/25 14:04:29
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -49,10 +49,10 @@ namespace nl{
 	PtrV content(){ return content_; }
 
 	/// implement NameTable
-	PtrV add(const std::string &name, Variable::Ptr var);
+	PtrV add(const std::string &name, Variable::Ptr var); // 属性追加
 	PtrV add(const int idx, Variable::Ptr var);
 	PtrV find(const std::string &name); // 属性へのポインタを返す。無ければ NULL
-	PtrV find(const int idx); // idx 番目の属性へのポインタを返す。無ければ NULL
+	PtrV find(const int idx); // idx 番目の子ノード へのポインタを返す。無ければ NULL
 	// clone = DeppCopy
 	PtrNT clone() const{ return cloneC(); }
 	Ptr   cloneC() const; // concrete

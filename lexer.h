@@ -59,6 +59,7 @@ namespace nl{
 	LexRule *get(); // LexRuleList は setRule で渡されたものを使う
 	LexRule *get(LexRuleList &lst); // 渡した LexRuleList を使う。 rule_list は更新しない。
 	const std::string &getLine() const;  // 読み取り中の行を返す。idx は進めない。
+	int getRawColumnNo() const{ return pre_idx; }  // pre_idx
 	std::string getRest();	// 読み取り中の行の残り部分を返す。idx は進める。
 	/// 前回返したトークンの情報を返す
 	const char *getPosStr() const; // 位置情報 を文字列で返す

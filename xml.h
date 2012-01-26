@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/25 14:04:29
+// last updated : 2012/01/27 01:31:14
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -58,8 +58,7 @@ namespace nl{
 	Ptr   cloneC() const; // concrete
 
 	//
-	int size() const{ return attrs_.size(); } // 登録されている属性の個数
-
+	int size() const{ return children_.size(); /*attrs_.size();*/ } // 子ノードの個数
 	// パース
 	XmlNode &parse(const std::string &file_name);	// ファイル内容をパース このオブジェクトをルートノードにする
 	XmlNode &parseText(const std::string &text); // 文字列をパース

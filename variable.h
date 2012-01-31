@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/02/01 07:11:04
+// last updated : 2012/02/01 07:15:11
 // 動的型 dynamic type
 
 #include <string>
@@ -69,7 +69,7 @@ namespace nl{
 	static const Ptr NullPtr;
 	// alias
 	typedef unsigned char uchar;
-	//typedef double dbl;
+	typedef double dbl;
 	// 変数の型
 	//  型が違った場合などに どうするか(エラーにするか?警告か?) は処理系依存。
 	//  オーバーロードを利用して 型推論する。
@@ -78,7 +78,7 @@ namespace nl{
 	  Undef = 0, // 未定義
 	  Auto,    // 代入されたときに決定。挙動はUndefと同じ
 	  Integer,
-	  Float,   // 小数
+		//Float,   // 小数
 	  String,
 	  Boolean, // 内部の値は int。
 	  VoidPtr, // Variable へのポインタ。void* しか考えない
@@ -99,7 +99,7 @@ namespace nl{
 	
 	explicit Variable(const int   &v);
 	explicit Variable(const long  &v);
-	//explicit Variable(const dbl   &v);
+	explicit Variable(const dbl   &v);
 	explicit Variable(const bool  &v);
 	explicit Variable(const char  *v);
 	explicit Variable(const uchar *v);
@@ -118,7 +118,7 @@ namespace nl{
 	Variable &assign_undef(); // undef を代入
 	Variable &assign(const int  &v);
 	Variable &assign(const long &v);
-	//Variable &assign(const dbl  &v);
+	Variable &assign(const dbl  &v);
 	Variable &assign(const bool &v);
 	Variable &assign(const char *v);
 	Variable &assign(const unsigned char *v);
@@ -163,8 +163,9 @@ namespace nl{
   private:	/// member
 	Type type_;
 	
-	long val_int;
-	double val_dbl;
+	//long val_int;
+	//double val_dbl;
+	double val_int;
 	std::string val_str;
 	PtrV  ptr_v;
 	PtrF  ptr_f; // 関数へのポインタ

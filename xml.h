@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/27 01:31:14
+// last updated : 2012/02/01 05:59:40
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -59,6 +59,10 @@ namespace nl{
 
 	//
 	int size() const{ return children_.size(); /*attrs_.size();*/ } // 子ノードの個数
+	int attr_size() const{ return attrs_.size(); } // 属性の個数
+	PtrV attrAt(int idx); // idx番目の 属性へのポインタを返す。無ければ NULL
+	std::string attrNameAt(int idx); // idx番目の 属性の名前を返す。
+	
 	// パース
 	XmlNode &parse(const std::string &file_name);	// ファイル内容をパース このオブジェクトをルートノードにする
 	XmlNode &parseText(const std::string &text); // 文字列をパース
@@ -71,12 +75,14 @@ namespace nl{
 	
 	// 表示
 	void dump();	// 確認用表示
+	void save_dbg(const std::string &file_name); // ファイルに書き出し
 
   private: // method
 	//AbsNameTable::WeakPtr parent() const{ return parent_; }
 	//void parent(AbsNameTable::WeakPtr p){ parent_ = p; }
 	XmlNode &parse(XmlScanner &s); // XmlScanner から読み込み
 	void write(XmlPrinter &p); // XmlPrinter に書き出し
+	void write_dbg(XmlPrinter &p); // XmlPrinter に書き出し
 
   private: // member
 	//std::string ns;      // namespace

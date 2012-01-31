@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/21 21:55:13
+// last updated : 2012/02/01 07:10:54
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -91,20 +91,13 @@ namespace nl{
   Variable &Variable::operator=(const Variable &obj){ return assign(obj); }
   
   Variable &Variable::assign(Type type, const string &val){  // val を指定したTypeに変換して代入
-	static RegEx rx_int("^[+-]?[0-9]+?$");
-	static RegEx rx_dbl("^[+-]?[0-9]+([.][0-9]*)?$");
 	type_ = type;
 	switch(type_){
 	case Undef  : return assign_undef();
 	case Integer: return assign(atol(val.c_str()));
 	case String : return assign(val);
 	case Boolean: return assign(val == "true"  || val == "TRUE" ); // true, TRUE なら真
-	case Auto: // 自動判定
-	  if(val == "true"  || val == "TRUE" ) return assign(true);  // true,  TRUE  なら 真
-	  if(val == "false" || val == "FALSE") return assign(false); // false, FALSE なら 偽
-	  if( rx_int.match(val) ) return assign( atol(val.c_str()) ); // int正規表現にマッチ -> int
-	  //if( rx_dbl.match(val) ) return assign( atof(val.c_str()) ); // int正規表現にマッチ -> double
-	  return assign(val);
+	case Auto   : return assign_auto(val);  // 自動判定
 	default:
 	  ERRP("unimplemented. " << dump_str());
 	}
@@ -118,11 +111,24 @@ namespace nl{
 	case Integer: assign( val.asInt()  ); break;
 	case Boolean: assign( val.asBool() ); break;
 	case String:  assign( val.asStr()  ); break;
+	case Auto   : return assign_auto(val.asStr());  // 自動判定
 	default:
 	  ERRP("unimplemented. " << dump_str());
 	}
 	return *this;
   }
+
+  // val の型を自動判別して代入
+  Variable &Variable::assign_auto(const std::string &val){
+	static RegEx rx_int("^[+-]?[0-9]+?$");
+	static RegEx rx_dbl("^[+-]?[0-9]+([.][0-9]*)?$");
+	if(val == "true"  || val == "TRUE" ) return assign(true);  // true,  TRUE  なら 真
+	if(val == "false" || val == "FALSE") return assign(false); // false, FALSE なら 偽
+	if( rx_int.match(val) ) return assign( atol(val.c_str()) ); // int正規表現にマッチ -> int
+	//if( rx_dbl.match(val) ) return assign( atof(val.c_str()) ); // int正規表現にマッチ -> double
+	return assign(val);
+  }
+
 
   /// clone (Deep Copy)
   Variable::Ptr Variable::clone() const{

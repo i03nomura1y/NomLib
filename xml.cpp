@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/01/25 14:18:10
+// last updated : 2012/02/01 06:26:57
 
 #include "util.h"
 
@@ -105,6 +105,26 @@ namespace nl{
 	return ret;
   }
   
+  // idx番目の 属性へのポインタを返す。無ければ NULL
+  PtrV XmlNode::attrAt(int idx){
+	if( idx < 0 || (unsigned int)idx >= attrs_.size() ) return PtrV();
+	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite, idx--){
+	  if( idx == 0 ) return ite->second;
+	}
+	return PtrV();
+  }
+
+  // idx番目の 属性の名前を返す。
+  std::string XmlNode::attrNameAt(int idx){
+	if( idx < 0 || (unsigned int)idx >= attrs_.size() ) return "";
+	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite, idx--){
+	  if( idx == 0 ) return ite->first;
+	}
+	return "";
+  }
+
+
+
   // 子ノードへのポインタを返す
   Variable::Ptr XmlNode::find(const int idx){
 	Ptr p = childAt(idx);
@@ -188,6 +208,37 @@ namespace nl{
 
 	for( List::iterator ite=children_.begin(); ite!=children_.end(); ++ite)
 	  (*ite)->write(p);
+	
+	p.end();
+  }
+
+  void XmlNode::save_dbg(const std::string &file_name){
+	XmlPrinter p(file_name);
+	write_dbg(p);
+  }
+
+
+  void XmlNode::write_dbg(XmlPrinter &p){
+	p.start(name_->refOf_val_str());
+	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite){
+	  if(ite->first == "calcPrefSize" ||
+		 ite->first == "setSize" ||
+		 ite->first == "min_w" || ite->first == "min_h" ||
+		 ite->first == "length" ||
+		 ite->first == "bg_color" ||
+		 //ite->first == "scale" ||
+		 ite->first == "orientation" ||
+		 ite->first == "c_id" ||
+		 ite->first == "enable" ||
+		 ite->first == "" ||
+		 ite->first == "" ||
+		 ite->first == "place" ) continue;
+	  p.attr(ite->first, ite->second->asStr());
+	}
+	p.content(content_->asStr());
+
+	for( List::iterator ite=children_.begin(); ite!=children_.end(); ++ite)
+	  (*ite)->write_dbg(p);
 	
 	p.end();
   }

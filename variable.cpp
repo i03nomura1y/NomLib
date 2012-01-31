@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/02/01 07:26:28
+// last updated : 2012/02/01 07:41:45
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -246,7 +246,7 @@ namespace nl{
 	  if( op == "-" ) return Variable( val_int -  o.val_int );
 	  if( op == "*" ) return Variable( val_int *  o.val_int );
 	  if( op == "/" ) return Variable( val_int /  o.val_int );
-	  if( op == "%" ) return Variable( (int)(val_int) %  (int)(o.val_int) );
+	  if( op == "%" ) return Variable( val_int %  o.val_int );
 	  if( op == "<" ) return Variable( val_int <  o.val_int );
 	  if( op == "<=") return Variable( val_int <= o.val_int );
 	  if( op == ">" ) return Variable( val_int >  o.val_int );

@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/02/01 07:15:25
+// last updated : 2012/02/01 07:26:28
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -63,33 +63,32 @@ namespace nl{
   Variable::~Variable(){ nl_DEC(); }
 
   // undef で初期化。vector<> のために public にする
-  Variable::Variable()                : type_(Undef  ), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(const int    &v) : type_(Integer), val_int(v        ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(const long   &v) : type_(Integer), val_int(v        ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  //Variable::Variable(const dbl    &v) : type_(Float  ), val_int(v        ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(const dbl    &v) : type_(Integer), val_int(v        ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(const bool   &v) : type_(Boolean), val_int(v?1:0    ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(const char   *v) : type_(String ), val_int(undef_int), val_str(v        ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(const uchar  *v) : type_(String ), val_int(undef_int), val_str((const char*)v ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(const string &v) : type_(String ), val_int(undef_int), val_str(v        ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(const PtrV   &p) : type_(VoidPtr), val_int(undef_int), val_str(undef_str), ptr_v(p), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(const PtrF   &p) : type_(FuncPtr), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f(p), ptr_nt( ), constant(false){ nl_INC(); }
-  Variable::Variable(const PtrNT  &p) : type_(Array  ), val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt(p), constant(false){ nl_INC(); }
-  Variable::Variable(const Variable &o) : type_(o.type_), val_int(o.val_int), val_str(o.val_str), ptr_v(o.ptr_v), ptr_f(o.ptr_f), ptr_nt(o.ptr_nt), constant(o.constant){ nl_INC(); }
-  Variable::Variable(Type type, const string   &val) : type_(type),    val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC();  assign(type, val); }
-  Variable::Variable(Type type, const Variable &val) : type_(type),    val_int(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC();  assign(type, val); }
+  Variable::Variable()                : type_(Undef  ), val_int(undef_int), val_dbl(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const int    &v) : type_(Integer), val_int(v        ), val_dbl(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const long   &v) : type_(Integer), val_int(v        ), val_dbl(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const dbl    &v) : type_(Float  ), val_int(undef_int), val_dbl(v        ), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const bool   &v) : type_(Boolean), val_int(v?1:0    ), val_dbl(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const char   *v) : type_(String ), val_int(undef_int), val_dbl(undef_int), val_str(v        ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const uchar  *v) : type_(String ), val_int(undef_int), val_dbl(undef_int), val_str((const char*)v ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const string &v) : type_(String ), val_int(undef_int), val_dbl(undef_int), val_str(v        ), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const PtrV   &p) : type_(VoidPtr), val_int(undef_int), val_dbl(undef_int), val_str(undef_str), ptr_v(p), ptr_f( ), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const PtrF   &p) : type_(FuncPtr), val_int(undef_int), val_dbl(undef_int), val_str(undef_str), ptr_v( ), ptr_f(p), ptr_nt( ), constant(false){ nl_INC(); }
+  Variable::Variable(const PtrNT  &p) : type_(Array  ), val_int(undef_int), val_dbl(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt(p), constant(false){ nl_INC(); }
+  Variable::Variable(const Variable &o) : type_(o.type_), val_int(o.val_int), val_dbl(o.val_dbl), val_str(o.val_str), ptr_v(o.ptr_v), ptr_f(o.ptr_f), ptr_nt(o.ptr_nt), constant(o.constant){ nl_INC(); }
+  Variable::Variable(Type type, const string   &val) : type_(type),    val_int(undef_int), val_dbl(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC();  assign(type, val); }
+  Variable::Variable(Type type, const Variable &val) : type_(type),    val_int(undef_int), val_dbl(undef_int), val_str(undef_str), ptr_v( ), ptr_f( ), ptr_nt( ), constant(false){ nl_INC();  assign(type, val); }
 
   /// assign()
-  Variable &Variable::assign_undef()         { type_=Undef;   val_int = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
-  Variable &Variable::assign(const int    &v){ type_=Integer; val_int = v;         val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
-  Variable &Variable::assign(const dbl    &v){ type_=Integer; val_int = v;         val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
-  Variable &Variable::assign(const long   &v){ type_=Integer; val_int = v;         val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
-  Variable &Variable::assign(const bool   &v){ type_=Boolean; val_int = (v?1:0);   val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
-  Variable &Variable::assign(const char *v){ type_=String;  val_int = undef_int; val_str = v;         ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
-  Variable &Variable::assign(const uchar *v){ type_=String;  val_int = undef_int; val_str = (const char*)v;         ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
-  Variable &Variable::assign(const string &v){ type_=String;  val_int = undef_int; val_str = v;         ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
-  Variable &Variable::assign(const PtrNT  &p){ type_=Array;   val_int = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = p;                     return *this; }
-  Variable &Variable::assign(const Variable &o){ type_=o.type_; val_int = o.val_int; val_str = o.val_str; ptr_v = o.ptr_v; ptr_f = o.ptr_f; ptr_nt = o.ptr_nt; constant = o.constant; return *this; }
+  Variable &Variable::assign_undef()         { type_=Undef;   val_int = undef_int; val_dbl = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const int    &v){ type_=Integer; val_int = v;         val_dbl = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const long   &v){ type_=Integer; val_int = v;         val_dbl = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const dbl    &v){ type_=Integer; val_int = undef_int; val_dbl = v;         val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const bool   &v){ type_=Boolean; val_int = (v?1:0);   val_dbl = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const char   *v){ type_=String;  val_int = undef_int; val_dbl = undef_int; val_str = v;         ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const uchar  *v){ type_=String;  val_int = undef_int; val_dbl = undef_int; val_str = (const char*)v; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const string &v){ type_=String;  val_int = undef_int; val_dbl = undef_int; val_str = v;         ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = AbsNameTable::NullPtr; return *this; }
+  Variable &Variable::assign(const PtrNT  &p){ type_=Array;   val_int = undef_int; val_dbl = undef_int; val_str = undef_str; ptr_v = Variable::NullPtr; ptr_f = AbsFunction::NullPtr; ptr_nt = p;                     return *this; }
+  Variable &Variable::assign(const Variable &o){ type_=o.type_; val_int = o.val_int; val_dbl = o.val_dbl; val_str = o.val_str; ptr_v = o.ptr_v; ptr_f = o.ptr_f; ptr_nt = o.ptr_nt; constant = o.constant; return *this; }
   Variable &Variable::operator=(const Variable &obj){ return assign(obj); }
   
   Variable &Variable::assign(Type type, const string &val){  // val を指定したTypeに変換して代入

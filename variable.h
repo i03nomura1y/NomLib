@@ -2,7 +2,7 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/02/01 07:15:11
+// last updated : 2012/02/01 07:26:41
 // 動的型 dynamic type
 
 #include <string>
@@ -78,7 +78,7 @@ namespace nl{
 	  Undef = 0, // 未定義
 	  Auto,    // 代入されたときに決定。挙動はUndefと同じ
 	  Integer,
-		//Float,   // 小数
+	  Float,   // 小数
 	  String,
 	  Boolean, // 内部の値は int。
 	  VoidPtr, // Variable へのポインタ。void* しか考えない
@@ -163,9 +163,8 @@ namespace nl{
   private:	/// member
 	Type type_;
 	
-	//long val_int;
-	//double val_dbl;
-	double val_int;
+	long val_int;
+	double val_dbl;
 	std::string val_str;
 	PtrV  ptr_v;
 	PtrF  ptr_f; // 関数へのポインタ

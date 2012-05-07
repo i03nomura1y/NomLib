@@ -1,6 +1,6 @@
 // -*- mode:c++ -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2012/01/14 03:11:45
+// last updated : 2012/05/07 17:05:45
 
 #include "util.h"
 
@@ -54,12 +54,40 @@ namespace nl{
 	ifs.seekg(pos, std::ios::beg);
 	return fileSize;
   }
+  // 拡張子を返す。無ければ ""
+  std::string getExtension(const std::string &path){
+    int pos = path.find_last_of('.');
+    if(pos > 0) return path.substr( pos+1 );
+    return "";
+  }
   // 親ディレクトリのパスを返す
   std::string getParentPath(const std::string &path){
 	int pos = path.find_last_of('/');
 	if(pos > 0) return path.substr( 0, pos );
 	if(pos == 0) return "/";
 	return "";
+  }
+  /**
+   * 拡張子 ext の mimetype を返す。
+   * ex. 'html' -> 'text/html'
+   */
+  std::string ext2mimetype(const std::string &ext){
+    if( ext == "html" || ext == "htm" || ext == "" ) return "text/html";
+    if( ext == "js"  ) return "text/javascript";
+    if( ext == "css" ) return "text/css";
+  
+    if( ext == "jpg" || ext == "jpeg") return "image/jpeg";
+    if( ext == "png" ) return "image/png";
+    if( ext == "gif" ) return "image/gif";
+    if( ext == "ico" ) return "image/x-icon";
+
+    if( ext == "m4v" ) return "video/x-m4v";
+    if( ext == "mp4" ) return "video/mp4";
+    if( ext == "mpg" ) return "video/mpeg";
+    if( ext == "3gp" ) return "video/3gpp"; // audio/3gpp も有り得る。
+  
+    DBGP("unknown extension '" << ext << "'");
+    return "";
   }
 
   // ostream <- istream

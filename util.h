@@ -1,6 +1,6 @@
 // -*- mode: cpp -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2012/01/25 13:45:47
+// last updated : 2012/05/07 17:05:32
 #ifndef __NOMLIB_UTIL_H__
 #define __NOMLIB_UTIL_H__
 
@@ -35,8 +35,15 @@ namespace nl{
   /// File
   // ファイルの長さを返す
   size_t getFileSize(std::istream &is);
+  // 拡張子を返す。無ければ ""
+  std::string getExtension(const std::string &path);
   // 親ディレクトリのパスを返す
   std::string getParentPath(const std::string &path);
+  /**
+   * 拡張子 ext の mimetype を返す。
+   * ex. 'html' -> 'text/html'
+   */
+  std::string ext2mimetype(const std::string &ext);
 
   /// Stream
   // ostream <- istream

@@ -1,5 +1,5 @@
 // created date : 2011/12/13 22:47:44
-// last updated : 2011/12/20 03:11:19
+// last updated : 2012/03/22 11:49:04
 // linux: -I/usr/local/ssl/include -L/usr/local/ssl/lib -lcrypto
 #include "aes.h"
 
@@ -146,6 +146,8 @@ using namespace std;
 int main(){
   unsigned char key[16] = {0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5};
   unsigned char iv[16]  = {0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5};
+
+  // 文字列を encode -> decode して出力
   {
 	std::stringstream ss;
 	ss << "hello, world!!";
@@ -167,6 +169,7 @@ int main(){
 	delete dec;
   }
   
+  // ファイルを encode して保存, decode して保存
   {
 	int c;
 	std::ifstream ifs("TestData/input.txt", std::ios::in | std::ios::binary);
@@ -175,10 +178,12 @@ int main(){
 	  DBGP("encode error.");
 	  return 0;
 	}
-
+	DBGP("encode TestData/input.txt");
+	
 	std::ofstream ofs1("TestData/input.enc", std::ios::out | std::ios::binary);
 	std::stringstream tmp;
 	while( (c=enc->get())!=EOF){ ofs1.put(c); tmp.put(c); }
+	DBGP("save to TestData/input.enc");
 	delete enc;
 
 	std::stringstream *dec = nl::aes_decode(tmp, key, iv);
@@ -188,7 +193,7 @@ int main(){
 	}
 	std::ofstream ofs2("TestData/input.dec", std::ios::out | std::ios::binary);
 	while( (c=dec->get())!=EOF) ofs2.put(c);
-
+	DBGP("save to TestData/input.dec");
 	delete dec;
   }
   

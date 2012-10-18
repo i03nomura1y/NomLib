@@ -1,3 +1,4 @@
-NomLib
 *.exe
 *.o
+TestData/input.enc
+TestData/input.dec

@@ -1,5 +1,5 @@
 // created date : 2011/12/13 22:47:44
-// last updated : 2012/03/22 11:49:04
+// last updated : 2012/10/18 18:37:15
 // linux: -I/usr/local/ssl/include -L/usr/local/ssl/lib -lcrypto
 #include "aes.h"
 
@@ -10,7 +10,11 @@
 namespace nl{
 
   /// AES暗号/復号
-  static std::stringstream *aes_core(bool encode, std::istream &data, const BYTE key[16], const BYTE iv_org[16]){
+  static std::stringstream *aes_core(bool encode,
+                                     CryptMode cr_mode,
+                                     std::istream &data,
+                                     const BYTE key[16],
+                                     const BYTE iv_org[16]){
 	std::stringstream *ret = NULL;
 	BYTE iv[16];
 	for(int i=0;i<16;i++) iv[i] = iv_org[i];
@@ -19,7 +23,8 @@ namespace nl{
 	const int key_len = 16;
 	HCRYPTPROV hProv;
 	HCRYPTKEY hKey;
-	DWORD	mode = CRYPT_MODE_CBC;
+	DWORD	mode = (cr_mode == CryptMode_ECB) ? CRYPT_MODE_ECB 
+                                                  : CRYPT_MODE_CBC ;
 	struct KeyBLOB{
 	  BLOBHEADER hdr;
 	  DWORD cbKeySize;
@@ -89,7 +94,12 @@ namespace nl{
 		  //DBGP("padding: " << padding);
 		  for(;in_len<AES_BLOCK_SIZE;in_len++) in[in_len] = padding;
 		}
-		AES_cbc_encrypt(in, out, AES_BLOCK_SIZE, &enc_key, iv, AES_ENCRYPT);
+        if( cr_mode == CryptMode_ECB ){
+          AES_ecb_encrypt(in, out, AES_BLOCK_SIZE, &enc_key, iv, AES_ENCRYPT);
+        }else{
+          AES_cbc_encrypt(in, out, AES_BLOCK_SIZE, &enc_key, iv, AES_ENCRYPT);
+        }
+		
 		ret->write((const char*)out, AES_BLOCK_SIZE);
 	  }
 	}else{
@@ -101,7 +111,12 @@ namespace nl{
 		for(int i = 0; i < AES_BLOCK_SIZE && (c=data.get()) != EOF; i++) in[i] = c;
 		last = (data.get()==EOF);
 		data.unget();
-		AES_cbc_encrypt(in, out, AES_BLOCK_SIZE, &enc_key, iv, AES_DECRYPT);
+        if( cr_mode == CryptMode_ECB ){
+          AES_cbc_encrypt(in, out, AES_BLOCK_SIZE, &enc_key, iv, AES_DECRYPT);
+        }else{
+          AES_ecb_encrypt(in, out, AES_BLOCK_SIZE, &enc_key, iv, AES_DECRYPT);
+        }
+		
 		out_len = last ? (AES_BLOCK_SIZE-out[AES_BLOCK_SIZE-1]) : AES_BLOCK_SIZE; // padding 削除
 		ret->write((const char*)out, out_len);
 	  }
@@ -112,24 +127,22 @@ namespace nl{
   }
 
   /**
-   * AES暗号 128bit, CBC, PKCS5
-   * @param data 元データ
-   * @param key  パスワード(16bit)
-   * @param iv   Initialize Vector(16bit)
-   * @return 暗号化したデータ
+   * AES暗号
    */
-  std::stringstream *aes_encode(std::istream &data, const BYTE key[16], const BYTE iv[16]){
-	return aes_core(true,  data, key, iv );
+  std::stringstream *aes_encode( CryptMode cr_mode,
+                                 std::istream &data,
+                                 const BYTE key[16],
+                                 const BYTE iv[16] ){
+	return aes_core(true,  cr_mode, data, key, iv );
   }
   /**
-   * AES復号 128bit, CBC, PKCS5
-   * @param data 暗号化されたデータ
-   * @param key  パスワード(16bit)
-   * @param iv   Initialize Vector(16bit)
-   * @return 復号化したデータ or NULL
+   * AES復号
    */
-  std::stringstream *aes_decode(std::istream &data, const BYTE key[16], const BYTE iv[16]){
-	return aes_core(false, data, key, iv );
+  std::stringstream *aes_decode( CryptMode cr_mode,
+                                 std::istream &data,
+                                 const BYTE key[16],
+                                 const BYTE iv[16] ){
+	return aes_core(false, cr_mode, data, key, iv );
   }
 
 }; // namespace nl
@@ -147,17 +160,18 @@ int main(){
   unsigned char key[16] = {0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5};
   unsigned char iv[16]  = {0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5};
 
+  nl::CryptMode cr_mode = nl::CryptMode_ECB;
   // 文字列を encode -> decode して出力
   {
 	std::stringstream ss;
 	ss << "hello, world!!";
 	
-	std::stringstream *enc = nl::aes_encode( ss , key, iv);
+	std::stringstream *enc = nl::aes_encode( cr_mode,  ss , key, iv);
 	if(enc == NULL){
 	  DBGP("encode error.");
 	  return 0;
 	}
-	std::stringstream *dec = nl::aes_decode(*enc, key, iv);
+	std::stringstream *dec = nl::aes_decode( cr_mode, *enc, key, iv);
 	
 	delete enc;
 	
@@ -173,7 +187,7 @@ int main(){
   {
 	int c;
 	std::ifstream ifs("TestData/input.txt", std::ios::in | std::ios::binary);
-	std::stringstream *enc = nl::aes_encode(ifs, key, iv);
+	std::stringstream *enc = nl::aes_encode( cr_mode, ifs, key, iv);
 	if(enc == NULL){
 	  DBGP("encode error.");
 	  return 0;
@@ -186,7 +200,7 @@ int main(){
 	DBGP("save to TestData/input.enc");
 	delete enc;
 
-	std::stringstream *dec = nl::aes_decode(tmp, key, iv);
+	std::stringstream *dec = nl::aes_decode( cr_mode, tmp, key, iv);
 	if(dec == NULL){
 	  DBGP("decode error.");
 	  return 0;

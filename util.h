@@ -1,6 +1,6 @@
 // -*- mode: cpp -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2012/05/07 17:05:32
+// last updated : 2012/10/18 19:45:27
 #ifndef __NOMLIB_UTIL_H__
 #define __NOMLIB_UTIL_H__
 
@@ -48,6 +48,15 @@ namespace nl{
   /// Stream
   // ostream <- istream
   void write(std::ostream &out, std::istream &in);
+  // ostream <- istream
+  // 書き込みバイト数を指定
+  void write(std::ostream &out, std::istream &in, unsigned int byte_count);
+  // out に num を little-endian で put
+  // @param byte_count  :  int は何バイト分? (通常は 4)
+  void writeAsLittleEndian(std::ostream &out, int num, unsigned int byte_count);
+  // in から little-endian で get
+  // @param byte_count  :  int は何バイト分? (通常は 4)
+  unsigned int readAsLittleEndian(std::istream &in, unsigned int byte_count);
   
   /// Container
   // @return container に val が含まれれば true

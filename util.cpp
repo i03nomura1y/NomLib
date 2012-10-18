@@ -1,6 +1,6 @@
 // -*- mode:c++ -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2012/05/07 17:05:45
+// last updated : 2012/10/18 19:46:09
 
 #include "util.h"
 
@@ -96,6 +96,34 @@ namespace nl{
 	int c;
 	while( (c=in.get()) != EOF ) out.put(c);
   }
+  // ostream <- istream
+  // 書き込みバイト数を指定
+  void write(std::ostream &out, std::istream &in, unsigned int byte_count){
+    if((void*)&in == (void*)&out) return;
+	int c;
+	for(unsigned int i=0; i<byte_count && (c=in.get()) != EOF; i++ )
+      out.put(c);
+  }
+  // out に num を little-endian で put
+  // @param byte_count  :  int は何バイト分? (通常は 4)
+  void writeAsLittleEndian(std::ostream &out, int num, unsigned int byte_count){
+    for(unsigned int i=0;i<byte_count;i++){
+      out.put( num & 0xff );
+      num = (num>>8);
+    }
+  }
+  // in から little-endian で get
+  // @param byte_count  :  int は何バイト分? (通常は 4)
+  unsigned int readAsLittleEndian(std::istream &in, unsigned int byte_count){
+    unsigned int num = 0;
+    int c;
+    for(unsigned int i=0;i<byte_count;i++){
+      if( (c = in.get()) == EOF) return num;
+      num |= (c<<i*8);
+    }
+    return num;
+  }
+
 
 
   /// Container

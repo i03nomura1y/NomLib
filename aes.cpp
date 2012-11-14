@@ -1,5 +1,5 @@
 // created date : 2011/12/13 22:47:44
-// last updated : 2012/10/18 18:37:15
+// last updated : 2012/11/14 21:36:28
 // linux: -I/usr/local/ssl/include -L/usr/local/ssl/lib -lcrypto
 #include "aes.h"
 
@@ -95,7 +95,8 @@ namespace nl{
 		  for(;in_len<AES_BLOCK_SIZE;in_len++) in[in_len] = padding;
 		}
         if( cr_mode == CryptMode_ECB ){
-          AES_ecb_encrypt(in, out, AES_BLOCK_SIZE, &enc_key, iv, AES_ENCRYPT);
+          //AES_ecb_encrypt(in, out, AES_BLOCK_SIZE, &enc_key, iv, AES_ENCRYPT);
+          AES_ecb_encrypt(in, out, &enc_key, AES_ENCRYPT);
         }else{
           AES_cbc_encrypt(in, out, AES_BLOCK_SIZE, &enc_key, iv, AES_ENCRYPT);
         }
@@ -112,9 +113,9 @@ namespace nl{
 		last = (data.get()==EOF);
 		data.unget();
         if( cr_mode == CryptMode_ECB ){
-          AES_cbc_encrypt(in, out, AES_BLOCK_SIZE, &enc_key, iv, AES_DECRYPT);
+          AES_ecb_encrypt(in, out, &enc_key, AES_DECRYPT);
         }else{
-          AES_ecb_encrypt(in, out, AES_BLOCK_SIZE, &enc_key, iv, AES_DECRYPT);
+          AES_cbc_encrypt(in, out, AES_BLOCK_SIZE, &enc_key, iv, AES_DECRYPT);
         }
 		
 		out_len = last ? (AES_BLOCK_SIZE-out[AES_BLOCK_SIZE-1]) : AES_BLOCK_SIZE; // padding 削除

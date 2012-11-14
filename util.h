@@ -1,6 +1,6 @@
 // -*- mode: cpp -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2012/10/18 19:45:27
+// last updated : 2012/11/14 21:44:42
 #ifndef __NOMLIB_UTIL_H__
 #define __NOMLIB_UTIL_H__
 
@@ -31,6 +31,8 @@ namespace nl{
   /// String
   // 文字列 text が suffix で終わっていれば true
   bool strEndsWith(const std::string &text, const std::string &suffix);
+// 文字列 text が key を含めば true
+  inline bool hasStr(const std::string &text, const std::string &key){ return ( text.find(key) != std::string::npos); }
 
   /// File
   // ファイルの長さを返す

@@ -1,6 +1,6 @@
 // -*- mode:c++ -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2012/10/18 19:46:09
+// last updated : 2012/11/27 16:55:54
 
 #include "util.h"
 
@@ -72,6 +72,8 @@ namespace nl{
    * ex. 'html' -> 'text/html'
    */
   std::string ext2mimetype(const std::string &ext){
+    if( ext == "txt" ) return "text/plain";
+
     if( ext == "html" || ext == "htm" || ext == "" ) return "text/html";
     if( ext == "js"  ) return "text/javascript";
     if( ext == "css" ) return "text/css";
@@ -85,6 +87,10 @@ namespace nl{
     if( ext == "mp4" ) return "video/mp4";
     if( ext == "mpg" ) return "video/mpeg";
     if( ext == "3gp" ) return "video/3gpp"; // audio/3gpp も有り得る。
+
+    // for HTTP Live Streaming
+    if( ext == "ts" ) return "video/MP2T";
+    if( ext == "m3u8" ) return "application/x-mpegURL";
   
     DBGP("unknown extension '" << ext << "'");
     return "";

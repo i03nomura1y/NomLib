@@ -6,6 +6,7 @@
 SRC = $(shell ls *.cpp *.c)
 OBJ0 = $(SRC:.c=.o)
 OBJ  = $(OBJ0:.cpp=.o)
+TARGET = libNomLib.a
 
 CC = g++
 ifeq ($(OS),Windows_NT)			# Windows
@@ -32,9 +33,11 @@ clean:
 run: all
 	./$(TEST)
 else
-all: $(OBJ)
+all: $(TARGET)
 clean:
 	@rm -f $(OBJ) $(EXE_LIST)
+$(TARGET): $(OBJ)
+	@ar r $@ $^
 endif
 
 .cpp.o .c.o:

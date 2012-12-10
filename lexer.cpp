@@ -7,19 +7,10 @@ namespace nl{
     static RegEx re_lastEscape("^(((\\\\.)|[^\\\\])*)\\\\$");
   
     Lexer::Lexer() : is(NULL), ifs(NULL), ss(NULL){ init(); }
-    Lexer::Lexer(const std::string &file_name_,
-                 const int line_offs,
-                 const int idx_offs,
-                 const int start_idx_pos,
-                 const std::string &content_)
-        : is(NULL), ifs(NULL), ss(NULL){
-        init();
-        open(file_name_, line_offs, idx_offs, start_idx_pos, &content_);
-    }
     Lexer::Lexer(const std::string &file_name_)
         : is(NULL), ifs(NULL), ss(NULL){
         init();
-        open(file_name_);
+        setSourceFile(file_name_);
     }
     // コピーコンストラクタ 元のやつは壊す
     Lexer::Lexer(const Lexer &obj) : is(NULL), ifs(NULL), ss(NULL){
@@ -56,28 +47,6 @@ namespace nl{
         line_offset = col_offset = start_col_pos = 0;
     }
     
-    void Lexer::open(const std::string &file_name_,
-                     const int line_offs,
-                     const int idx_offs,
-                     const int start_idx_pos,
-                     const std::string *content_){
-        init();
-        file_name     = file_name_;
-        line_offset   = line_offs;
-        col_offset    = idx_offs;
-        start_col_pos = start_idx_pos;
-        // コンテンツが NULL -> ファイルを開く
-        if( content_ == NULL ){
-            ifs = new std::ifstream( file_name.c_str(), std::ios::in | std::ios::binary );
-            if(!ifs->is_open()){ ERRP("error: cannot open file " << file_name); delete ifs; }
-            else is = ifs;
-        }else{
-            ss = new std::stringstream();
-            ss->str(*content_);
-            is = ss;
-        }
-    }
-
     // 入力元として、ファイルを設定
     void Lexer::setSourceFile(const std::string &file_name_){
         init();
@@ -93,7 +62,17 @@ namespace nl{
         ss->str(content_);
         is = ss;
     }    
-  
+    // 入力元の追加情報のセット
+    void Lexer::setSourceInfo(const std::string &file_name_,
+                              const int line_offs,
+                              const int col_offs,
+                              const int start_col_pos_){
+        if( file_name_.length() > 0 )  file_name = file_name_;
+        line_offset   = line_offs;
+        col_offset    = col_offs;
+        start_col_pos = start_col_pos_;
+    }
+
     // トークンをひとつ切り出す。
     // @return マッチした LexRule へのポインタ or NULL
     LexRule *Lexer::get(){
@@ -180,45 +159,36 @@ using nl::Lexer;
 using nl::LexRule;
 using nl::LexRuleList;
 
-Lexer lexer;
-LexRuleList rule_list;
-
-void func(){
+void showAllToken(Lexer &lexer){
     LexRule *ret;
-    lexer.setRule(&rule_list);
+    DBGP("---------");
     while( (ret = lexer.get()) != NULL ){
-        DBGP("[" << lexer.getPosStr() << "] " << ret->type << "  '" << ret->str() << "'");
+        std::cout << "[" << lexer.getPosStr() << "] " << ret->type << "  '" << ret->str() << "'" << std::endl;
     }
     if(!lexer.eod()) DBGP("parse error.");
 }
 
 int main(){
+    Lexer lexer;
+    LexRuleList rule_list;
+
     // タイプと正規表現のリストを作成
-    rule_list.push_back( LexRule(  0, "(^\\s+)|(^$)", 0 )); // whitespace | 空行
-    rule_list.push_back( LexRule(  1, "^\\w+",        0 )); // リテラル
-    rule_list.push_back( LexRule(  2, "^\\d+",        0)); // 数値
+    rule_list.push_back( LexRule(  0, "(^\\s+)|(^$)")); // whitespace | 空行
+    rule_list.push_back( LexRule(  1, "^\\w+"       )); // リテラル
+    rule_list.push_back( LexRule(  2, "^\\d+"       )); // 数値
     rule_list.push_back( LexRule(  3, "^\"(((\\\\.)|[^\"])*)\"", 1)); // 文字列
-    rule_list.push_back( LexRule(  4, "^//.*$",       0 )); // コメント行
-    LexRule rule_wildcard = LexRule(100, "^.*$",         0 );
-    rule_list.push_back( rule_wildcard ); //
-    //rule_list.push_back( LexRule(100, "^.*$",         0 )); //
-
-    //std::string scr = "{\n";
-    lexer.open("TestData/input.txt");  // ファイル開く
-    //lexer.open("dat",10,20,30,&scr);
-    //lexer.open("dat",0,0,0,&scr);
-    func();
-    return 0;
-
-    // lexer.open("TestData/input.txt");  // ファイル開く
-    // func();
-
-    //lexer.open("dat","// comment line.\nint a=0;\nint b=0;");
-    lexer.open("dat","// comment line.\n");
-    func();
-
-    lexer.open("dat2","a*b");
-    func();
+    rule_list.push_back( LexRule(  4, "^//.*$"      )); // コメント行
+    rule_list.push_back( LexRule(100, "^.*$"        )); // その他
+    // lexer にセット
+    lexer.setRule(&rule_list);
+    
+    // ファイル開く
+    lexer.setSourceFile("TestData/input.txt");
+    showAllToken(lexer);
+    // 文字列をパース
+    lexer.setSourceText("// comment line.\nint a=0;\nint b=0;");
+    lexer.setSourceInfo("text01", 3, 10, 20);
+    showAllToken(lexer);
 
     return 0;
 }

@@ -26,12 +26,7 @@ namespace nl{
     class Lexer{
     public:
         Lexer();
-        explicit Lexer(const std::string &file_name_,
-                       const int line_offs,
-                       const int idx_offs,
-                       const int start_idx_pos,
-                       const std::string &content_);
-        Lexer(const std::string &file_name_);
+        explicit Lexer(const std::string &file_name_);
         ~Lexer();
         Lexer(const Lexer &); // コピーコンストラクタ 元のやつは壊す
     private:
@@ -40,18 +35,13 @@ namespace nl{
         /// 入力元の設定
         void setSourceFile(const std::string &file_name_);
         void setSourceText(const std::string &content_);
+        // 入力元の追加情報のセット
+        // file_name_ は、 "" を渡すと file_name を更新しない。
+        void setSourceInfo(const std::string &file_name_,
+                           const int line_offs = 0,        // line の初期位置
+                           const int col_offs  = 0,        // col のオフセット
+                           const int start_col_pos_  = 0); // col の初期位置
 
-
-        void open(const std::string &file_name_, const std::string &content_){
-            open(file_name_, 0, 0, 0, &content_);
-        }
-        // ファイルを開く / 文字列を入力ストリームにする
-        void open(const std::string &file_name_,
-                  const int line_offs = 0,
-                  const int idx_offs  = 0,
-                  const int start_idx_pos  = 0,
-                  const std::string *content_ = NULL);
-  
         // 現在の行/列番号の取得
         int getLineNo()       const{ return line_no   + line_offset  ; }
         int getColumnNo()     const{ return pre_idx+1 + start_col_pos; } // 列番号は 1 から始まる
@@ -109,7 +99,7 @@ namespace nl{
         // @param type_  識別用
         // @param rxstr  正規表現 文字列
         // @param idx    何番目のマッチを str() で返すか
-        LexRule(unsigned int type_, const std::string &rxstr, unsigned int idx_) : RegEx(rxstr), type(type_), idx(idx_){}
+        LexRule(unsigned int type_, const std::string &rxstr, unsigned int idx_ = 0) : RegEx(rxstr), type(type_), idx(idx_){}
         ~LexRule(){}
         LexRule(const LexRule &obj) : RegEx(obj), type(obj.type), idx(obj.idx){} // コピーコンストラクタ
     private:

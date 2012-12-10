@@ -1,11 +1,12 @@
 created date : 2011/12/02 00:32:55
-last updated : 2011/12/08 02:32:50
+last updated : 2012/12/10 20:25:45
 
 Nom Library:
  - http://github.com/i03nomura1y/NomLib.git
  - for CPP: *.cpp, namespace nl
  - for C:   *_c.c
  - テスト用 main() は .c/.cpp の最後に記述。
+ - 2012/12/09 ver2 開発開始。関数名変更、リファクタリング目的
 
 List:
  - lexer 字句解析器

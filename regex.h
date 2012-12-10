@@ -21,7 +21,7 @@ namespace nl{
 	void swap(RegEx &obj);
 
 	// コンストラクタに渡された文字列を返す
-	std::string rx_str() const{ return rx_str_; };
+	std::string rx_str() const{ return m_rx_str; };
 	// 正規表現を正常にコンパイルできたか？
 	bool isValid() const { return valid; }
 	
@@ -47,8 +47,8 @@ namespace nl{
 
   private:
 	bool valid;
-	mutable regex_t *reg; // smart pointer として使う。
-	std::string rx_str_; // コンストラクタに渡された文字列
+	mutable regex_t *m_reg; // smart pointer として使う。
+	std::string m_rx_str; // コンストラクタに渡された文字列
 	// 前回 match()実行したときの文字列
 	std::string str;
 	// 前回の match()実行によりマッチした部分文字列の(インデクス,長さ) ただし最大100個

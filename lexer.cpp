@@ -95,6 +95,29 @@ namespace nl{
     // 前回の get() を無かったことにする
     void Lexer::unget(){ idx = pre_idx; }
   
+    // 切り出した token が条件にマッチしていたら、その token を返す。
+    // マッチしてなかったら unget して NULL を返す。
+    LexRule *Lexer::getIf(const unsigned int type_){
+        LexRule *tkn = get();
+        if( tkn == NULL ) return NULL;
+        if( tkn->type == type_ ) return tkn;
+        unget();
+        return NULL;
+    }
+    LexRule *Lexer::getIf(const std::string &str_){
+        LexRule *tkn = get();
+        if( tkn == NULL ) return NULL;
+        if( tkn->str() == str_ ) return tkn;
+        unget();
+        return NULL;
+    }
+    // 指定typeのあいだ読み捨て。一回もtypeが切り出せなかったら false
+    bool Lexer::getWhile(const unsigned int type_){
+        if( !getIf(type_) ) return false;
+        while( getIf(type_) );
+        return true;
+    }
+        
     // 読み取り中の行を返す。idx は進めない。
     const std::string &Lexer::getLine() const{ return str; }
     // 読み取り中の行の残り部分を返す。idx は進める。

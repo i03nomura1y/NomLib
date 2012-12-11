@@ -42,25 +42,36 @@ namespace nl{
                            const int col_offs  = 0,        // col のオフセット
                            const int start_col_pos_  = 0); // col の初期位置
 
+        // ルールをセット
+        void setRule( LexRuleList *rule_list_ ){ rule_list = rule_list_; }
+        
+        // トークンをひとつ切り出す。
+        // @return マッチした LexRule へのポインタ or NULL
+        LexRule *get(); // LexRuleList は setRule で渡されたものを使う
+        LexRule *get(LexRuleList &lst); // 渡した LexRuleList を使う。 rule_list は更新しない。
+        // 前回の get() を無かったことにする
+        void unget();
+        
+        // 切り出した token が条件にマッチしていたら、その token を返す。
+        // マッチしてなかったら unget して NULL を返す。
+        LexRule *getIf(const unsigned int type_); // type を指定
+        LexRule *getIf(const std::string &str_ ); // 文字列 を指定
+        // 指定typeのあいだ読み捨て。一回もtypeが切り出せなかったら false
+        bool getWhile(const unsigned int type_);
+
+        const std::string &getLine() const;  // 読み取り中の行を返す。idx は進めない。
+        int getRawColumnNo() const{ return pre_idx; }  // pre_idx
+        std::string getRest();	// 読み取り中の行の残り部分を返す。idx は進める。
+        
         // 現在の行/列番号の取得
         int getLineNo()       const{ return line_no   + line_offset  ; }
         int getColumnNo()     const{ return pre_idx+1 + start_col_pos; } // 列番号は 1 から始まる
         int getNextColumnNo() const{ return idx    +1 + start_col_pos; } //  今から読むトークンの開始位置
         const std::string &getFileName() const{ return file_name; }
 	
-        // ルールをセット
-        void setRule( LexRuleList *rule_list_ ){ rule_list = rule_list_; }
-        // トークンをひとつ切り出す。
-        // @return マッチした LexRule へのポインタ or NULL
-        LexRule *get(); // LexRuleList は setRule で渡されたものを使う
-        LexRule *get(LexRuleList &lst); // 渡した LexRuleList を使う。 rule_list は更新しない。
-        const std::string &getLine() const;  // 読み取り中の行を返す。idx は進めない。
-        int getRawColumnNo() const{ return pre_idx; }  // pre_idx
-        std::string getRest();	// 読み取り中の行の残り部分を返す。idx は進める。
         /// 前回返したトークンの情報を返す
         const char *getPosStr() const; // 位置情報 を文字列で返す
 
-        void unget();	// 前回の get() を無かったことにする
         bool eol() const; // 行末を指している? == その行で読める文字はもうない?
         bool eod() const; // データをすべて読み終わった?
     private:

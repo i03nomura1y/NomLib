@@ -38,13 +38,14 @@ clean:
 	@rm -f $(OBJ) $(EXE_LIST)
 $(TARGET): $(OBJ)
 	@ar r $@ $^
+	@echo "$@ created."
 endif
 
 .cpp.o .c.o:
 	@if [ "$(TEST).o" = "$@" ]; then \
-	  echo "create $@ with -DTEST"; $(CC) -c $< -o $@ $(CFLAGS) -DTEST; \
+	  echo "create $@ with -DTEST ..."; $(CC) -c $< -o $@ $(CFLAGS) -DTEST; \
 	else \
-	  echo "create $@"; $(CC) -c $< -o $@ $(CFLAGS); \
+	  echo "create $@ ..."; $(CC) -c $< -o $@ $(CFLAGS); \
 	fi
 
 remake: clean all

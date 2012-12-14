@@ -201,6 +201,7 @@ int main(){
     rule_list.push_back( LexRule(  2, "^\\d+"       )); // 数値
     rule_list.push_back( LexRule(  3, "^\"(((\\\\.)|[^\"])*)\"", 1)); // 文字列
     rule_list.push_back( LexRule(  4, "^//.*$"      )); // コメント行
+    rule_list.push_back( LexRule(  5, "^[\xC0-\xD6]")); // 0xC0 - 0xD6 の一文字にマッチ
     rule_list.push_back( LexRule(100, "^.*$"        )); // その他
     // lexer にセット
     lexer.setRule(&rule_list);

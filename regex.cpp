@@ -201,6 +201,8 @@ int main(){
   DBGP("" << my_replace("zzzaab"));
   DBGP("" << my_replace("zzzaaab"));
 
+  // [\x20-\x7F]  0x20 - 0x7F の一文字にマッチ。 '\' はひとつだけでOK
+
   /*
   test("([[:digit:]]+), (([[:digit:]]+), ([[:digit:]]+))", 
 	   "123, 456, 789", "Hello");

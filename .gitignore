@@ -4,3 +4,4 @@
 TestData/input.enc
 TestData/input.dec
 lexer
+depend.inc

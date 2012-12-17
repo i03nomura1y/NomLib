@@ -6,6 +6,7 @@
 
 namespace nl{
     
+#if 0
     Lexer::~Lexer(){}
 
     LexRule *Lexer::getToken(){
@@ -17,6 +18,7 @@ namespace nl{
         return reg_tkn;
 #endif
     }
+#endif
 }; // namespace nl;
 
 

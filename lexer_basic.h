@@ -22,7 +22,7 @@ namespace nl{
     class LexRule;  // 切り出しのルール
     typedef std::list<LexRule> LexRuleList;
     
-    // 登録されたルールに従って、入力ファイル/文字列 からトークンを切り出す
+    // 入力ファイル/文字列 からトークンを切り出す
     class BasicLexer{
     public:
         BasicLexer();
@@ -42,28 +42,26 @@ namespace nl{
                            const int col_offs  = 0,        // col のオフセット
                            const int start_col_pos_  = 0); // col の初期位置
 
-        // ルールをセット
-        void setRule( LexRuleList *rule_list_ ){ rule_list = rule_list_; }
-        
-        // トークンをひとつ切り出す。
-        // @return マッチした LexRule へのポインタ or NULL
-        LexRule *get(); // LexRuleList は setRule で渡されたものを使う
-        LexRule *get(LexRuleList &lst); // 渡した LexRuleList を使う。 rule_list は更新しない。
-        // 前回の get() を無かったことにする
+        /// トークンをひとつ切り出す。
+        // @return 成功: true / 失敗: false
+        bool getToken(LexRule &tkn);
+        // @return 成功した token へのポインタ or NULL
+        LexRule *getToken(LexRuleList &lst);
+        /// 前回の get() を無かったことにする
         void unget();
         
-        const std::string &getLine() const;  // 読み取り中の行を返す。idx は進めない。
-        int getRawColumnNo() const{ return pre_idx; }  // pre_idx
-        std::string getRest();	// 読み取り中の行の残り部分を返す。idx は進める。
+        // 読み取り中の行を返す。idx は進めない。
+        const std::string &currentLine() const{ return str; }
+        std::string popRestStr();  // 読み取り中の行の残り部分を返す。idx は進める。
         
         // 現在の行/列番号の取得
-        int getLineNo()       const{ return line_no   + line_offset  ; }
-        int getColumnNo()     const{ return pre_idx+1 + start_col_pos; } // 列番号は 1 から始まる
-        int getNextColumnNo() const{ return idx    +1 + start_col_pos; } //  今から読むトークンの開始位置
-        const std::string &getFileName() const{ return file_name; }
+        int currentLineNo()       const{ return line_no   + line_offset;      }
+        int currentColumnNo() const{ return idx    +1 + start_col_pos;        } // 列番号は 1 から始まる
+        int preColumnNo()     const{ return pre_idx+1 + start_col_pos; } // 前回返したトークンの開始位置
+        const std::string &fileName() const{ return file_name; }
 	
         /// 前回返したトークンの情報を返す
-        const char *getPosStr() const; // 位置情報 を文字列で返す
+        const char *prePosStr() const; // 位置情報 を文字列で返す
 
         bool eol() const; // 行末を指している? == その行で読める文字はもうない?
         bool eod() const; // データをすべて読み終わった?
@@ -77,16 +75,16 @@ namespace nl{
         bool updateString();
 	
     private:
-        LexRuleList *rule_list;
-	
         // File の内容
-        std::string str;
+        std::string str; // カーソルがある行の文字列
+        // カーソル
         int line_no; // 現在の str が何行目のものか
         int idx;     // str の何文字目までスキャンしたか
         int pre_idx; // 前回 get() が呼ばれたときの idx (unget用)
+        
         // File にあたる部分
         std::string file_name;
-        std::istream  *is;
+        std::istream  *is; // ポインタ. ifs / ss を指す
         mutable std::ifstream *ifs;
         mutable std::stringstream *ss;
 	

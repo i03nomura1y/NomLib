@@ -15,8 +15,8 @@
 #include "lexer_basic.h"
 
 namespace nl{
+#if 0
     class Lexer;
-    typedef std::list<unsigned int> TokenTypeList;
     
     // 登録されたルールに従って、入力ファイル/文字列 からトークンを切り出す
     class Lexer : public BasicLexer{
@@ -49,7 +49,7 @@ namespace nl{
     private:
         LexRule *reg_tkn; // getToken で前回返した token
     };
-  
+#endif
   
 }; // namespace nl
 

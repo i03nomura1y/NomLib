@@ -5,7 +5,7 @@
 
 namespace nl{
     static RegEx re_lastEscape("^(((\\\\.)|[^\\\\])*)\\\\$");
-  
+
     BasicLexer::BasicLexer() : is(NULL), ifs(NULL), ss(NULL){ init(); }
     BasicLexer::BasicLexer(const std::string &file_name_)
         : is(NULL), ifs(NULL), ss(NULL){
@@ -14,7 +14,6 @@ namespace nl{
     }
     // コピーコンストラクタ 元のやつは壊す
     BasicLexer::BasicLexer(const BasicLexer &obj) : is(NULL), ifs(NULL), ss(NULL){
-        rule_list = obj.rule_list;
         str       = obj.str      ;
         line_no   = obj.line_no  ;
         idx 	  = obj.idx 	 ;
@@ -74,13 +73,7 @@ namespace nl{
     }
 
     // トークンをひとつ切り出す。
-    // @return マッチした LexRule へのポインタ or NULL
-    LexRule *BasicLexer::get(){
-        if( rule_list == NULL ) return ERRP("rule_list is NULL."), (LexRule*)NULL;
-        return get(*rule_list);
-    }
-    LexRule *BasicLexer::get(LexRuleList &lst){
-	
+    LexRule *BasicLexer::getToken(LexRuleList &lst){
         if( !updateString()   ) return (LexRule*)NULL;
         for( LexRuleList::iterator ite = lst.begin(); ite != lst.end(); ++ite){
             if( ite->match( &str[idx] ) ){
@@ -89,25 +82,31 @@ namespace nl{
                 return &(*ite);
             }
         }
-        DBGP("didn't match. " << &str[idx]);
         return NULL;
+    }
+    bool BasicLexer::getToken(LexRule &tkn){
+        if( !updateString()   ) return false;
+        if( tkn.match( &str[idx] ) ){
+            pre_idx = idx;
+            idx += tkn.get(0).length();
+            return true;
+        }
+        return false;
     }
     // 前回の get() を無かったことにする
     void BasicLexer::unget(){ idx = pre_idx; }
   
-    // 読み取り中の行を返す。idx は進めない。
-    const std::string &BasicLexer::getLine() const{ return str; }
     // 読み取り中の行の残り部分を返す。idx は進める。
-    std::string BasicLexer::getRest(){
+    std::string BasicLexer::popRestStr(){
         int tmp = idx;
         idx = str.length();
         return &str[tmp];
     }
 
     // 前回返したトークンの位置情報を文字列で返す
-    const char *BasicLexer::getPosStr() const{
+    const char *BasicLexer::prePosStr() const{
         static char buf[512];
-        sprintf(buf,"%s:%d:%d",file_name.c_str(), getLineNo(), getColumnNo() );
+        sprintf(buf,"%s:%d:%d",file_name.c_str(), currentLineNo(), preColumnNo() );
         return buf;
     }
 
@@ -144,6 +143,7 @@ namespace nl{
         }
         return true;
     }
+  
 	
 }; // namespace nl;
 
@@ -159,11 +159,11 @@ using nl::BasicLexer;
 using nl::LexRule;
 using nl::LexRuleList;
 
-void showAllToken(BasicLexer &lexer){
+void showAllToken(BasicLexer &lexer,LexRuleList &rule_list){
     LexRule *ret;
     DBGP("---------");
-    while( (ret = lexer.get()) != NULL ){
-        std::cout << "[" << lexer.getPosStr() << "] " << ret->type << "  '" << ret->str() << "'" << std::endl;
+    while( (ret = lexer.getToken(rule_list)) != NULL ){
+        std::cout << "[" << lexer.prePosStr() << "] " << "  '" << ret->str() << "'" << std::endl;
     }
     if(!lexer.eod()) DBGP("parse error.");
 }
@@ -173,23 +173,28 @@ int main(){
     LexRuleList rule_list;
 
     // タイプと正規表現のリストを作成
-    rule_list.push_back( LexRule(  0, "(^\\s+)|(^$)")); // whitespace | 空行
-    rule_list.push_back( LexRule(  1, "^\\w+"       )); // リテラル
-    rule_list.push_back( LexRule(  2, "^\\d+"       )); // 数値
-    rule_list.push_back( LexRule(  3, "^\"(((\\\\.)|[^\"])*)\"", 1)); // 文字列
-    rule_list.push_back( LexRule(  4, "^//.*$"      )); // コメント行
-    rule_list.push_back( LexRule(  5, "^[\xC0-\xD6]")); // 0xC0 - 0xD6 の一文字にマッチ
-    rule_list.push_back( LexRule(100, "^.*$"        )); // その他
-    // lexer にセット
-    lexer.setRule(&rule_list);
+    // rule_list.push_back( LexRule(  0, "(^\\s+)|(^$)")); // whitespace | 空行
+    // rule_list.push_back( LexRule(  1, "^\\w+"       )); // リテラル
+    // rule_list.push_back( LexRule(  2, "^\\d+"       )); // 数値
+    // rule_list.push_back( LexRule(  3, "^\"(((\\\\.)|[^\"])*)\"", 1)); // 文字列
+    // rule_list.push_back( LexRule(  4, "^//.*$"      )); // コメント行
+    // rule_list.push_back( LexRule(  5, "^[\xC0-\xD6]")); // 0xC0 - 0xD6 の一文字にマッチ
+    // rule_list.push_back( LexRule(100, "^.*$"        )); // その他
+    rule_list.push_back( LexRule("(^\\s+)|(^$)")); // whitespace | 空行
+    rule_list.push_back( LexRule("^\\w+"       )); // リテラル
+    rule_list.push_back( LexRule("^\\d+"       )); // 数値
+    rule_list.push_back( LexRule("^\"(((\\\\.)|[^\"])*)\"", 1)); // 文字列
+    rule_list.push_back( LexRule("^//.*$"      )); // コメント行
+    rule_list.push_back( LexRule("^[\xC0-\xD6]")); // 0xC0 - 0xD6 の一文字にマッチ
+    rule_list.push_back( LexRule("^.*$"        )); // その他
     
     // ファイル開く
     lexer.setSourceFile("TestData/input.txt");
-    showAllToken(lexer);
+    showAllToken(lexer, rule_list);
     // 文字列をパース
     lexer.setSourceText("// comment line.\nint a=0;\nint b=0;");
     lexer.setSourceInfo("text01", 3, 10, 20);
-    showAllToken(lexer);
+    showAllToken(lexer, rule_list);
 
     return 0;
 }

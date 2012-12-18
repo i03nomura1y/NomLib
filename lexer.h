@@ -15,6 +15,10 @@
 #include "lexer_basic.h"
 
 namespace nl{
+    class Lexer : public BasicLexer{
+    public:
+        virtual ~Lexer();
+    };
 #if 0
     class Lexer;
     

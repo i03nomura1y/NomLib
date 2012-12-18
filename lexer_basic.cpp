@@ -40,6 +40,7 @@ namespace nl{
         ss  = NULL;
         file_name = "";
         is = NULL;
+        reg_str = "";
 
         str     = "";
         line_no = idx = pre_idx =  0;
@@ -73,29 +74,40 @@ namespace nl{
     }
 
     // トークンをひとつ切り出す。
-    LexRule *BasicLexer::getToken(LexRuleList &lst){
+    bool BasicLexer::getToken(LexRule &tkn){
+        if( !updateString()   ) return false;
+        if( !tkn.match( &str[idx] ) ) return false;
+        incCursor( tkn.get(0).length() );
+        reg_str = tkn.str();
+        return true;
+    }
+    // @return マッチした: true / マッチしなかった: false
+    bool BasicLexer::getToken(const std::string &tkn_){
+        if( !updateString()   ) return false;
+        int t_len = tkn_.length();        // token length
+        int s_len = str.length() - idx;   // 残りstr length
+        if( s_len < t_len ) return false; //  (残りstr < token) -> false
+        for(int i=0;i<t_len;i++)
+            if( tkn_[i] != str[i+idx] ) return false;
+        incCursor( tkn_.length() );
+        reg_str = tkn_;
+        return true;
+    }
+
+#if 0
+    // 最初にマッチしたやつを返す
+    LexRule *BasicLexer::getToken(std::list<LexRule> &lst){
         if( !updateString()   ) return (LexRule*)NULL;
-        for( LexRuleList::iterator ite = lst.begin(); ite != lst.end(); ++ite){
-            if( ite->match( &str[idx] ) ){
-                pre_idx = idx;
-                idx += ite->get(0).length();
-                return &(*ite);
-            }
+        for( std::list<LexRule>::iterator ite = lst.begin(); ite != lst.end(); ++ite){
+            if( getToken(*ite) ) return &(*ite);
         }
         return NULL;
     }
-    bool BasicLexer::getToken(LexRule &tkn){
-        if( !updateString()   ) return false;
-        if( tkn.match( &str[idx] ) ){
-            pre_idx = idx;
-            idx += tkn.get(0).length();
-            return true;
-        }
-        return false;
-    }
+#endif
+
     // 前回の get() を無かったことにする
     void BasicLexer::unget(){ idx = pre_idx; }
-  
+
     // 読み取り中の行の残り部分を返す。idx は進める。
     std::string BasicLexer::popRestStr(){
         int tmp = idx;
@@ -143,6 +155,12 @@ namespace nl{
         }
         return true;
     }
+
+    // カーソルを n 文字分進める
+    void BasicLexer::incCursor(unsigned int n){
+        pre_idx = idx;
+        idx += n;
+    }
   
 	
 }; // namespace nl;
@@ -161,7 +179,6 @@ using nl::LexRuleList;
 
 void showAllToken(BasicLexer &lexer,LexRuleList &rule_list){
     LexRule *ret;
-    DBGP("---------");
     while( (ret = lexer.getToken(rule_list)) != NULL ){
         std::cout << "[" << lexer.prePosStr() << "] " << "  '" << ret->str() << "'" << std::endl;
     }
@@ -189,12 +206,21 @@ int main(){
     rule_list.push_back( LexRule("^.*$"        )); // その他
     
     // ファイル開く
+    DBGP("------------------------");
     lexer.setSourceFile("TestData/input.txt");
     showAllToken(lexer, rule_list);
+
     // 文字列をパース
+    DBGP("------------------------");
     lexer.setSourceText("// comment line.\nint a=0;\nint b=0;");
     lexer.setSourceInfo("text01", 3, 10, 20);
     showAllToken(lexer, rule_list);
+
+    //
+    DBGP("------------------------");
+    lexer.setSourceFile("TestData/simple.xml");
+    lexer.getToken("<?xml");
+    DBGP(lexer.popRestStr());
 
     return 0;
 }

@@ -11,6 +11,9 @@
 namespace nl{
     class RegEx{
     public:
+        // デフォルトコンストラクタ
+        // compile() を明示的に呼びだすまで invalid 状態
+        RegEx();
         // 正規表現文字列をコンパイルする
         // @param rxstr 正規表現 文字列
         // [\x20-\x7F]  0x20 - 0x7F の一文字にマッチ。 '\' はひとつだけでOK

@@ -9,7 +9,8 @@
 #include "util.h"
 
 namespace nl{
-
+    RegEx::RegEx() : valid(false), str(),idx_list(){}
+    
     RegEx::RegEx(const std::string &rxstr) : valid(false), str(),idx_list(){
         compile(rxstr);
     }

@@ -104,7 +104,15 @@ namespace nl{
         return NULL;
     }
 #endif
-
+    // 任意の一文字
+    bool Lexer::getChar(){
+        reg_str = "";
+        if( !updateString()   ) return false;
+        reg_str = str[idx];
+        incCursor(1);
+        return true;
+    }
+        
     // 前回の get() を無かったことにする
     void Lexer::unget(){ idx = pre_idx; }
 

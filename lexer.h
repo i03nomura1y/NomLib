@@ -54,6 +54,8 @@ namespace nl{
             }
             return NULL;
         }
+        // 任意の一文字
+        bool getChar();
         // getToken で前回返した token 文字列
         std::string reg() const{ return reg_str; }
         

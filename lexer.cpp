@@ -94,19 +94,8 @@ namespace nl{
         return true;
     }
 
-#if 0
-    // 最初にマッチしたやつを返す
-    LexRule *Lexer::getToken(std::list<LexRule> &lst){
-        if( !updateString()   ) return (LexRule*)NULL;
-        for( std::list<LexRule>::iterator ite = lst.begin(); ite != lst.end(); ++ite){
-            if( getToken(*ite) ) return &(*ite);
-        }
-        return NULL;
-    }
-#endif
     // 任意の一文字
     bool Lexer::getChar(){
-        reg_str = "";
         if( !updateString()   ) return false;
         reg_str = str[idx];
         incCursor(1);

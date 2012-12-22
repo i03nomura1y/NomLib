@@ -171,8 +171,10 @@ void test(const string &rx_str, const string &str1){
 
 int main(){
     // match のテスト
-    test("hello", "hello, world!!");
-    test("(\\w*), (\\w*)", "hello, world!!");
+    //test("hello",          "hello, world!!");
+    //test("(\\w*), (\\w*)", "hello, world!!");
+    //test("<.*>", "<aaaa><bbbb>");
+    test("<[^>]*>", "<aaaa><bbbb>");
 
     // replace のテスト
     cout << " ================================================" << endl;

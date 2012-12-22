@@ -47,16 +47,16 @@ namespace nl{
         bool getToken(LexRule &tkn);
         bool getToken(const std::string &tkn_);
         // @return 最初にマッチした token へのポインタ or NULL
-        template<class T>
+        template<typename T>
         T *getToken(std::list<T> &lst){
-            for( std::list<LexRule>::iterator ite = lst.begin(); ite != lst.end(); ++ite){
+            for( typename std::list<T>::iterator ite = lst.begin(); ite != lst.end(); ++ite){
                 if( getToken(*ite) ) return &(*ite);
             }
             return NULL;
         }
         // 任意の一文字
         bool getChar();
-        // getToken で前回返した token 文字列
+        // getToken/getChar で前回返した token 文字列
         std::string reg() const{ return reg_str; }
         
         /// 前回の get() を無かったことにする

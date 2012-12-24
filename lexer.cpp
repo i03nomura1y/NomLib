@@ -6,6 +6,14 @@
 namespace nl{
     static RegEx re_lastEscape("^(((\\\\.)|[^\\\\])*)\\\\$");
 
+    // \r\n に対応した getline
+    static std::istream& my_getline(std::istream& is, std::string& str){
+        std::istream &ret = getline(is, str);
+        if( str.length() > 0 && str[str.length()-1] == '\r' )
+            str.resize( str.length()-1 );
+        return ret;
+    }
+
     Lexer::Lexer() : is(NULL), ifs(NULL), ss(NULL){ init(); }
     Lexer::Lexer(const std::string &file_name_)
         : is(NULL), ifs(NULL), ss(NULL){
@@ -52,7 +60,7 @@ namespace nl{
         init();
         file_name     = file_name_;
         ifs = new std::ifstream( file_name.c_str(), std::ios::in | std::ios::binary );
-        if(!ifs->is_open()){ ERRP("error: cannot open file " << file_name); delete ifs; }
+        if(!ifs->is_open()){ ERRP("error: cannot open file " << file_name); delete ifs; ifs=NULL; }
         else is = ifs;
     }
     // 入力元として、文字列を設定
@@ -136,7 +144,7 @@ namespace nl{
         idx = 0; pre_idx = 0;
         if( line_no > 0 ) start_col_pos = col_offset; // 最初の getline では更新しない。
         line_no++;
-        if( is == NULL || !getline(*is, str) ){
+        if( is == NULL || !my_getline(*is, str) ){
             // 次の行がない -> false
             is = NULL;
             str = "";
@@ -147,7 +155,7 @@ namespace nl{
             str = str.substr(0,str.length()-1);
             std::string tmp;
             line_no++;
-            if( !getline(*is, tmp) ){ is = NULL; break; }
+            if( !my_getline(*is, tmp) ){ is = NULL; break; }
             str = str + tmp;
         }
         return true;
@@ -158,8 +166,7 @@ namespace nl{
         pre_idx = idx;
         idx += n;
     }
-  
-	
+    
 }; // namespace nl;
 
 

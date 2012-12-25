@@ -2,12 +2,12 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/02/01 07:26:41
+// last updated : 2012/12/24 22:57:15
 // 動的型 dynamic type
 
 #include <string>
 #include <vector>
-#include "ptr_base.h"
+#include "hasPtr_I.h"
 
 namespace nl{
   class AbsFunction;  // 抽象クラス: 関数

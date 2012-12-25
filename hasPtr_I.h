@@ -2,8 +2,8 @@
 #ifndef NL_POINTER_INTERFACE_H
 #define NL_POINTER_INTERFACE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/01/21 17:13:49
-// ƒ|ƒCƒ“ƒ^‚ğ typedef ‚·‚é interface
+// last updated : 2012/12/25 22:59:58
+// ãƒã‚¤ãƒ³ã‚¿ã‚’ typedef ã™ã‚‹ interface
 
 #include <tr1/memory> // shared_ptr, weak_ptr
 
@@ -11,8 +11,8 @@ namespace nl{
   using std::tr1::shared_ptr;
   using std::tr1::weak_ptr;
 
-  // T Œ^‚Ìƒ|ƒCƒ“ƒ^‚ğ’è‹`B
-  // Šî–{“I‚Èg‚¢Œ^‚Í class OBJ : public hasPtr<OBJ>{ ... };
+  // T å‹ã®ãƒã‚¤ãƒ³ã‚¿ã‚’å®šç¾©ã€‚
+  // åŸºæœ¬çš„ãªä½¿ã„å‹ã¯ class OBJ : public hasPtr<OBJ>{ ... };
   template <class T>
   class hasPtr{
 	

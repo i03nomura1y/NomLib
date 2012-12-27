@@ -20,7 +20,7 @@ namespace nl{
         explicit RegEx(const std::string &rxstr);
         virtual ~RegEx();
         RegEx(const RegEx &obj); // コピーコンストラクタ
-        RegEx &operator=(RegEx &obj); // 代入演算子
+        RegEx &operator=(const RegEx &obj); // 代入演算子
         void swap(RegEx &obj);
     public:
         // 正規表現文字列をコンパイルする

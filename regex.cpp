@@ -16,14 +16,11 @@ namespace nl{
     }
 
     // コピーコンストラクタ
-    RegEx::RegEx(const RegEx &obj)
-        : valid(false),
-          str(obj.str),
-          idx_list(obj.idx_list) {
+    RegEx::RegEx(const RegEx &obj) : valid(false), str(obj.str), idx_list(obj.idx_list) {
         compile(obj.m_rx_str);
     }
     // 代入演算子
-    RegEx &RegEx::operator=(RegEx &obj){
+    RegEx &RegEx::operator=(const RegEx &obj){
         compile(obj.m_rx_str);
         str = obj.str;
         idx_list = obj.idx_list;

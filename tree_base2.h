@@ -2,7 +2,7 @@
 #ifndef NL_TREE_INTERFACE2_H
 #define NL_TREE_INTERFACE2_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/12/25 23:28:40
+// last updated : 2012/12/27 23:15:47
 // 木構造を表す interface
 
 #include <list>
@@ -11,23 +11,22 @@
 
 namespace nl{
     using std::tr1::shared_ptr;
-    using std::tr1::weak_ptr;
+    //using std::tr1::weak_ptr;
     
     template <class T>
     class AbsTree2{
     public: // typedef
         typedef shared_ptr<T> Ptr; // 子クラスへのポインタ
         typedef std::list< Ptr > List; // 子クラスのリスト
-	
     public: // method
-        AbsTree2(){}
+        AbsTree2() : children_(), depth_(0){}
         virtual ~AbsTree2(){}
-        void copy( const AbsTree2<T> *obj ){
-            children_ = obj->children_;
-            //parent_   = obj->parent_;
-            //this_ptr_ 
-            depth_    = obj->depth_;
-        }
+//        void copy( const AbsTree2<T> *obj ){
+//            children_ = obj->children_;
+//            //parent_   = obj->parent_;
+//            //this_ptr_ 
+//            depth_    = obj->depth_;
+//        }
         /// 子ノード追加
         void add(const T &node){ Ptr p(new T(node)); add(p); }
         void add(      T *node){ Ptr p(node);        add(p); }

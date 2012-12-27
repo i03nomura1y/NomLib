@@ -125,27 +125,30 @@ namespace nl{
         // @param rxstr  正規表現 文字列
         // @param idx    何番目のマッチを str() で返すか
         LexRule(unsigned int type_, const std::string &rxstr, unsigned int idx_ = 0) : RegEx(rxstr), type(type_), idx(idx_){}
-        LexRule(const std::string &rxstr, unsigned int idx_ = 0) : RegEx(rxstr), type(0), idx(idx_){}
+        explicit LexRule(const std::string &rxstr, unsigned int idx_ = 0) : RegEx(rxstr), type(0), idx(idx_){}
+        LexRule() : RegEx(""), type(0), idx(0){}
         ~LexRule(){}
         LexRule(const LexRule &obj) : RegEx(obj), type(obj.type), idx(obj.idx){} // コピーコンストラクタ
-
-        // type / str() が等しい?
-        bool operator==(const unsigned int &type_) const{ return type == type_; }
-        bool operator==(const std::string  &str_ ) const{ return str() == str_; }
-        template<class T>
-        bool equals(const T &val) const{ return operator==(val); }
-        // list で type / str() を指定
-        template<class T>
-        bool equals(const std::list<T> &vals) const{
-            return ( std::find(vals.begin(), vals.end(), *this) != vals.end() );
+        LexRule &operator=(const LexRule &obj){ // 代入演算子
+            RegEx::operator=(obj); type=obj.type; idx=obj.idx;
+            return *this;
         }
-    private:
-        LexRule &operator=(LexRule &){ return *this; }    // 代入演算子 禁止
+
+        //// type / str() が等しい?
+        //bool operator==(const unsigned int &type_) const{ return type == type_; }
+        //bool operator==(const std::string  &str_ ) const{ return str() == str_; }
+        //template<class T>
+        //bool equals(const T &val) const{ return operator==(val); }
+        //// list で type / str() を指定
+        //template<class T>
+        //bool equals(const std::list<T> &vals) const{
+        //    return ( std::find(vals.begin(), vals.end(), *this) != vals.end() );
+        //}
     public:
         std::string str() const{ return ( idx<length() )?get(idx):""; } // マッチ部分の文字列
     public:
-        const unsigned int type;
-        const unsigned int idx;
+        unsigned int type;
+        unsigned int idx;
     };
   
 }; // namespace nl

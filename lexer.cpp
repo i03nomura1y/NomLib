@@ -194,13 +194,6 @@ int main(){
     LexRuleList rule_list;
 
     // タイプと正規表現のリストを作成
-    // rule_list.push_back( LexRule(  0, "(^\\s+)|(^$)")); // whitespace | 空行
-    // rule_list.push_back( LexRule(  1, "^\\w+"       )); // リテラル
-    // rule_list.push_back( LexRule(  2, "^\\d+"       )); // 数値
-    // rule_list.push_back( LexRule(  3, "^\"(((\\\\.)|[^\"])*)\"", 1)); // 文字列
-    // rule_list.push_back( LexRule(  4, "^//.*$"      )); // コメント行
-    // rule_list.push_back( LexRule(  5, "^[\xC0-\xD6]")); // 0xC0 - 0xD6 の一文字にマッチ
-    // rule_list.push_back( LexRule(100, "^.*$"        )); // その他
     rule_list.push_back( LexRule("(^\\s+)|(^$)")); // whitespace | 空行
     rule_list.push_back( LexRule("^\\w+"       )); // リテラル
     rule_list.push_back( LexRule("^\\d+"       )); // 数値
@@ -223,8 +216,18 @@ int main(){
     //
     DBGP("------------------------");
     lexer.setSourceFile("TestData/simple.xml");
-    lexer.getToken("<?xml");
-    DBGP(lexer.popRestStr());
+    rule_list.clear();
+    rule_list.push_back( LexRule(1, "(^\\s+)|(^$)")); // whitespace | 空行
+    rule_list.push_back( LexRule(2, "^\\w+"       )); // リテラル
+    rule_list.push_back( LexRule(3, "^\\d+"       )); // 数値
+    rule_list.push_back( LexRule(4, "^."        )); // その他
+
+    LexRule *ret;
+    while( (ret = lexer.getToken(rule_list)) != NULL ){
+        std::cout << (ret->type == 2) << "[" << lexer.prePosStr() << "] " << "  '" << ret->str() << "'" << std::endl;
+    }
+
+    
 
     return 0;
 }

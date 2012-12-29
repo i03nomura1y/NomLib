@@ -1,5 +1,5 @@
 // created date : 2012/01/20 22:15:23
-// last updated : 2012/12/27 22:55:39
+// last updated : 2012/12/29 17:54:51
 // 
 #include "tree_base2.h"
 
@@ -17,8 +17,6 @@ static int cnt = 0;
 class Tree : public nl::AbsTree2<Tree>{
 public:
     int num;
-    Tree(int n) : num(n){ cnt++; }
-    Tree(const Tree &obj) : num(obj.num){ cnt++; }
     ~Tree(){}
     void dump(){
         cout << endl;
@@ -29,18 +27,22 @@ public:
         }
         cout << ")";
     }
+    static Ptr build(int n){ return Ptr(new Tree(n)); }
+private:
+    Tree(int n) : num(n){ cnt++; }
+    Tree(const Tree &obj) : num(obj.num){ cnt++; }
 };
 
 int main(){
-    Tree::Ptr tree = Tree::Ptr(new Tree(0) );
-    tree->add( new Tree(10) );
-    Tree::Ptr node = Tree::Ptr(new Tree(20) );
-    node->add( new Tree(21) );
-    node->add( new Tree(22) );
-    node->add( new Tree(23) );
+    Tree::Ptr tree = Tree::build(0);
+    tree->add( Tree::build(10) );
+    Tree::Ptr node = Tree::build(0);
+    node->add( Tree::build(21) );
+    node->add( Tree::build(22) );
+    node->add( Tree::build(23) );
     tree->add( node );
-    tree->add( Tree(30) );
-    tree->add( Tree(40) );
+    tree->add( Tree::build(30) );
+    tree->add( Tree::build(40) );
     tree->dump(); cout << endl;
     return 0;
 }

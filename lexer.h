@@ -70,6 +70,7 @@ namespace nl{
         /// 前回返したトークンの情報を返す
         const char *prePosStr() const; // 位置情報 を文字列で返す
 
+        bool eol() const; // 行末を指している?
         bool eod() const; // データをすべて読み終わった?
     private:
         // 読み取り中の行を返す。idx は進めない。
@@ -82,8 +83,6 @@ namespace nl{
         int preColumnNo()     const{ return pre_idx+1 + start_col_pos; } // 前回返したトークンの開始位置
         const std::string &fileName() const{ return file_name; }
 	
-        bool eol() const; // 行末を指している? == その行で読める文字はもうない?
-        
     private:
         void init(); // 初期化
         // str を更新。

@@ -2,7 +2,7 @@
 #ifndef NL_TREE_INTERFACE2_H
 #define NL_TREE_INTERFACE2_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/12/27 23:15:47
+// last updated : 2012/12/29 17:57:49
 // 木構造を表す interface
 
 #include <list>
@@ -28,8 +28,8 @@ namespace nl{
 //            depth_    = obj->depth_;
 //        }
         /// 子ノード追加
-        void add(const T &node){ Ptr p(new T(node)); add(p); }
-        void add(      T *node){ Ptr p(node);        add(p); }
+//        void add(const T &node){ Ptr p(new T(node)); add(p); }
+//        void add(      T *node){ Ptr p(node);        add(p); }
         void add(const Ptr &node){
             //node->this_ptr(node);
             //node->parent_   = this_ptr_;
@@ -95,7 +95,7 @@ namespace nl{
     bool AbsTree2<T>::remove(const T *key){
         for(typename List::iterator ite = children_.begin(); ite!=children_.end(); ++ite){
             if((*ite).get() == key){
-                (*ite)->parent_ = Ptr(); // Null
+                //(*ite)->parent_ = Ptr(); // Null
                 children_.erase(ite);
                 return true;
             }

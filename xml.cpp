@@ -1,7 +1,7 @@
 // -*- mode: cpp -*-
 #include "xml.h"
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/02/01 06:26:57
+// last updated : 2012/12/29 21:04:00
 
 #include "util.h"
 
@@ -45,12 +45,12 @@ namespace nl{
 	return *this;
   }
   
-  XmlNode &XmlNode::attr(const std::string &name, Variable::Ptr val){
+  XmlNode &XmlNode::attr(const std::string &name, PtrV val){
 	attrs_.push_back(Attr(name, val));
 	return *this;
   }
   XmlNode &XmlNode::attr(const std::string &name, const std::string &val){
-	return attr(name, Variable::Ptr(new Variable(val)));
+	return attr(name, PtrV(new Variable(val)));
   }
   XmlNode &XmlNode::attr(const std::string &name, const int val){
 	char buf[256];
@@ -59,7 +59,7 @@ namespace nl{
   }
 
   // 属性追加
-  Variable::Ptr XmlNode::add(const std::string &name, Variable::Ptr var){
+  PtrV XmlNode::add(const std::string &name, PtrV var){
 	if( find(name) ){
 	  DBGP("warning: multiple definition '" << name << "'");
 	  return Variable::NullPtr;
@@ -67,7 +67,7 @@ namespace nl{
 	attr(name, var);
 	return var;
   }
-  Variable::Ptr XmlNode::add(const int idx, Variable::Ptr ){
+  PtrV XmlNode::add(const int idx, PtrV ){
 	if( find(idx) ){
 	  DBGP("warning: multiple definition '" << idx << "'");
 	  return Variable::NullPtr;
@@ -76,8 +76,8 @@ namespace nl{
   }
 
   // 属性へのポインタを返す
-  Variable::Ptr XmlNode::find(const std::string &name){
-	Variable::Ptr ret;
+  PtrV XmlNode::find(const std::string &name){
+	PtrV ret;
 	for( AttrList::iterator ite=attrs_.begin(); ite!=attrs_.end(); ++ite)
 	  if( ite->first == name ){ ret = ite->second; break; }
 	
@@ -92,15 +92,15 @@ namespace nl{
 	if( name == "this" ){
 	  if( ret ) DBGP("warning: reserved word '" << name << "'is used as attr-name");
 	  if( !this_ptr() ) ERRP("error: this_ptr is not set");
-	  return Variable::Ptr(new Variable(this_ptr()));
+	  return PtrV(new Variable(this_ptr()));
 	}
 	if( name == "_parent" ){
 	  if( ret ) DBGP("warning: reserved word '" << name << "'is used as attr-name");
 	  if( !parent_.lock() ){
 		ERRP( "error: parent is not set. " << this->name());
-		return Variable::Ptr(new Variable(AbsNameTable::NullPtr));
+		return PtrV(new Variable(AbsNameTable::NullPtr));
 	  }
-	  return Variable::Ptr(new Variable(parent_.lock()));
+	  return PtrV(new Variable(parent_.lock()));
 	}
 	return ret;
   }
@@ -126,7 +126,7 @@ namespace nl{
 
 
   // 子ノードへのポインタを返す
-  Variable::Ptr XmlNode::find(const int idx){
+  PtrV XmlNode::find(const int idx){
 	Ptr p = childAt(idx);
 	if( !p ) return nl::PtrV();
 	return nl::PtrV(new nl::Variable(nl::PtrNT(p)));

@@ -1,5 +1,5 @@
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/02/01 07:41:45
+// last updated : 2012/12/29 21:05:53
 // 動的型 dynamic type
 
 #include "variable.h"
@@ -18,9 +18,9 @@ namespace nl{
   const long   Variable::undef_int = 0;
   const string Variable::undef_str = "#undef";
 
-  const AbsFunction::Ptr  AbsFunction::NullPtr  = AbsFunction::Ptr();
-  const AbsNameTable::Ptr AbsNameTable::NullPtr = AbsNameTable::Ptr();
-  const Variable::Ptr     Variable::NullPtr     = Variable::Ptr();
+  const PtrF  AbsFunction::NullPtr  = PtrF();
+  const PtrNT AbsNameTable::NullPtr = PtrNT();
+  const PtrV  Variable::NullPtr     = PtrV();
 
   AbsNameTable::AbsNameTable() : parent_() { nl_INC(); }
   AbsNameTable::~AbsNameTable(){ nl_DEC(); }
@@ -43,14 +43,14 @@ namespace nl{
 	}
   }
 
-  PtrNT AbsNameTable::push(Ptr parent, Ptr child){
+  PtrNT AbsNameTable::push(PtrNT parent, PtrNT child){
 	if( parent ) child->parent_ = parent;
 	return child;
   }
   
-  PtrNT AbsNameTable::pop(Ptr nt){
+  PtrNT AbsNameTable::pop(PtrNT nt){
 	if( !nt ) return nt;
-	Ptr ret = nt->parent_;
+	PtrNT ret = nt->parent_;
 	//nt->parent_.reset();
 	return ret;
   }
@@ -132,8 +132,8 @@ namespace nl{
 
 
   /// clone (Deep Copy)
-  Variable::Ptr Variable::clone() const{
-	Variable::Ptr ptr = Variable::Ptr(new Variable() );
+  PtrV Variable::clone() const{
+    PtrV ptr = PtrV(new Variable() );
 	ptr->type_    = type_   ;
 	ptr->val_int  = val_int ;
 	ptr->val_str  = val_str ;
@@ -316,7 +316,7 @@ namespace nl{
 	return "#undef";
   }
 
-}
+};
 
 #ifdef TEST
 // test

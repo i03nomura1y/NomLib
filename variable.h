@@ -2,27 +2,27 @@
 #ifndef NL_VARIABLE_H
 #define NL_VARIABLE_H
 // created date : 2011/12/18 22:43:33
-// last updated : 2012/12/24 22:57:15
+// last updated : 2012/12/29 20:54:32
 // 動的型 dynamic type
 
 #include <string>
 #include <vector>
-#include "hasPtr_I.h"
+#include "smart.h"
 
 namespace nl{
   class AbsFunction;  // 抽象クラス: 関数
   class AbsNameTable; // 抽象クラス: 名前表
   class Variable;     // 動的型 変数。 AbsFunction, AbsNameTable へのポインタを持つ
 
-  typedef typename hasPtr<Variable>::Ptr     PtrV;
-  typedef typename hasPtr<AbsFunction>::Ptr  PtrF;
-  typedef typename hasPtr<AbsNameTable>::Ptr PtrNT;
+  typedef typename Smart<Variable>::Ptr     PtrV;
+  typedef typename Smart<AbsFunction>::Ptr  PtrF;
+  typedef typename Smart<AbsNameTable>::Ptr PtrNT;
   typedef std::vector<Variable> Arguments; // 実引数リスト(Function用)
   typedef std::pair<std::string, PtrV> NTEntry; // 名前と値のペア(NameTable用)
 
   // 抽象クラス: 関数を表す
-  class AbsFunction : public hasPtr<AbsFunction>{
-  public: static const Ptr NullPtr;
+  class AbsFunction{
+  public: static const PtrF NullPtr;
   public:
 	virtual ~AbsFunction(){}
 	virtual const std::string &name() const = 0;
@@ -31,9 +31,9 @@ namespace nl{
   };
 
   // 抽象クラス: 名前表インタフェース
-  class AbsNameTable : public hasPtr<AbsNameTable>{
+  class AbsNameTable{
   public:
-	static const Ptr NullPtr;
+	static const PtrNT NullPtr;
 
   public:
 	AbsNameTable();
@@ -54,19 +54,19 @@ namespace nl{
 	virtual void dump() = 0;
 	void dump_stack();
 	
-	static Ptr push(Ptr parent, Ptr child);
-	static Ptr pop (Ptr nt);
+	static PtrNT push(PtrNT parent, PtrNT child);
+	static PtrNT pop (PtrNT nt);
 	
   public:
 	// 親へのポインタ
-	Ptr parent_;
+	PtrNT parent_;
   };
 
 
   // 動的型 変数
-  class Variable : public hasPtr<Variable>{
+  class Variable{
   public: // alias, const
-	static const Ptr NullPtr;
+	static const PtrV NullPtr;
 	// alias
 	typedef unsigned char uchar;
 	typedef double dbl;

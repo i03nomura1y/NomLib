@@ -1,5 +1,5 @@
 // created date : 2012/01/20 22:15:23
-// last updated : 2012/12/29 17:54:51
+// last updated : 2012/12/29 21:14:07
 // 
 #include "tree_base2.h"
 
@@ -22,7 +22,7 @@ public:
         cout << endl;
         for(unsigned int i=0;i<depth_;i++) cout << " ";
         cout << "(" << num;
-        for(List::iterator ite = children_.begin(); ite != children_.end(); ++ite){
+        for(List::iterator ite = m_list.begin(); ite != m_list.end(); ++ite){
             (*ite)->dump();
         }
         cout << ")";

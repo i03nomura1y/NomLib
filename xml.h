@@ -2,7 +2,7 @@
 #ifndef __NOMLIB_XML_H__
 #define __NOMLIB_XML_H__
 // created date : 2011/12/07 19:59:43
-// last updated : 2012/02/01 05:59:40
+// last updated : 2012/12/29 21:02:12
 // xml_c.h の c++ 版
 //  XmlNode : Xml のひとつのタグ(node)を表す
 // -lxml2 -lws2_32
@@ -22,7 +22,7 @@ namespace nl{
   // Xml のひとつのタグを表す。
   class XmlNode : public AbsTree<XmlNode>{
   public: // alias
-	typedef hasPtr<XmlNode>::Ptr Ptr;
+	typedef Smart<XmlNode>::Ptr Ptr;
 	// typedef std::list<XmlNode::Ptr> List;
   public: // method
 	XmlNode();
@@ -33,7 +33,7 @@ namespace nl{
 	XmlNode &operator=(const XmlNode &obj);
 
 	// 属性追加
-	XmlNode &attr(const std::string &name, nl::Variable::Ptr val);
+	XmlNode &attr(const std::string &name, nl::PtrV val);
 	XmlNode &attr(const std::string &name, const std::string &val);
 	XmlNode &attr(const std::string &name, const int val);
 	// content 
@@ -49,8 +49,8 @@ namespace nl{
 	PtrV content(){ return content_; }
 
 	/// implement NameTable
-	PtrV add(const std::string &name, Variable::Ptr var); // 属性追加
-	PtrV add(const int idx, Variable::Ptr var);
+	PtrV add(const std::string &name, PtrV var); // 属性追加
+	PtrV add(const int idx, PtrV var);
 	PtrV find(const std::string &name); // 属性へのポインタを返す。無ければ NULL
 	PtrV find(const int idx); // idx 番目の子ノード へのポインタを返す。無ければ NULL
 	// clone = DeppCopy

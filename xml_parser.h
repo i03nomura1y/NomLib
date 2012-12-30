@@ -28,12 +28,12 @@ namespace nl{
         ~XmlParser(){}
 
         
-        XmlElement::Ptr parseFile(const std::string file_path){
+        XmlNode::Ptr parseFile(const std::string file_path){
             nl::Lexer lexer;
             MSGP(file_path);
             lexer.setSourceFile(file_path);
             
-            XmlElement::Ptr rootElem = parseDocument(lexer);
+            XmlNode::Ptr rootElem = parseDocument(lexer);
             
             /// 残りを表示
             static LexRule line = LexRule("^.+");
@@ -48,7 +48,7 @@ namespace nl{
         }
         
     private:
-        XmlElement::Ptr parseDocument(nl::Lexer &lexer){
+        XmlNode::Ptr parseDocument(nl::Lexer &lexer){
             // document ::= prolog element Misc*
             
             /// prolog ::= XMLDecl?  Misc*  (doctypedecl Misc*)?
@@ -57,7 +57,7 @@ namespace nl{
             if( parseDocTypeDecl(lexer) )
                 while( parseMisc(lexer) );
             ///
-            XmlElement::Ptr rootElem = parseElement(lexer);
+            XmlNode::Ptr rootElem = parseElement(lexer);
             ///
             while( parseMisc(lexer) );
             
@@ -115,14 +115,14 @@ namespace nl{
             return false;
         }
 
-        XmlElement::Ptr parseElement(nl::Lexer &lexer){
+        XmlNode::Ptr parseElement(nl::Lexer &lexer){
             // ETag のはじまり -> unget してfalse を返す
-            if( lexer.getToken("</") ){ lexer.unget(); return XmlElement::Ptr(); }
+            if( lexer.getToken("</") ){ lexer.unget(); return XmlNode::Ptr(); }
             
             // STag / EmptyElemTag
-            if( !lexer.getToken("<") ) return XmlElement::Ptr();
-            if( !parseName(lexer) ){ DBGP("parse error."); return XmlElement::Ptr(); } // error.
-            XmlElement::Ptr node = XmlElement::build(reg);
+            if( !lexer.getToken("<") ) return XmlNode::Ptr();
+            if( !parseName(lexer) ){ DBGP("parse error."); return XmlNode::Ptr(); } // error.
+            XmlNode::Ptr node = XmlNode::build(reg);
             // Attribute
             XmlAttr::Ptr attr;
             while( attr = parseAttribute(lexer) ){
@@ -131,15 +131,14 @@ namespace nl{
             lexer.skipToken(Blank);
             if( lexer.getToken("/>") ) return node; // EmptyElemTag = 中身のないタグ
             
-            if( !lexer.getToken(">") ){ DBGP("parse error."); return XmlElement::Ptr(); } // error.
+            if( !lexer.getToken(">") ){ DBGP("parse error."); return XmlNode::Ptr(); } // error.
             
             /// content ::= CharData? ((element | Reference | CDSect | PI | Comment) CharData?)*
-            XmlNode_I::Ptr ptr;
+            XmlNode::Ptr ptr;
             if( ptr = parseCharData(lexer) ){
                 node->add(ptr);
             }
             while(true){
-                //XmlElement::Ptr ptr;
                 if      ( lexer.getToken(CharRef_l) ){
                     MSGP(lexer.reg());
                 }else if( parseEntityRef(lexer) ){
@@ -157,13 +156,13 @@ namespace nl{
                 }
             }
             // ETag
-            if( !lexer.getToken("</") ){ DBGP("parse error."); return XmlElement::Ptr(); } // error.
-            if( !parseName(lexer) ){ DBGP("parse error."); return XmlElement::Ptr(); } // error.
+            if( !lexer.getToken("</") ){ DBGP("parse error."); return XmlNode::Ptr(); } // error.
+            if( !parseName(lexer) ){ DBGP("parse error."); return XmlNode::Ptr(); } // error.
             lexer.skipToken(Blank);
-            if( !lexer.getToken(">") ){ DBGP("parse error."); return XmlElement::Ptr(); } // error.
+            if( !lexer.getToken(">") ){ DBGP("parse error."); return XmlNode::Ptr(); } // error.
             
             // 閉じタグが違う -> エラー
-            if(reg != node->name){ DBGP("parse error."); return XmlElement::Ptr(); } // error.
+            if(reg != node->name){ DBGP("parse error."); return XmlNode::Ptr(); } // error.
             
             return node;
         }
@@ -212,7 +211,7 @@ namespace nl{
             return true;
         }
 
-        XCharData::Ptr parseCharData(nl::Lexer &lexer){
+        XmlNode::Ptr parseCharData(nl::Lexer &lexer){
             static LexRule CharData = LexRule("(^[^<&]+)|(^$)");
             std::stringstream ss;
             
@@ -225,10 +224,10 @@ namespace nl{
                 ss << lexer.reg();
                 if(lexer.eol()) ss << std::endl;
             }
-            if( !read_succeed ) return XCharData::Ptr(); // 一回も読めなかった -> false
+            if( !read_succeed ) return XmlNode::Ptr(); // 一回も読めなかった -> false
             
-            if( ss.str().find("]]>") != std::string::npos ){ DBGP("parse error."); return XCharData::Ptr(); } // error
-            return XCharData::build(ss.str());
+            if( ss.str().find("]]>") != std::string::npos ){ DBGP("parse error."); return XmlNode::Ptr(); } // error
+            return XmlNode::buildText(ss.str());
         }
 
         bool parseDocTypeDecl(nl::Lexer &lexer){

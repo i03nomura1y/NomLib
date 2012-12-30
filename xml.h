@@ -1,124 +1,126 @@
-// -*- mode: cpp -*-
-#ifndef __NOMLIB_XML_H__
-#define __NOMLIB_XML_H__
-// created date : 2011/12/07 19:59:43
-// last updated : 2012/12/29 21:02:12
-// xml_c.h の c++ 版
-//  XmlNode : Xml のひとつのタグ(node)を表す
-// -lxml2 -lws2_32
+// -*- mode:cpp -*-
+#ifndef NL_XML_H
+#define NL_XML_H
+// created date : 2012/12/30 17:58:09
+// last updated : 2012/12/30 18:09:06
+// 
 
-#include <string>
-#include <list>
+// http://www.w3.org/TR/xml/
 
-#include "xml_io.h"
-
-#include "util.h"
-#include "tree_base.h"
+#include <iostream>
+#include "smart.h"
 
 namespace nl{
-  class XmlNode;
-  // std::list<XmlNode> XmlNode::List;
-  
-  // Xml のひとつのタグを表す。
-  class XmlNode : public AbsTree<XmlNode>{
-  public: // alias
-	typedef Smart<XmlNode>::Ptr Ptr;
-	// typedef std::list<XmlNode::Ptr> List;
-  public: // method
-	XmlNode();
-	explicit XmlNode(const std::string &name); // タグ名を指定して初期化
-	explicit XmlNode(XmlScanner &s); // パース
-	~XmlNode();
-	XmlNode(const XmlNode &obj);
-	XmlNode &operator=(const XmlNode &obj);
 
-	// 属性追加
-	XmlNode &attr(const std::string &name, nl::PtrV val);
-	XmlNode &attr(const std::string &name, const std::string &val);
-	XmlNode &attr(const std::string &name, const int val);
-	// content 
-	XmlNode &content(const std::string &con){ content_->assign(con); return *this; }
+    class XmlNode_I;  // ノードのインタフェース。ツリー情報を持つ
+    class XmlElement; // extends XmlNode_I
+    class XmlAttr;
+    
 
-	/// 子ノード追加
-	XmlNode &add(const XmlNode &node){ AbsTree<XmlNode>::add(node); return *this; }
-	XmlNode &add(      XmlNode *node){ AbsTree<XmlNode>::add(node); return *this; }
-	XmlNode &add(      Ptr      node){ AbsTree<XmlNode>::add(node); return *this; }
+    class XmlNode_I{
+    public:
+        typedef nl::Smart<XmlNode_I>::Ptr Ptr;
+    public:
+        virtual ~XmlNode_I(){}
+        virtual void dump(){}
+        virtual void updateDepth(unsigned int newDepth){ depth_ = newDepth; }
+    protected:
+        // ツリー情報
+        unsigned int depth_;
+        nl::Smart<XmlNode_I>::WeakPtr this_ptr_;
+    public:
+        nl::Smart<XmlNode_I>::WeakPtr parent_;
+    protected:
+        XmlNode_I() : depth_(0){}
+    };
 
-	// getter
-	const std::string &name() const{ return name_->refOf_val_str(); } // タグ名
-	PtrV content(){ return content_; }
-
-	/// implement NameTable
-	PtrV add(const std::string &name, PtrV var); // 属性追加
-	PtrV add(const int idx, PtrV var);
-	PtrV find(const std::string &name); // 属性へのポインタを返す。無ければ NULL
-	PtrV find(const int idx); // idx 番目の子ノード へのポインタを返す。無ければ NULL
-	// clone = DeppCopy
-	PtrNT clone() const{ return cloneC(); }
-	Ptr   cloneC() const; // concrete
-
-	//
-	int size() const{ return children_.size(); /*attrs_.size();*/ } // 子ノードの個数
-	int attr_size() const{ return attrs_.size(); } // 属性の個数
-	PtrV attrAt(int idx); // idx番目の 属性へのポインタを返す。無ければ NULL
-	std::string attrNameAt(int idx); // idx番目の 属性の名前を返す。
-	
-	// パース
-	XmlNode &parse(const std::string &file_name);	// ファイル内容をパース このオブジェクトをルートノードにする
-	XmlNode &parseText(const std::string &text); // 文字列をパース
-	static Ptr create(const std::string &file_name); // ファイル名から XmlNode を生成
-	static Ptr createFromText(const std::string &text); // XML文字列から XmlNode を生成
-	
-	// 文字列に変換
-	void save(const std::string &file_name); // ファイルに書き出し
-	std::string toStr(); // XML文字列に変換
-	
-	// 表示
-	void dump();	// 確認用表示
-	void save_dbg(const std::string &file_name); // ファイルに書き出し
-
-  private: // method
-	//AbsNameTable::WeakPtr parent() const{ return parent_; }
-	//void parent(AbsNameTable::WeakPtr p){ parent_ = p; }
-	XmlNode &parse(XmlScanner &s); // XmlScanner から読み込み
-	void write(XmlPrinter &p); // XmlPrinter に書き出し
-	void write_dbg(XmlPrinter &p); // XmlPrinter に書き出し
-
-  private: // member
-	//std::string ns;      // namespace
-	PtrV name_;    // tag name  string の代わりに Variable::Ptr を使用
-	PtrV content_; //           string の代わりに Variable::Ptr を使用
-	AttrList attrs_; // xml_io.h で typedef std::list< pair<string name, nl::Variable::Ptr > >
-  };
+    // CharData
+    class XCharData : public XmlNode_I{
+    public:
+        typedef nl::Smart<XCharData>::Ptr Ptr;
+    public:
+        std::string data;
+        void dump(){
+            std::cout << " [" << data << "]";
+        }
+        static Ptr build(const std::string &data_){
+            Ptr ptr(new XCharData(data_));
+            ptr->this_ptr_ = ptr;
+            return ptr;
+        }
+    private:
+        XCharData(const std::string &data_) : data(data_){}
+    };
 
 
 
-// class XmlPtr{
-// public:
-//   XmlPtr(XmlNode &node) : root_(node), ptr_(&node){};
-//   ~XmlPtr(){};
-//   XmlPtr(const XmlPtr &obj) : root_(obj.root_), ptr_(obj.ptr_){}
-//   XmlPtr &operator=(const XmlPtr &obj){
-// 	root_ = obj.root_;
-// 	ptr_  = obj.ptr_;
-// 	return *this;
-//   }
-//   
-//   XmlNode &root() const{ return root_; }
-//   
-//   XmlPtr &add(XmlNode &node){ ptr_->add(node); return *this; }
-//   XmlPtr &addMove(XmlNode &node){ ptr_->add(node); ptr_ = &node; return *this; }
-//   XmlPtr &parent(){ ptr_ = ptr_->parent(); return *this; }
-//   
-// 
-// public:
-//   XmlNode &root_;
-//   XmlNode *ptr_;
-// };
+    // attribute
+    class XmlAttr{
+    public:
+        typedef nl::Smart<XmlAttr>::Ptr Ptr;
+
+        std::string name;
+        std::string value;
+        static Ptr build(){ return Ptr(new XmlAttr()); }
+    private:
+        XmlAttr(){}
+    };
 
 
+    class XmlElement : public XmlNode_I{
+    public:
+        typedef nl::Smart<XmlElement>::Ptr Ptr;
+    
+    public:
+        // このエレメントの情報
+        std::string name;
+        nl::Smart<XmlAttr>::List attr_list;
+    private:
+        // 子エレメント
+        nl::Smart<XmlNode_I>::List children;
+    
+    public:
+        ~XmlElement(){}
+    
+        void add(const XmlNode_I::Ptr &obj){
+            if( !obj ) return;
+            children.push_back(obj);
+            obj->updateDepth(depth_+1);
+            obj->parent_ = this_ptr_;
+        }
+    
+        void updateDepth(unsigned int newDepth){
+            XmlNode_I::updateDepth(newDepth);
+            for(nl::Smart<XmlNode_I>::List::iterator ite = children.begin(); ite != children.end(); ++ite)
+                (*ite)->updateDepth(depth_+1);
+        }
+
+        void dump(){
+            std::cout << std::endl;
+            for(unsigned int i=0;i<depth_;i++) std::cout << " ";
+            std::cout << "(" << name;
+            // Attribute
+            std::cout << " (";
+            for(nl::Smart<XmlAttr>::List::iterator ite = attr_list.begin(); ite != attr_list.end(); ++ite)
+                std::cout << "(" << (*ite)->name << " " << (*ite)->value << ")";
+            std::cout << ")";
+            // Children
+            for(nl::Smart<XmlNode_I>::List::iterator ite = children.begin(); ite != children.end(); ++ite)
+                (*ite)->dump();
+            std::cout << ")";
+            if(depth_==0) std::cout << std::endl;
+        }
+    
+        static XmlElement::Ptr build(const std::string &name_){
+            Ptr ptr(new XmlElement());
+            ptr->name      = name_;
+            ptr->this_ptr_ = ptr;
+            return ptr;
+        }
+    private:
+        XmlElement(){}
+    };
 
 };
 
 #endif
-

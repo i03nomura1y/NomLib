@@ -1,6 +1,6 @@
 // -*- mode:c++ -*-
 // created date : 2011/12/02 00:32:55
-// last updated : 2012/11/27 16:55:54
+// last updated : 2013/01/07 17:51:33
 
 #include "util.h"
 
@@ -87,6 +87,9 @@ namespace nl{
     if( ext == "mp4" ) return "video/mp4";
     if( ext == "mpg" ) return "video/mpeg";
     if( ext == "3gp" ) return "video/3gpp"; // audio/3gpp も有り得る。
+
+    if( ext == "zip" ) return "application/zip";
+    if( ext == "pdf" ) return "application/pdf";
 
     // for HTTP Live Streaming
     if( ext == "ts" ) return "video/MP2T";

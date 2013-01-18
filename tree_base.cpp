@@ -1,7 +1,7 @@
 // created date : 2012/01/20 22:15:23
-// last updated : 2012/12/29 21:14:07
+// last updated : 2013/01/18 22:17:39
 // 
-#include "tree_base2.h"
+#include "tree_base.h"
 
 namespace nl{
 
@@ -14,7 +14,7 @@ using namespace std;
 
 static int cnt = 0;
 
-class Tree : public nl::AbsTree2<Tree>{
+class Tree : public nl::AbsTree<Tree>{
 public:
     int num;
     ~Tree(){}

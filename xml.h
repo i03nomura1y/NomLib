@@ -2,13 +2,13 @@
 #ifndef NL_XML_H
 #define NL_XML_H
 // created date : 2012/12/30 17:58:09
-// last updated : 2012/12/30 21:47:37
+// last updated : 2013/01/18 22:18:11
 // 
 
 // http://www.w3.org/TR/xml/
 
 #include "smart.h"
-#include "tree_base2.h"
+#include "tree_base.h"
 
 namespace nl{
     class XmlNode;
@@ -35,8 +35,8 @@ namespace nl{
     };
 
     // Node (Element, Text, Comment, ...)
-    class XmlNode : public AbsTree2<XmlNode>{
-        friend Ptr AbsTree2<XmlNode>::build();
+    class XmlNode : public AbsTree<XmlNode>{
+        friend Ptr AbsTree<XmlNode>::build();
     public:
         typedef Smart<XmlNode>::Ptr Ptr;
         typedef Smart<XmlNode>::List List;
@@ -48,13 +48,13 @@ namespace nl{
         XmlAttr::List attr_list;
     public:
         static Ptr build(const std::string &name_){
-            Ptr ptr = AbsTree2<XmlNode>::build();
+            Ptr ptr = AbsTree<XmlNode>::build();
             ptr->type = XmlNode_Elem;
             ptr->name = name_;
             return ptr;
         }
         static Ptr buildText(const std::string &text_){
-            Ptr ptr = AbsTree2<XmlNode>::build();
+            Ptr ptr = AbsTree<XmlNode>::build();
             ptr->type = XmlNode_Text;
             ptr->text = text_;
             return ptr;

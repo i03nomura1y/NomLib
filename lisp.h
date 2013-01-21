@@ -2,7 +2,7 @@
 #ifndef NL_LISP_H
 #define NL_LISP_H
 // created date : 2013/01/18 22:46:28
-// last updated : 2013/01/18 22:51:03
+// last updated : 2013/01/21 20:41:43
 // 
 
 #include "smart.h"
@@ -14,7 +14,11 @@ namespace nl{
     enum{
         LispNode_None = 0,
         LispNode_List,
-        LispNode_Atom,
+
+        LispNode_Comment,
+        LispNode_String,
+        LispNode_Number,
+        LispNode_Literal,
     };
 
     
